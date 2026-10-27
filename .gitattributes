@@ -1,0 +1,2 @@
+# Preserve exact source bytes: frozen protocol and collector hashes are byte-level.
+* -text

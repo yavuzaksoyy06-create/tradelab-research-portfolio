@@ -1,0 +1,57 @@
+{
+  "adjustment": "split",
+  "baseline_policy": "Timed control every fourth completed bar, same sizing/horizon/costs; exposure is measured, not forced equal",
+  "bootstrap": "1000 circular moving-block resamples of five session P&Ls; descriptive 95% interval",
+  "cost_sensitivity_bps_per_side": [
+    0,
+    3,
+    6,
+    10
+  ],
+  "end": "2026-10-22",
+  "execution": {
+    "daily_drawdown": 0.02,
+    "fee_bps": 0,
+    "half_spread_bps": 1,
+    "horizon_bars": 4,
+    "initial_capital": 100000,
+    "max_distance_atr": 0.5,
+    "max_notional_fraction": 0.1,
+    "min_risk_atr": 0.05,
+    "reward_risk": 2,
+    "risk_fraction": 0.005,
+    "slippage_bps": 2,
+    "stop_buffer_atr": 0.1
+  },
+  "features": {
+    "atr_period": 14,
+    "left": 3,
+    "lookback_bars": 520,
+    "merge_gap_atr": 0.1,
+    "min_pivots": 2,
+    "rejection_atr": 0.1,
+    "right": 3,
+    "touch_separation": 4,
+    "zone_half_width_atr": 0.2
+  },
+  "feed": "sip",
+  "seed": 20261023,
+  "sensitivity_scope": "training_and_validation_only",
+  "start": "2026-04-01",
+  "symbols": [
+    "MSFT",
+    "SPY",
+    "QQQ"
+  ],
+  "test_policy": "All remaining sessions; no parameter selection from any returns",
+  "train_sessions": 70,
+  "universe_policy": "All three symbols, including failures; independent 100k accounts, not an executable combined portfolio",
+  "validation_sessions": 30,
+  "version": "4.0.0",
+  "walk_forward_test_block_sessions": 14,
+  "width_sensitivity_atr": [
+    0.15,
+    0.2,
+    0.3
+  ]
+}

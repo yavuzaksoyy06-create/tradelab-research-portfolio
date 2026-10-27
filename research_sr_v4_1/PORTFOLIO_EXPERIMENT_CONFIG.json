@@ -1,0 +1,88 @@
+{
+  "allocation": "MSFT then SPY then QQQ; exits at open before entries; intrabar proceeds unavailable for opening allocations",
+  "control": "One causal delay 0..3 bars per anchor, same session/hour bucket, translated percentage geometry; report realized exposure mismatch",
+  "control_seeds": [
+    11,
+    23,
+    37,
+    51,
+    71
+  ],
+  "cost_sensitivity_bps_per_side": [
+    0,
+    3,
+    6,
+    10
+  ],
+  "features": {
+    "atr_period": 14,
+    "left": 3,
+    "lookback_bars": 520,
+    "merge_gap_atr": 0.1,
+    "min_pivots": 2,
+    "rejection_atr": 0.1,
+    "right": 3,
+    "touch_separation": 4,
+    "zone_half_width_atr": 0.2
+  },
+  "future_gates": "All three complete SIP/split datasets and matching frozen source; never evaluate an unfinished session",
+  "future_window": {
+    "complete_after": "2027-01-21 21:15:00+00:00",
+    "end": "2027-01-21",
+    "sessions": 60,
+    "start": "2026-10-26"
+  },
+  "historical_claim": "Previously inspected; accounting and descriptive diagnostics only",
+  "historical_windows": {
+    "observed_replay": [
+      "2026-08-25",
+      "2026-10-22"
+    ],
+    "training_diagnostic": [
+      "2026-04-01",
+      "2026-07-13"
+    ],
+    "validation_diagnostic": [
+      "2026-07-14",
+      "2026-08-24"
+    ]
+  },
+  "portfolio": {
+    "aggregate_exposure_cap": 0.3,
+    "allocation_order": [
+      "MSFT",
+      "SPY",
+      "QQQ"
+    ],
+    "daily_drawdown": 0.02,
+    "fee_bps": 0,
+    "half_spread_bps": 1,
+    "horizon_bars": 4,
+    "initial_capital": 100000,
+    "max_distance_atr": 0.5,
+    "max_notional_fraction": 0.1,
+    "max_positions": 3,
+    "min_risk_atr": 0.05,
+    "reward_risk": 2,
+    "risk_fraction": 0.005,
+    "slippage_bps": 2,
+    "stop_buffer_atr": 0.1,
+    "version": "4.1.0"
+  },
+  "source_sha256": {
+    "research_sr_v4\\__init__.py": "ecc5c59564f3da85f054d77120bd7b3b7d7536350428bb34b54ea146bf608e2f",
+    "research_sr_v4\\causal.py": "949f6401a0411233230f088579d83a1f6dc820aa56f35a8dd98c4ef690fb1e0b",
+    "research_sr_v4\\data.py": "2dd648e47320251bb4d3b38c83efe66ef1d3f9f08bfa1ddf268a2801135a7bfb",
+    "research_sr_v4\\execution.py": "6beb7b6254231cd4ffefb0461d8fdbe4f31fa5900533892a0925ebbffacb9ce7",
+    "research_sr_v4\\research.py": "64fef6d640632662043da6b7f071466a2065cd394df09f7b6ae639dea49d5145",
+    "research_sr_v4_1\\__init__.py": "99352f11c52ff83a4e7ea14fe8a4d873721eeebaa9eaf1da38e0c45e8e6407d5",
+    "research_sr_v4_1\\controls.py": "5193bd27d558f952b357441295657fe6a0af89c486f0a9e74594bb97a03e8438",
+    "research_sr_v4_1\\data.py": "6220e8ed362dec7439942b849468921abc94c4e1e731857dafecff88e31a5460",
+    "research_sr_v4_1\\policy.py": "08cb1008b1e5216de5cdfe1ac5f6e81a82790bef33374c8d6f334ea62e07c1af",
+    "research_sr_v4_1\\portfolio.py": "40629845a1de5b2f9e3c8235aca7cb1ee508fa2fc50929f61c19ca65aa955db5",
+    "research_sr_v4_1\\research.py": "d6e3b5e56cabcdb401a4891935a7a10c4134d05336660bba6caaa9306a1cb291",
+    "research_sr_v4_1\\statistics.py": "6a3fc92350fd8bf03477b66920caad6ec6f809019c7c4d251e863a68d2a6e1d6"
+  },
+  "statistics": "paired daily difference versus mean of five seeds; five-session block bootstrap, 1000 resamples; 20 sessions and 10 active paired sessions minimum; no alpha claims",
+  "version": "4.1.0"
+}
