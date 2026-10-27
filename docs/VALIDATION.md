@@ -9,10 +9,10 @@ The curated source copy was tested separately from the original checkout:
 | Macro source/document/event-study contracts | 115 | 0 | 0 |
 | Crypto calendar and manifests | 100 | 1 | 0 |
 | Forex calendar/DST/rollover | 31 | 0 | 0 |
-| Workspace adapters, evidence, real sources, SQL and UI | 82 | 0 | 0 |
-| **Total** | **328** | **1** | **all zero** |
+| Workspace adapters, evidence, real sources, SQL and UI | 90 | 0 | 0 |
+| **Total** | **336** | **1** | **all zero** |
 
-**327 passed, 1 environment-dependent symlink test skipped.** Machine-readable
+**335 passed, 1 environment-dependent symlink test skipped.** Machine-readable
 start/end times and exit codes are in `evidence/public_test_results.json`.
 
 The test environment was the existing Windows Python 3.12 environment. Its
@@ -52,10 +52,13 @@ look valid.
 
 ## Source integrity
 
-`evidence/source_snapshot_sha256.json` records the 81 exported source/test/config
-files as copied from the original project. Their contents were verified unchanged
-after export, including the three SQL feature files copied from the verified local implementation. The prior 79-file inventory and prior test result remain in `evidence/archive/`. Public documentation and packaging tools are additions. This is a
-local hash inventory, not a publisher signature or independent third-party audit.
+`evidence/source_snapshot_sha256.json` records the current 81 source/test/config
+files. The original export and initial SQL publication inventories are preserved
+in `evidence/archive/`. In this stage, only the SQL module, its UI integration and
+its tests changed relative to the previous source inventory. The newer bytes are
+not claimed to match the separate original application. V4.1 and the collector
+remain unchanged. Documentation and packaging tools are separate additions.
+This is a local hash inventory, not a publisher signature or independent audit.
 
 Credential-pattern and personal-path scans found no unresolved matches in the
 publication text files. A URL-userinfo fixture (`name@...`) was manually reviewed
@@ -69,8 +72,14 @@ It does not invoke the older credentialed data collector or frozen research
 runners. Successful tests demonstrate those implemented contracts, not trading
 profitability or completeness of an unseen-data evaluation.
 
-## SQL publication verification
+## Historical SQL publication verification (d04372a)
 
 The first restricted-environment attempt encountered Windows temporary-directory access errors in the crypto suite; console output then failed with a character-encoding error before the remaining suites ran. The runner now explicitly uses UTF-8 for subprocess and console output. The unchanged test selection was rerun with normal local permissions and completed: 328 tests, 327 passed, 1 symlink-privilege skip. No integrity check was relaxed. Result timestamps are UTC; this run occurred on 28 October in Europe/Istanbul.
 
 The frozen V4.1 tree, all prior source fingerprints except the intended real-data UI change, and the collector remained byte-identical to the previous public commit. The new SQL module and tests match the original locally tested implementation. `evidence/sql_publication_checks.json` records these checks. Full raw logs remain local because they contain workstation paths; their hashes are recorded for traceability.
+
+## Quality diagnostics publication
+
+Fresh public-package selection: 336 tests, 335 passed and 1 Windows symlink-permission skip. Workspace now has 90 tests, including 8 new diagnostic tests. Initial regression tests detected Turkish text encoding errors introduced during editing; these were fixed before the successful rerun. Previous SQL publication evidence is archived under the `d04372a_` prefix; the preceding SQL publication section describes that historical stage. The current hash inventory includes the three modified SQL/UI/test files; these newer bytes are not claimed to match the separate original application. That original application and V4.1 were not modified in this stage.
+
+Current publication checks and local test-log hashes are recorded in `evidence/quality_checks.json`.

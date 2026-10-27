@@ -30,7 +30,7 @@ The central question is not “can a chart look convincing?” It is **“what w
 | Multi-market calendars | Crypto 24/7 grid and Forex NY/DST/rollover handling | FX provider profile is explicitly hypothetical |
 | Real public sources | ECB daily reference FX and US Treasury historical daily par yields | Not intraday OHLCV or point-in-time release vintages |
 | Communication | Turkish learning mode, charts, data tables, rejection reasons and audit views | No invented values for unavailable evidence |
-| Relational SQL catalog | Verified sources, versions and observations; JOIN/GROUP BY coverage and LEFT JOIN row reconciliation in SQLite | In-memory, fixed read-only reports; no warehouse or predictive ML pipeline |
+| Relational SQL catalog | Verified sources, versions and observations; JOIN/GROUP BY coverage, row reconciliation, observed-grid quality and gap diagnostics in SQLite | In-memory, fixed read-only reports; no warehouse or predictive ML pipeline |
 
 ## Screenshots
 
@@ -75,6 +75,8 @@ Run the portable-source test selection on Windows:
 ```powershell
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
+
+Current Windows test selection: **336 tests, 335 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; missing publisher calendars remain explicitly unknown.
 
 Read [validation](docs/VALIDATION.md) before interpreting counts. Full archived research runners need excluded private caches/checkpoints and must not be represented as passing in a fresh clone.
 

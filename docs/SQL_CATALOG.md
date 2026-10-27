@@ -29,3 +29,11 @@ Run `python -B tools/run_public_tests.py` in the documented Windows environment.
 Counts and first/last dates do not establish trading-calendar completeness. Collection time does not prove a historical publication vintage. Local hashes are not publisher signatures. This is a small analytical catalog, not a production warehouse, a trading signal, or a predictive model.
 
 V4.1 files and the prospective clock gate are unchanged. No order submission functionality is added.
+
+## Observed-grid quality diagnostics (28 October 2026)
+
+Quality reports summarize per-version/per-series min/max values, zero/negative counts, observed date counts and absences relative to the union of dates actually observed in that version. Zero/negative counts are descriptive, not universal error flags. Invalid source values are still rejected by the unchanged upstream verifier.
+
+An SQL anti-join lists absent series/date pairs, including boundary dates. These are candidates for source review, not confirmed missing publications: series may start late, end early or have intentionally unavailable values. A separate LAG query lists calendar intervals between observations. It does not label weekends or holidays as data loss. No publisher calendar or expected series universe has been verified; calendar completeness is explicitly `unknown`, including empty results. Entirely absent series, dates absent across all series, and outside-range dates cannot be certified by this comparison.
+
+Both detail lists are deterministically ordered and capped at 500 rows. Exact total counts and truncation flags remain available. No values are filled, no snapshots modified, and no versions combined. Eight additional tests cover partial grids, boundary absence, weekends, common missing dates, value summaries, version/rejection isolation, empty/single observations and capped detail output.

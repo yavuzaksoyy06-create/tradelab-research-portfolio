@@ -31,6 +31,52 @@ GROUP BY v.version_id,v.status,v.declared_rows,v.rejection_reason
 ORDER BY v.version_id
 '''
 
+# Observed-date grid is diagnostic, not a publisher calendar or expected universe.
+QUALITY_SQL = """
+WITH grid AS (SELECT version_id, COUNT(DISTINCT observation_date) AS observed_dates
+ FROM observations GROUP BY version_id)
+SELECT o.version_id,o.series,COUNT(*) AS observations,
+ MIN(o.value) AS minimum_value,MAX(o.value) AS maximum_value,
+ SUM(CASE WHEN o.value=0 THEN 1 ELSE 0 END) AS zero_values,
+ SUM(CASE WHEN o.value<0 THEN 1 ELSE 0 END) AS negative_values,
+ g.observed_dates,g.observed_dates-COUNT(*) AS absent_on_observed_dates,
+ 'observed_date_grid_only' AS assessment_basis
+FROM observations o JOIN grid g ON g.version_id=o.version_id
+GROUP BY o.version_id,o.series,g.observed_dates ORDER BY o.version_id,o.series
+"""
+MISSING_CTE = """
+WITH days AS (SELECT DISTINCT version_id,observation_date FROM observations),
+series AS (SELECT DISTINCT version_id,series FROM observations),
+missing AS (SELECT s.version_id,s.series,d.observation_date
+ FROM series s JOIN days d ON d.version_id=s.version_id
+ LEFT JOIN observations o ON o.version_id=s.version_id AND o.series=s.series
+ AND o.observation_date=d.observation_date WHERE o.version_id IS NULL)
+"""
+GAPS_CTE = """
+WITH ordered AS (SELECT version_id,series,observation_date,
+ LAG(observation_date) OVER (PARTITION BY version_id,series ORDER BY observation_date) AS previous_date
+ FROM observations), gaps AS (
+ SELECT version_id,series,previous_date,observation_date,
+ CAST(julianday(observation_date)-julianday(previous_date) AS INTEGER)-1 AS intervening_calendar_days
+ FROM ordered WHERE julianday(observation_date)-julianday(previous_date)>1)
+"""
+DETAIL_LIMIT = 500
+
+def _diagnostics(db):
+    quality=[dict(r) for r in db.execute(QUALITY_SQL)]
+    missing_count=sum(r['absent_on_observed_dates'] for r in quality)
+    gap_count=db.execute(GAPS_CTE+'SELECT COUNT(*) FROM gaps').fetchone()[0]
+    return {'quality':quality,
+            'missing_observations':[dict(r) for r in db.execute(MISSING_CTE+
+                'SELECT * FROM missing ORDER BY version_id,series,observation_date LIMIT ?', (DETAIL_LIMIT,))],
+            'missing_observations_total':missing_count,
+            'missing_observations_truncated':missing_count>DETAIL_LIMIT,
+            'calendar_gaps':[dict(r) for r in db.execute(GAPS_CTE+
+                'SELECT * FROM gaps ORDER BY version_id,series,observation_date LIMIT ?', (DETAIL_LIMIT,))],
+            'calendar_gaps_total':gap_count,'calendar_gaps_truncated':gap_count>DETAIL_LIMIT,
+            'calendar_completeness':'unknown','detail_limit':DETAIL_LIMIT}
+
+
 def _database(entries):
     db=sqlite3.connect(':memory:')
     db.row_factory=sqlite3.Row
@@ -69,6 +115,6 @@ def reports():
     try:
         return {'coverage':[dict(r) for r in db.execute(COVERAGE_SQL)],
                 'reconciliation':[dict(r) for r in db.execute(RECONCILIATION_SQL)],
-                'persistent_database':False,'evaluation_enabled':False}
+                'persistent_database':False,'evaluation_enabled':False, **_diagnostics(db)}
     finally:
         db.close()

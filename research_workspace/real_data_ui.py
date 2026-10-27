@@ -20,6 +20,19 @@ def render():
                 st.dataframe(pd.DataFrame(report['coverage']), hide_index=True, width='stretch')
                 st.caption('Gözlem tarih aralığı beklenen işlem takviminin eksiksiz olduğunu kanıtlamaz. '
                            'Reddedilen sürümlerin fiyatları rapora alınmaz.')
+                st.markdown('**Veri kalitesi · gözlenen tarihlere göre kapsam**')
+                st.dataframe(pd.DataFrame(report['quality']), hide_index=True, width='stretch')
+                st.caption('Sıfır/negatif sayıları tanımlayıcıdır; tek başına hata değildir. '
+                           'Yayın takvimi ve beklenen seri listesi doğrulanmadığı için takvim eksiksizliği bilinmiyor.')
+                st.markdown('**Diğer serilerin bulunduğu tarihlerde bulunmayan gözlemler**')
+                st.dataframe(pd.DataFrame(report['missing_observations']), hide_index=True, width='stretch')
+                st.caption(f"Toplam: {report['missing_observations_total']} · İlk {report['detail_limit']} kayıt gösterilir. "
+                           'Serinin o tarihte yayımlanması gerektiği kanıtlanmış değildir; boşluklar doldurulmaz.')
+                st.markdown('**Gözlemler arasındaki takvim aralıkları**')
+                st.dataframe(pd.DataFrame(report['calendar_gaps']), hide_index=True, width='stretch')
+                st.caption(f"Toplam: {report['calendar_gaps_total']} · İlk {report['detail_limit']} aralık gösterilir. "
+                           'Hafta sonu ve tatil içerebilir; bu aralıklar veri kaybı olarak sınıflandırılmaz. '
+                           'Hiç gözlenmemiş seri ve tüm serilerde kayıp günler eksiksizlik kontrolüyle saptanamaz.')
                 st.code(COVERAGE_SQL, language='sql')
             except (ValueError, KeyError, TypeError, OSError, sqlite3.Error) as exc:
                 st.error('SQL raporu doğrulanamadı: ' + str(exc))

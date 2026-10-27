@@ -54,10 +54,14 @@ Published the locally tested relational catalog and UI integration. Reports reva
 
 ## Next development priorities — not implemented in this snapshot
 
-1. Broader independently reviewed SQL quality reports and dependency testing.
+1. Independently reviewed publisher calendars and expected series lists for stronger completeness checks.
 2. Provider-specific real intraday calendars and licensed OHLCV acquisition, if justified by research needs.
 3. Point-in-time vintage evidence before using historical macro values in backtests.
 4. Pre-registered new hypotheses and untouched samples; no parameter tuning against an already-inspected replay.
 5. Independent review and broader dependency/platform testing.
 
 None of these priorities authorizes broker orders or bypassing the frozen prospective gate.
+
+## 12. Observed-grid quality diagnostics — 28 October 2026
+
+Added per-series descriptive quality summaries, missing cells relative to observed dates, and calendar-gap diagnostics. Unknown publisher calendars remain explicitly unknown; no calendar completeness claim is made. Eight new tests accompany the read-only UI reports.
