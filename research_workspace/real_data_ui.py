@@ -2,12 +2,27 @@
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import sqlite3
 from research_workspace.real_sources import catalog
+from research_workspace.catalog_sql import reports, COVERAGE_SQL
 
 def render():
     st.info('GERÇEK KAYNAK VERİSİ · Günlük referans değerleri · Yerel, sürümlenmiş anlık görüntü')
     st.caption('Canlı fiyat, OHLCV veya işlem sinyali değildir. V4.1 değerlendirmesine aktarılmaz.')
     entries = catalog()
+    with st.expander('SQL katalog raporu · kaynak, sürüm ve seri kapsamı'):
+        st.caption('Bellekteki ilişkisel tablolar kullanılır; kaynak dosyalar değiştirilmez. '
+                   'Rapor istendiğinde hash ve erişilebilirlik kontrolleri yeniden çalışır.')
+        if st.button('SQL raporunu doğrula ve göster', key='sql_catalog_report'):
+            try:
+                report = reports()
+                st.dataframe(pd.DataFrame(report['reconciliation']), hide_index=True, width='stretch')
+                st.dataframe(pd.DataFrame(report['coverage']), hide_index=True, width='stretch')
+                st.caption('Gözlem tarih aralığı beklenen işlem takviminin eksiksiz olduğunu kanıtlamaz. '
+                           'Reddedilen sürümlerin fiyatları rapora alınmaz.')
+                st.code(COVERAGE_SQL, language='sql')
+            except (ValueError, KeyError, TypeError, OSError, sqlite3.Error) as exc:
+                st.error('SQL raporu doğrulanamadı: ' + str(exc))
     if not entries:
         st.warning('Doğrulanmış veri sürümü yok. Veri indirme yalnızca ayrı toplama komutuyla yapılır.')
         return

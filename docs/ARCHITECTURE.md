@@ -53,4 +53,4 @@ CREATE TABLE IF NOT EXISTS datasets (
 );
 ```
 
-Writes use placeholders rather than interpolating metadata into SQL. This provides a small local dataset index, not normalized multi-table analytical modeling. A richer read-only relational catalog is a documented next step, not an achievement attributed to earlier stages.
+Writes use placeholders rather than interpolating metadata into SQL. This provides a small local dataset index, not normalized multi-table analytical modeling. The subsequent SQL catalog adds three related in-memory tables and fixed coverage/reconciliation queries; see [the SQL design](SQL_CATALOG.md). It is a separate later stage, not an achievement attributed to the historical ingestion implementation.

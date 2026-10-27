@@ -28,7 +28,7 @@ test koşusu gibi sunma.
 |---|---|---|
 | Python/R | Python veri işleme, doğrulama, test ve görselleştirme | R kullanımı iddia edilmiyor |
 | Uygulamalı istatistik | Kontrol karşılaştırmaları, bootstrap, örneklem sınırları | Çok değişkenli tahmin modeli henüz yok |
-| Veritabanı/SQL | SQLite metadata tablosu ve parametreli sorgu kullanımı | İleri SQL/ilişkisel modelleme sınırlı |
+| Veritabanı/SQL | Üç ilişkili SQLite tablosu, JOIN/GROUP BY kapsam raporu, satır mutabakatı ve parametreli yükleme | Küçük, bellekte çalışan katalog; üretim ölçeği iddia edilmiyor |
 | Araştırma ve sorumluluk | Kaynak kayıtları, zaman kapısı, negatif sonuçların korunması | Bağımsız dış denetim iddia edilmiyor |
 | İletişim/sunum | Türkçe öğrenme modu, grafikler, karar ve veri reddi açıklamaları | Gerçek müşteri sunumu iddia edilmiyor |
 

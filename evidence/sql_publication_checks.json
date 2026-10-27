@@ -1,0 +1,23 @@
+{
+  "previous_commit": "780aab32ab4d96508911fcea6518985219993cf0",
+  "previous_source_files": 79,
+  "current_source_files": 81,
+  "changed_previous_source_files": [
+    "research_workspace/real_data_ui.py"
+  ],
+  "all_current_source_hashes_match": true,
+  "v41_unchanged": true,
+  "collector_unchanged": true,
+  "test_results": {
+    "tests": 328,
+    "passed": 327,
+    "skipped": 1
+  },
+  "logs_sha256": {
+    "research_crypto.log": "49682e5a70892f0ee267a79375ef24493d14c51421cb807ccb5592bae39ef405",
+    "research_fx.log": "a15b4955ff74fdebad52dd7594e4e5acf75900ceb373b78b9473192d41c244c6",
+    "research_macro.log": "b946f4d7aae852a0a15a4c3058406f91d4debd6ea7c474cfdfe720cb73789c1d",
+    "research_workspace.log": "101cfc12e724ce77e24a0e7e0b570fcf2b190e9f3a8d550c59c06d312e34421e"
+  },
+  "no_raw_provider_data_published": true
+}

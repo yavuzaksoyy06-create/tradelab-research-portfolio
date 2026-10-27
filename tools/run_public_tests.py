@@ -3,6 +3,9 @@ from pathlib import Path
 from datetime import datetime, timezone
 import os, subprocess, sys, json, re
 
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 root=Path(__file__).resolve().parents[1]
 out=root/'evidence';out.mkdir(exist_ok=True)
 results=[]
@@ -10,7 +13,7 @@ for package in ('research_macro','research_crypto','research_fx','research_works
     started=datetime.now(timezone.utc).isoformat()
     proc=subprocess.run([sys.executable,'-B','-m','unittest','discover','-s',package+'/tests','-v'],
                         cwd=root,capture_output=True,text=True,encoding='utf-8',errors='replace',
-                        env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','STREAMLIT_BROWSER_GATHER_USAGE_STATS':'false'},timeout=300)
+                        env={**os.environ,'PYTHONIOENCODING':'utf-8','PYTHONDONTWRITEBYTECODE':'1','STREAMLIT_BROWSER_GATHER_USAGE_STATS':'false'},timeout=300)
     log=proc.stdout+'\n'+proc.stderr
     (out/(package+'.log')).write_text(log,encoding='utf-8')
     match=re.search(r'Ran (\d+) tests?',log)

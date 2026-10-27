@@ -69,7 +69,7 @@
   "research_workspace/charts.py": "d1b82172bc6ce44aa0b9b251514929f4f105794ca40f464e186096850611ebf6",
   "research_workspace/evidence.py": "2c8e1f57237150ced9a233368b0a658f369256a6176c199d90fbf877aed54309",
   "research_workspace/learning.py": "5069cd761cca0fbfe33acbee879254ef87637e210e728276a85e2fac8ae6f100",
-  "research_workspace/real_data_ui.py": "69a3f5165dac74a8ee7043730b5d37b81f148b73161d37baf7ac7e0c7e304d56",
+  "research_workspace/real_data_ui.py": "8c40612a1659bc7096969589301cbb4b2c24b5f5a63f18509f666f26647fef37",
   "research_workspace/real_sources.py": "1f64378ccd00f6b6a7c5891b3e573e13f63c2524e46d358c9cec6d1ac2e36ce3",
   "research_workspace/__init__.py": "5ddc922641bd8c6ccdc02bd22381a6354be8b26e6c35dbcfbc04b087ee06a7ed",
   "research_workspace/tests/test_adapters.py": "ddaa6c22b26a0d9a0a9165fcc7e449d6206c3d6ed9998d7105baefd4802b93af",
@@ -77,5 +77,7 @@
   "research_workspace/tests/test_evidence.py": "50125f472e31774f3fbee598e8b1b35724329fbd265e67d81a088ccf605a05ce",
   "research_workspace/tests/test_real_sources.py": "73b63f11fad7c834857bc2729db998a2de4dabcd07460f3867742bc663bfd9fd",
   "research_sr_v4_1/PORTFOLIO_EXPERIMENT_CONFIG.json": "69f55f30764e3eb7dcb54ba14a9e4b515d0ebe2e79b70dd4dae6dc4fec2f79ab",
-  "research_sr_v4/EXPERIMENT_CONFIG.json": "f5c44232a1aeb7df4796714c1b34a29614d1f29a780c0a2db13eccd924e5daab"
+  "research_sr_v4/EXPERIMENT_CONFIG.json": "f5c44232a1aeb7df4796714c1b34a29614d1f29a780c0a2db13eccd924e5daab",
+  "research_workspace/catalog_sql.py": "c2830ea61ef48b0e0ffe0b0ec3b367ed74fdb9f2c2b91e5e1fd27ea155dc6d34",
+  "research_workspace/tests/test_catalog_sql.py": "fdf792d91059ea173af48cc017f9305257c9170ab760ae87ce59d72bedd1ca6e"
 }

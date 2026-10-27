@@ -30,7 +30,7 @@ The central question is not “can a chart look convincing?” It is **“what w
 | Multi-market calendars | Crypto 24/7 grid and Forex NY/DST/rollover handling | FX provider profile is explicitly hypothetical |
 | Real public sources | ECB daily reference FX and US Treasury historical daily par yields | Not intraday OHLCV or point-in-time release vintages |
 | Communication | Turkish learning mode, charts, data tables, rejection reasons and audit views | No invented values for unavailable evidence |
-| Database exposure | SQLite dataset metadata index and parameterized writes in the historical ingestion code | This initial snapshot is not an enterprise warehouse or a predictive ML pipeline |
+| Relational SQL catalog | Verified sources, versions and observations; JOIN/GROUP BY coverage and LEFT JOIN row reconciliation in SQLite | In-memory, fixed read-only reports; no warehouse or predictive ML pipeline |
 
 ## Screenshots
 
@@ -68,6 +68,8 @@ Optional public reference collection (explicit network access, no credentials):
 
 These commands create new local versions; they do not update frozen V4.1 research. The Treasury adapter is deliberately fixed to **2025**; the ECB feed contains the most recent 90 days. Collection results will differ by collection time. Hash verification requires the collector code to remain unchanged after collection.
 
+On the **Gerçek Veri** page, expand **SQL katalog raporu** and click **SQL raporunu doğrula ve göster**. Each request revalidates snapshots before loading an ephemeral SQLite database. Rejected versions retain their rejection reason but contribute no observations. With no collected data, reports are empty rather than successful data verification. See [SQL catalog design and limitations](docs/SQL_CATALOG.md).
+
 Run the portable-source test selection on Windows:
 
 ```powershell
@@ -104,7 +106,7 @@ The frozen prospective window cannot complete before **21 January 2027, 21:15 UT
 
 This project demonstrates a workflow transferable to transaction-level business analytics: define a data contract, reject unreliable inputs, distinguish observation time from availability, compare against controls, quantify uncertainty, preserve an audit trail and communicate limitations to decision makers.
 
-It does **not** demonstrate a client engagement, deployed credit/insurance model, production-scale database, multivariate predictive model or measured business uplift. SQL depth is limited in the original snapshot; Python and research validation are the stronger evidence. Future work is clearly separated in the development document.
+It does **not** demonstrate a client engagement, deployed credit/insurance model, production-scale database, multivariate predictive model or measured business uplift. SQL evidence now includes a small relational catalog, parameterized loading, version-isolated aggregation and tested rejection paths; it does not imply production-scale database experience. Future work is clearly separated in the development document.
 
 ## Attribution and authorship
 

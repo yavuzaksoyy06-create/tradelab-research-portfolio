@@ -48,9 +48,13 @@ Kept TLS certificate validation, endpoint allowlists, no redirects, size/time li
 
 Exported reviewed source and tests into a separate repository without the original `.git`, credentials, brokerage configuration, licensed market caches, raw datasets, dependency vendor trees or personal workstation files. Added English technical documentation, Turkish CV guidance, source fingerprints and a public-package test selection. Original local files remain separate.
 
+## 11. Read-only SQL catalog — 28 October 2026
+
+Published the locally tested relational catalog and UI integration. Reports revalidate source snapshots, keep versions separate, reconcile declared and loaded rows, and exclude rejected observations. Added 12 SQL/UI tests; preserved strict collector hashes and the frozen V4.1 protocol. No source datasets are redistributed. [Design and limits](SQL_CATALOG.md).
+
 ## Next development priorities — not implemented in this snapshot
 
-1. Read-only relational catalog and SQL quality/coverage reports over verified source metadata.
+1. Broader independently reviewed SQL quality reports and dependency testing.
 2. Provider-specific real intraday calendars and licensed OHLCV acquisition, if justified by research needs.
 3. Point-in-time vintage evidence before using historical macro values in backtests.
 4. Pre-registered new hypotheses and untouched samples; no parameter tuning against an already-inspected replay.
