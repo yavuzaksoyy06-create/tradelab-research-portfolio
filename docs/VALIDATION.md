@@ -9,10 +9,10 @@ The curated source copy was tested separately from the original checkout:
 | Macro source/document/event-study contracts | 115 | 0 | 0 |
 | Crypto calendar and manifests | 100 | 1 | 0 |
 | Forex calendar/DST/rollover | 31 | 0 | 0 |
-| Workspace adapters, evidence, real sources, SQL and UI | 90 | 0 | 0 |
-| **Total** | **336** | **1** | **all zero** |
+| Workspace adapters, evidence, real sources, SQL and UI | 100 | 0 | 0 |
+| **Total** | **346** | **1** | **all zero** |
 
-**335 passed, 1 environment-dependent symlink test skipped.** Machine-readable
+**345 passed, 1 environment-dependent symlink test skipped.** Machine-readable
 start/end times and exit codes are in `evidence/public_test_results.json`.
 
 The test environment was the existing Windows Python 3.12 environment. Its
@@ -52,10 +52,10 @@ look valid.
 
 ## Source integrity
 
-`evidence/source_snapshot_sha256.json` records the current 81 source/test/config
+`evidence/source_snapshot_sha256.json` records the current 84 source/test/config/reference
 files. The original export and initial SQL publication inventories are preserved
-in `evidence/archive/`. In this stage, only the SQL module, its UI integration and
-its tests changed relative to the previous source inventory. The newer bytes are
+in `evidence/archive/`. In the publication-reference stage, the SQL module and its UI integration changed;
+a new publication-reference module, test module and pinned metadata file were added. The newer bytes are
 not claimed to match the separate original application. V4.1 and the collector
 remain unchanged. Documentation and packaging tools are separate additions.
 This is a local hash inventory, not a publisher signature or independent audit.
@@ -78,8 +78,12 @@ The first restricted-environment attempt encountered Windows temporary-directory
 
 The frozen V4.1 tree, all prior source fingerprints except the intended real-data UI change, and the collector remained byte-identical to the previous public commit. The new SQL module and tests match the original locally tested implementation. `evidence/sql_publication_checks.json` records these checks. Full raw logs remain local because they contain workstation paths; their hashes are recorded for traceability.
 
-## Quality diagnostics publication
+## Historical quality diagnostics publication (8b45682)
 
 Fresh public-package selection: 336 tests, 335 passed and 1 Windows symlink-permission skip. Workspace now has 90 tests, including 8 new diagnostic tests. Initial regression tests detected Turkish text encoding errors introduced during editing; these were fixed before the successful rerun. Previous SQL publication evidence is archived under the `d04372a_` prefix; the preceding SQL publication section describes that historical stage. The current hash inventory includes the three modified SQL/UI/test files; these newer bytes are not claimed to match the separate original application. That original application and V4.1 were not modified in this stage.
 
-Current publication checks and local test-log hashes are recorded in `evidence/quality_checks.json`.
+That stage’s publication checks and local test-log hashes are recorded in `evidence/quality_checks.json`.
+
+## Publication reference stage (28 October 2026)
+
+346 tests ran: 345 passed and one symlink-permission skip. Ten new tests cover reviewed profiles, tenor activation, entirely missing dates/series, TARGET holidays, unknown/partial ranges, reference tampering, version isolation and bounded output. The previous 336-test evidence is archived with prefix `8b45682_`. Current checks are in `evidence/calendar_checks.json`. Read-only integration found 218 absent 1.5-month Treasury observations; original snapshot files stayed byte-identical. ECB had zero missing pairs in the reviewed overlap, but one leading snapshot date was outside that reference. Neither result is a point-in-time or global completeness certification.

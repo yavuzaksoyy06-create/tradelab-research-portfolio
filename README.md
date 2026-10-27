@@ -76,7 +76,7 @@ Run the portable-source test selection on Windows:
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-Current Windows test selection: **336 tests, 335 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; missing publisher calendars remain explicitly unknown.
+Current Windows test selection: **346 tests, 345 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
 
 Read [validation](docs/VALIDATION.md) before interpreting counts. Full archived research runners need excluded private caches/checkpoints and must not be represented as passing in a fresh clone.
 

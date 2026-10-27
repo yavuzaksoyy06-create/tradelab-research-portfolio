@@ -1,0 +1,61 @@
+{
+  "baseline": "8b45682ea902f8a9d2d2f6d1c43aaa0db2469da7",
+  "tests": 346,
+  "passed": 345,
+  "skipped": 1,
+  "v41_unchanged": true,
+  "collector_unchanged": true,
+  "time_gate_unchanged": true,
+  "source_hash_count": 84,
+  "integration": {
+    "summary": [
+      {
+        "version_id": "ecb_fx_20261026T205149845771Z",
+        "source": "ecb_fx",
+        "status": "bounded_reference_comparison",
+        "missing_expected": 0,
+        "reference_sha256": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76",
+        "point_in_time": false,
+        "calendar_basis": "TARGET_2026",
+        "reference_url": "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml",
+        "review_date": "2026-10-28",
+        "scope_from": "2026-07-30",
+        "scope_through": "2026-10-26",
+        "outside_reference_range": true,
+        "expected_observations": 1827,
+        "entirely_absent_series": [],
+        "unexpected_series": [],
+        "outside_expected_grid": 0
+      },
+      {
+        "version_id": "treasury_2025_20261026T205152721948Z",
+        "source": "treasury_2025",
+        "status": "bounded_reference_comparison",
+        "missing_expected": 218,
+        "reference_sha256": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76",
+        "point_in_time": false,
+        "calendar_basis": "publisher_observed_2025_dates",
+        "reference_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2025",
+        "review_date": "2026-10-28",
+        "scope_from": "2025-01-02",
+        "scope_through": "2025-12-31",
+        "outside_reference_range": false,
+        "expected_observations": 3455,
+        "entirely_absent_series": [
+          "BC_1_5MONTH"
+        ],
+        "unexpected_series": [],
+        "outside_expected_grid": 0
+      }
+    ],
+    "missing_total": 218,
+    "original_snapshot_files_unchanged": true
+  },
+  "logs_sha256": {
+    "research_crypto.log": "1163ae4ebb2e0e5d298a59301d5765864ea6f15cd255accdc819ac6e27f98730",
+    "research_fx.log": "a15b4955ff74fdebad52dd7594e4e5acf75900ceb373b78b9473192d41c244c6",
+    "research_macro.log": "b946f4d7aae852a0a15a4c3058406f91d4debd6ea7c474cfdfe720cb73789c1d",
+    "research_workspace.log": "fc0ca4a82ded7cca954145dc3f366f0a7dc785871ce627974562e5365098698d"
+  },
+  "all_source_hashes_match": true
+}

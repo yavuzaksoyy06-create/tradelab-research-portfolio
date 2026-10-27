@@ -69,7 +69,7 @@
   "research_workspace/charts.py": "d1b82172bc6ce44aa0b9b251514929f4f105794ca40f464e186096850611ebf6",
   "research_workspace/evidence.py": "2c8e1f57237150ced9a233368b0a658f369256a6176c199d90fbf877aed54309",
   "research_workspace/learning.py": "5069cd761cca0fbfe33acbee879254ef87637e210e728276a85e2fac8ae6f100",
-  "research_workspace/real_data_ui.py": "cff5883b239bcba7ac2edf5026974b1e2de0509ad638ae5ad471a55b4cb9c739",
+  "research_workspace/real_data_ui.py": "3e9c8b09dc31b71877c71462b953434f534c517a48a5b8e4b0837ba69f4c675f",
   "research_workspace/real_sources.py": "1f64378ccd00f6b6a7c5891b3e573e13f63c2524e46d358c9cec6d1ac2e36ce3",
   "research_workspace/__init__.py": "5ddc922641bd8c6ccdc02bd22381a6354be8b26e6c35dbcfbc04b087ee06a7ed",
   "research_workspace/tests/test_adapters.py": "ddaa6c22b26a0d9a0a9165fcc7e449d6206c3d6ed9998d7105baefd4802b93af",
@@ -78,6 +78,9 @@
   "research_workspace/tests/test_real_sources.py": "73b63f11fad7c834857bc2729db998a2de4dabcd07460f3867742bc663bfd9fd",
   "research_sr_v4_1/PORTFOLIO_EXPERIMENT_CONFIG.json": "69f55f30764e3eb7dcb54ba14a9e4b515d0ebe2e79b70dd4dae6dc4fec2f79ab",
   "research_sr_v4/EXPERIMENT_CONFIG.json": "f5c44232a1aeb7df4796714c1b34a29614d1f29a780c0a2db13eccd924e5daab",
-  "research_workspace/catalog_sql.py": "a48fed8546037230f678641802d05fc3747e295abb1266334fe04b7df522eb9f",
-  "research_workspace/tests/test_catalog_sql.py": "f49dc765e991253a28d6724afc747e6782d1b56a663257f478d7c8a955ed9178"
+  "research_workspace/catalog_sql.py": "bdb5bf9ab650c234d5e42031fe33f446bbd4eb7d4cc003ecf35197d924321d7d",
+  "research_workspace/tests/test_catalog_sql.py": "f49dc765e991253a28d6724afc747e6782d1b56a663257f478d7c8a955ed9178",
+  "research_workspace/publication_calendar.py": "95b91aabc0ef36a2dbf3516bc4813ba5471d25466b6093d1d1357c5300c41c2a",
+  "research_workspace/tests/test_publication_calendar.py": "3216cba79a2cd1c16877b916e736f4ae0fbae70ed3563decbb39ef499cd927b3",
+  "research_workspace/reference_calendars/review_20261028.json": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76"
 }

@@ -33,6 +33,13 @@ def render():
                 st.caption(f"Toplam: {report['calendar_gaps_total']} · İlk {report['detail_limit']} aralık gösterilir. "
                            'Hafta sonu ve tatil içerebilir; bu aralıklar veri kaybı olarak sınıflandırılmaz. '
                            'Hiç gözlenmemiş seri ve tüm serilerde kayıp günler eksiksizlik kontrolüyle saptanamaz.')
+                st.markdown('**Kaynağa özel yayın referansı karşılaştırması**')
+                st.dataframe(pd.DataFrame(report['publication_summary']), hide_index=True, width='stretch')
+                st.dataframe(pd.DataFrame(report['publication_missing']), hide_index=True, width='stretch')
+                st.caption(f"Toplam eksik: {report['publication_missing_total']} · İlk 500 kayıt gösterilir. "
+                           'Yalnızca gözlenen aralık ile doğrulanmış referans aralığının kesişimi incelenir. '
+                           'ECB: TARGET takvimi. Treasury: 2025 yayımlanmış tarih referansı; geleceğe yönelik takvim değildir. '
+                           'Eksik sonuç, sağlayıcı hatası veya geçmişte bilinen bilgi iddiası değildir.')
                 st.code(COVERAGE_SQL, language='sql')
             except (ValueError, KeyError, TypeError, OSError, sqlite3.Error) as exc:
                 st.error('SQL raporu doğrulanamadı: ' + str(exc))

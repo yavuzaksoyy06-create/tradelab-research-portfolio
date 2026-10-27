@@ -65,3 +65,7 @@ None of these priorities authorizes broker orders or bypassing the frozen prospe
 ## 12. Observed-grid quality diagnostics — 28 October 2026
 
 Added per-series descriptive quality summaries, missing cells relative to observed dates, and calendar-gap diagnostics. Unknown publisher calendars remain explicitly unknown; no calendar completeness claim is made. Eight new tests accompany the read-only UI reports.
+
+## 13. Source publication references — 28 October 2026
+
+Reviewed official ECB calendar/currency sources and Treasury XML/developer notices. Added a bounded ECB TARGET comparison and a retrospective Treasury 2025 publication grid, with pinned reference metadata and ten new tests. The report exposes an existing omitted Treasury tenor without changing the collector or accepting new hashes for historical snapshots.

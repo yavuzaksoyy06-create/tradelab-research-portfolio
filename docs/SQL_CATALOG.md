@@ -37,3 +37,7 @@ Quality reports summarize per-version/per-series min/max values, zero/negative c
 An SQL anti-join lists absent series/date pairs, including boundary dates. These are candidates for source review, not confirmed missing publications: series may start late, end early or have intentionally unavailable values. A separate LAG query lists calendar intervals between observations. It does not label weekends or holidays as data loss. No publisher calendar or expected series universe has been verified; calendar completeness is explicitly `unknown`, including empty results. Entirely absent series, dates absent across all series, and outside-range dates cannot be certified by this comparison.
 
 Both detail lists are deterministically ordered and capped at 500 rows. Exact total counts and truncation flags remain available. No values are filled, no snapshots modified, and no versions combined. Eight additional tests cover partial grids, boundary absence, weekends, common missing dates, value summaries, version/rejection isolation, empty/single observations and capped detail output.
+
+## Source-specific reference extension
+
+The observed-grid diagnostics above remain separate. New `publication_summary` and `publication_missing` reports use hash-pinned source-specific metadata. Unknown range/source states are retained; the general `calendar_completeness` field remains unknown because no global completeness certificate is issued. See [review, source links and scope](PUBLICATION_CALENDARS.md).

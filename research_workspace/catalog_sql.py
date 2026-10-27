@@ -1,6 +1,7 @@
 """Ephemeral SQL reports from freshly verified snapshots, without persistent writes."""
 import sqlite3
 from research_workspace.real_sources import catalog
+from research_workspace.publication_calendar import publication_reports
 
 SCHEMA = '''
 CREATE TABLE sources(source_id TEXT PRIMARY KEY, publisher TEXT NOT NULL, unit TEXT NOT NULL);
@@ -115,6 +116,6 @@ def reports():
     try:
         return {'coverage':[dict(r) for r in db.execute(COVERAGE_SQL)],
                 'reconciliation':[dict(r) for r in db.execute(RECONCILIATION_SQL)],
-                'persistent_database':False,'evaluation_enabled':False, **_diagnostics(db)}
+                'persistent_database':False,'evaluation_enabled':False, **_diagnostics(db), **publication_reports(db)}
     finally:
         db.close()
