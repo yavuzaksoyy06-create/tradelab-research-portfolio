@@ -1,9 +1,11 @@
 """Stage 6 equity data checks: offline, no feeds and no order endpoints."""
 from datetime import datetime, timezone
 import unittest
+import json
 
 import pandas as pd
 
+from research_workspace.equity_provenance import replay_manifest, manifest_json
 from research_workspace.equity_data import (
     REQUIRED, MAX_BYTES, analyze_prefix, read_uploaded_csv, synthetic_fixture
 )
@@ -84,6 +86,28 @@ class EquityDataTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 analyze_prefix(self.frame, count)
 
+
+    def test_replay_manifest_is_deterministic_and_causal(self):
+        prefix, _ = analyze_prefix(self.frame, 85)
+        manifest = replay_manifest(prefix, self.meta)
+        self.assertEqual(manifest_json(prefix, self.meta), manifest_json(prefix, self.meta))
+        self.assertEqual(json.loads(manifest_json(prefix, self.meta)), manifest)
+        self.assertEqual(manifest['visible_bars'], 85)
+        self.assertFalse(manifest['orders_enabled'])
+        self.assertFalse(manifest['feed_verified'])
+        self.assertTrue(manifest['synthetic'])
+        self.assertNotIn('input_sha256', {k for k,v in manifest.items() if v is not None})
+        self.assertNotEqual(manifest['visible_ohlcv_sha256'],
+                            replay_manifest(self.frame, self.meta)['visible_ohlcv_sha256'])
+
+    def test_manifest_rejects_invalid_research_context(self):
+        prefix, _ = analyze_prefix(self.frame, 10)
+        with self.assertRaises(ValueError):
+            replay_manifest(prefix, {**self.meta, 'orders_enabled': True})
+        with self.assertRaises(ValueError):
+            replay_manifest(prefix, {**self.meta, 'feed_verified': True})
+        with self.assertRaises(ValueError):
+            replay_manifest(prefix.iloc[:0], self.meta)
 
 
 class EquityUITests(unittest.TestCase):
