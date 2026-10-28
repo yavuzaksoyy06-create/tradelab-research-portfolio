@@ -4,13 +4,14 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from urllib.error import HTTPError
 import numpy as np
 import pandas as pd
 
 from research_sr_v4.data import expected_grid
 from research_workspace.equity_data import synthetic_fixture, REQUIRED
-from research_workspace.equity_provider import read_alpaca_history
+from research_workspace.equity_provider import read_alpaca_history, _api_get, _NoRedirect
 from research_workspace.stage7_events import (
     event_dataset, safe_summary, outcome, classify_event, validated_history, causal_features,
 )
@@ -46,6 +47,11 @@ class Stage7ResearchTests(unittest.TestCase):
         for i, record in original.items():
             self.assertEqual(record, future[i])
             self.assertEqual(scenarios(record), scenarios(future[i]))
+        matured = [r for r in shorter["records"] if r["horizon"] == 4 and
+                   r["features"]["index"] + 4 < 60]
+        frozen_model = fit_frequency(matured)
+        self.assertEqual(predict_frequency(frozen_model, original[84]),
+                         predict_frequency(frozen_model, future[84]))
         # Truncation changes full snapshot hash, never a causal predictor hash.
         small = event_dataset(self.frame.iloc[:78], self.meta)
         self.assertNotEqual(small["dataset_sha256"], self.dataset["dataset_sha256"])
@@ -280,6 +286,27 @@ class Stage7ResearchTests(unittest.TestCase):
     def test_synthetic_flag_must_be_boolean(self):
         with self.assertRaises(ValueError):
             event_dataset(self.frame, {**self.meta, "synthetic": 0})
+
+    def test_actual_transport_is_get_only_and_never_redirects_credentials(self):
+        opener = MagicMock()
+        response = opener.open.return_value.__enter__.return_value
+        response.status = 200
+        response.url = "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY"
+        response.headers.get_content_type.return_value = "application/json"
+        response.read.return_value = b'{"bars": {}}'
+        with patch("research_workspace.equity_provider.build_opener", return_value=opener):
+            self.assertEqual(_api_get({"symbols": "SPY"}, "SECRET_KEY", "SECRET_VALUE"), {"bars": {}})
+            request = opener.open.call_args.args[0]
+            self.assertEqual(request.get_method(), "GET")
+            self.assertIsNone(request.data)
+            self.assertEqual(request.full_url, response.url)
+            self.assertNotIn("SECRET", request.full_url)
+            opener.open.side_effect = HTTPError(response.url, 429, "SECRET_VALUE", {}, None)
+            with self.assertRaisesRegex(ValueError, "HTTP 429") as exc:
+                _api_get({"symbols": "SPY"}, "SECRET_KEY", "SECRET_VALUE")
+            self.assertNotIn("SECRET", str(exc.exception))
+        with self.assertRaisesRegex(ValueError, "redirect refused"):
+            _NoRedirect().redirect_request(None, None, 302, "", {}, "https://example.org")
 
 
 if __name__ == "__main__":

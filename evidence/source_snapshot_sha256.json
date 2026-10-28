@@ -109,7 +109,7 @@
   "research_workspace/tests/test_publication_calendar.py": "3216cba79a2cd1c16877b916e736f4ae0fbae70ed3563decbb39ef499cd927b3",
   "research_workspace/tests/test_real_sources.py": "73b63f11fad7c834857bc2729db998a2de4dabcd07460f3867742bc663bfd9fd",
   "research_workspace/tests/test_stage7_commentary_audit.py": "d745eab9759ed1b6e0b4147fad0f1dc9d988653521253b391b2bae4c9aafc304",
-  "research_workspace/tests/test_stage7_research.py": "19fe3936b8678a30e8f81bbe19d4069ae5e84c3a76dd689047a6a918d9b64d5e",
+  "research_workspace/tests/test_stage7_research.py": "534106207f42a766f5df4fbb0603e2ba16ccea746eb0df38f1511297a90dd8ea",
   "research_workspace/tests/test_stage7_ui.py": "035a6b3715c688a8a098b5c93a51214b88ac3d6425d826b2494114f59b7150aa",
   "research_workspace/tests/test_treasury_v2.py": "a7200f4b1699c044180e82e80f1f4b61b8ff37f51495b2ccd7fa6ee0eae17847",
   "research_workspace/treasury_v2.py": "7e3ae4ced19d02a7c1fe3988927c73f3c8d6366701f4535cd027c3c17519a544",

@@ -26,7 +26,7 @@ The existing reader inferred the validation range from returned bars. If the req
 
 The verified Stage 6 base is 3a646e3477f741a793a62460ec66fa82167600ab. GitHub run #44 (40725369312), job 122947062110, directly inspected logs: 115 macro + 100 crypto + 31 FX + 194 workspace = **440 passed, zero failed/skipped**.
 
-Stage 7 local complete run: **467 discovered, 466 passed, one existing Windows symlink-privilege skip, zero failures**. Suites: macro 115, crypto 100, FX 31, workspace 221. Exact timestamps and exit codes: [public_test_results.json](../evidence/public_test_results.json). The 27 new tests comprise 3 independent commentary tests, 23 research tests, and 1 Streamlit test. Final presentation changes also passed targeted replay/UI regression tests.
+Stage 7 local complete run: **468 discovered, 467 passed, one existing Windows symlink-privilege skip, zero failures**. Suites: macro 115, crypto 100, FX 31, workspace 222. Exact timestamps and exit codes: [public_test_results.json](../evidence/public_test_results.json). The 28 new tests comprise 3 independent commentary tests, 24 research tests, and 1 Streamlit test. Final presentation changes also passed targeted replay/UI regression tests.
 
 The first restricted run hit Windows temporary-directory access denial in the private-storage test. That was an environment permission failure, not an algorithmic failure. The unchanged test passed under normal local test permissions. No automated security review was bypassed and no integrity test was weakened.
 
@@ -39,6 +39,7 @@ Core checks cover:
 - Insufficient history, actual data with unspecified feed, strict missing-bar/edge-session rejection.
 - Explicit download consent, sealed dates before network, bounded batches, same-feed provenance, sanitized transport failure with no automatic retry.
 - Private snapshot hash/coverage tampering, outside-Git storage, exclusive snapshot folder creation.
+- Actual HTTP transport inspected through a mocked opener: GET-only market-data URL, no request body, no secret in URL, redirect refusal and sanitized HTTP 429. No live request is sent.
 - Preserved chart plus all six Turkish research panels and replay result separation.
 
 No new statistical result table is presented as market evidence: no qualifying real-data experiment has run.

@@ -6,35 +6,35 @@
       "tests": 115,
       "skipped": 0,
       "exit_code": 0,
-      "started_at": "2026-10-28T16:51:55.854360+00:00",
-      "finished_at": "2026-10-28T16:51:56.343618+00:00"
+      "started_at": "2026-10-28T17:02:16.304382+00:00",
+      "finished_at": "2026-10-28T17:02:16.696671+00:00"
     },
     {
       "suite": "research_crypto",
       "tests": 100,
       "skipped": 1,
       "exit_code": 0,
-      "started_at": "2026-10-28T16:51:56.343618+00:00",
-      "finished_at": "2026-10-28T16:51:56.878320+00:00"
+      "started_at": "2026-10-28T17:02:16.696671+00:00",
+      "finished_at": "2026-10-28T17:02:16.976225+00:00"
     },
     {
       "suite": "research_fx",
       "tests": 31,
       "skipped": 0,
       "exit_code": 0,
-      "started_at": "2026-10-28T16:51:56.878320+00:00",
-      "finished_at": "2026-10-28T16:51:57.212097+00:00"
+      "started_at": "2026-10-28T17:02:16.976225+00:00",
+      "finished_at": "2026-10-28T17:02:17.226966+00:00"
     },
     {
       "suite": "research_workspace",
-      "tests": 221,
+      "tests": 222,
       "skipped": 0,
       "exit_code": 0,
-      "started_at": "2026-10-28T16:51:57.212097+00:00",
-      "finished_at": "2026-10-28T16:52:21.941859+00:00"
+      "started_at": "2026-10-28T17:02:17.226966+00:00",
+      "finished_at": "2026-10-28T17:02:40.184553+00:00"
     }
   ],
   "passed": true,
-  "tests": 467,
+  "tests": 468,
   "skipped": 1
 }

@@ -194,7 +194,7 @@ These collect official *daily reference data*, not intraday prices. The legacy T
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-- **Current development-branch local evidence:** 467 tests, 466 passed, 1 Windows symlink-permission skip (28 October 2026).
+- **Current development-branch local evidence:** 468 tests, 467 passed, 1 Windows symlink-permission skip (28 October 2026).
 - **GitHub Actions:** [Windows / Python 3.12 public-source workflow](.github/workflows/public-tests.yml). The badge above reflects GitHub's **actual workflow status**, not a manually asserted pass.
 - **Platform limits:** The public test runner excludes private cached-price and frozen original research reproduction. Windows is the documented platform; Linux/macOS compatibility is **not certified**. The full frozen historical replay cannot be reproduced without the excluded original evidence.
 
