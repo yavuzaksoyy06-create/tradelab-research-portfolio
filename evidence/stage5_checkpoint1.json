@@ -1,0 +1,9 @@
+{
+  "phase": "offline remediation",
+  "tests": 356,
+  "passed": 355,
+  "skipped": 1,
+  "no_network_collection": true,
+  "legacy_collector_unchanged": true,
+  "original_project_unchanged": true
+}

@@ -82,5 +82,7 @@
   "research_workspace/tests/test_catalog_sql.py": "f49dc765e991253a28d6724afc747e6782d1b56a663257f478d7c8a955ed9178",
   "research_workspace/publication_calendar.py": "95b91aabc0ef36a2dbf3516bc4813ba5471d25466b6093d1d1357c5300c41c2a",
   "research_workspace/tests/test_publication_calendar.py": "3216cba79a2cd1c16877b916e736f4ae0fbae70ed3563decbb39ef499cd927b3",
-  "research_workspace/reference_calendars/review_20261028.json": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76"
+  "research_workspace/reference_calendars/review_20261028.json": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76",
+  "research_workspace/treasury_v2.py": "7e3ae4ced19d02a7c1fe3988927c73f3c8d6366701f4535cd027c3c17519a544",
+  "research_workspace/tests/test_treasury_v2.py": "a7200f4b1699c044180e82e80f1f4b61b8ff37f51495b2ccd7fa6ee0eae17847"
 }

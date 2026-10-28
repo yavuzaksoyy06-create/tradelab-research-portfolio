@@ -76,7 +76,7 @@ Run the portable-source test selection on Windows:
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-Current Windows test selection: **346 tests, 345 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
+Current Windows test selection: **356 tests, 355 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
 
 Read [validation](docs/VALIDATION.md) before interpreting counts. Full archived research runners need excluded private caches/checkpoints and must not be represented as passing in a fresh clone.
 
@@ -115,3 +115,7 @@ It does **not** demonstrate a client engagement, deployed credit/insurance model
 Project owner: **Yavuz Kaan Aksoy**. Developed iteratively with AI coding assistance (including Codex). This repository records implementation and test evidence; authorship does not imply every line was written unaided. Interview explanations should focus on design choices and limitations the owner can personally defend.
 
 Sources: [ECB reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html), [US Treasury XML feeds](https://home.treasury.gov/treasury-daily-interest-rate-xml-feed). Third-party libraries are installed separately and are not vendored here. No open-source license grant is added by this publication; public visibility alone is not a redistribution license for third-party data.
+
+## Stage 5 checkpoint 1
+
+Offline Treasury revision 2 uses explicit maturity definitions, including the 1.5-month tenor. It derives a separately pinned immutable snapshot from an already verified legacy version; original snapshots and collector remain unchanged. No automatic downloads. Financial Analytics UI is the next checkpoint.

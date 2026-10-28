@@ -16,3 +16,5 @@ research_workspace/evidence/
 *.db
 *.log
 work/
+
+research_workspace/real_data_v2/
