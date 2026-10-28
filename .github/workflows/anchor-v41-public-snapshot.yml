@@ -1,0 +1,33 @@
+name: Anchor public V4.1 source snapshot
+
+# Manual, one-time provenance operation. This is NOT a backdated preregistration.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create-public-source-tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out public history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create immutable-intent annotated public snapshot tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="v4.1-public-snapshot-2026-10-27"
+          source="780aab32ab4d96508911fcea6518985219993cf0"
+          git cat-file -e "${source}^{commit}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "Existing tag detected; will not move or overwrite it."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${tag}" "${source}" -m "First publicly published source snapshot, 27 Oct 2026. Tag created later; NOT evidence of prior independent preregistration."
+          git push origin "refs/tags/${tag}"
