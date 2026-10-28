@@ -13,6 +13,7 @@ from research_sr_v4.data import DataQualityError
 from research_workspace.equity_data import SYMBOLS, analyze_prefix, read_uploaded_csv, synthetic_fixture
 from research_workspace.equity_provenance import manifest_json
 from research_workspace.equity_provider import read_alpaca_history
+from research_workspace.equity_indicators import EMA_PERIODS, indicator_frame
 
 
 def _session_axis(visible):
@@ -33,11 +34,16 @@ def _session_axis(visible):
     return bar_labels, tickvals, ticktext
 
 
-def equity_chart(prefix, features, symbol):
+def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False):
+    if any(period not in EMA_PERIODS for period in ema_periods):
+        raise ValueError('Unsupported EMA period')
     visible = prefix.tail(130)
     bar_labels, day_ticks, day_labels = _session_axis(visible)
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.06,
-                        row_heights=[0.78, 0.22])
+    rows = 3 if show_rsi else 2
+    heights = [0.62, 0.19, 0.19] if show_rsi else [0.78, 0.22]
+    fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, vertical_spacing=0.045,
+                        row_heights=heights)
+    indicators = indicator_frame(prefix) if (ema_periods or show_rsi) else None
     fig.add_trace(go.Candlestick(x=bar_labels, open=visible.open,
                                   high=visible.high, low=visible.low, close=visible.close,
                                   increasing_line_color='#43d6a6', decreasing_line_color='#f27d88',
@@ -45,6 +51,24 @@ def equity_chart(prefix, features, symbol):
     colors = ['#43d6a6' if c >= o else '#f27d88' for c, o in zip(visible.close, visible.open)]
     fig.add_trace(go.Bar(x=bar_labels, y=visible.volume, marker_color=colors,
                          name='Volume', opacity=0.7), row=2, col=1)
+    if indicators is not None:
+        visible_indicator_rows = indicators.tail(len(visible))
+        for period in ema_periods:
+            fig.add_trace(go.Scatter(
+                x=bar_labels, y=visible_indicator_rows[f'ema_{period}'],
+                mode='lines', name=f'EMA {period}', line=dict(width=1.8),
+                connectgaps=False,
+            ), row=1, col=1)
+        if show_rsi:
+            fig.add_trace(go.Scatter(
+                x=bar_labels, y=visible_indicator_rows['rsi_14'],
+                mode='lines', name='RSI 14', line=dict(width=1.8),
+                connectgaps=False,
+            ), row=3, col=1)
+            for threshold in (30, 70):
+                fig.add_hline(y=threshold, row=3, col=1,
+                              line_dash='dot', line_color='#748094',
+                              opacity=0.6)
     latest = features['snapshots'][-1]
     for zone in latest['zones']:
         fig.add_hrect(y0=zone['lower'], y1=zone['upper'],
@@ -64,19 +88,22 @@ def equity_chart(prefix, features, symbol):
                                      marker=dict(symbol=shape, size=9, color=color),
                                      customdata=[p['confirmed_at'] for p in selected],
                                      hovertemplate='Confirmed at %{customdata}<extra>'+kind+'</extra>',
-                                     name=kind), row=1, col=1)
+                                     name=kind, showlegend=False), row=1, col=1)
     fig.update_layout(template='plotly_dark', paper_bgcolor='#0b1322', plot_bgcolor='#0b1322',
                       height=570, margin=dict(l=18,r=18,t=54,b=20),
                       title=f'{symbol} · completed 15-minute bars · read-only',
-                      xaxis_rangeslider_visible=False, hovermode='x unified', showlegend=False)
+                      xaxis_rangeslider_visible=False, hovermode='x unified',
+                      showlegend=bool(ema_periods or show_rsi))
     # Ordinal categories compress non-trading periods without inserting prices.
     # Explicit ordering keeps candles, volume and confirmed pivots aligned.
     fig.update_xaxes(type='category', categoryorder='array', categoryarray=bar_labels)
     fig.update_xaxes(tickmode='array', tickvals=day_ticks, ticktext=day_labels,
                      title_text='XNYS sessions · overnight/weekend gaps hidden',
-                     row=2, col=1)
+                     row=rows, col=1)
     fig.update_yaxes(title_text='Price (source units)', row=1, col=1)
     fig.update_yaxes(title_text='Volume', row=2, col=1)
+    if show_rsi:
+        fig.update_yaxes(title_text='RSI (14)', range=[0, 100], row=3, col=1)
     return fig
 
 
@@ -138,7 +165,17 @@ def render():
         b.metric('Latest close', f'{prefix.close.iloc[-1]:.3f}')
         c.metric('ATR (research engine)', f'{last["atr"]:.3f}' if last['atr'] is not None else 'N/A')
         d.metric('Active S/R zones', len(last['zones']))
-        st.plotly_chart(equity_chart(prefix, features, symbol), width='stretch', key='equity_candles')
+        ema_selection = st.multiselect(
+            'Moving averages · EMA (15-minute bars)',
+            options=list(EMA_PERIODS), default=[9, 21], key='equity_ema_overlays'
+        )
+        show_rsi = st.checkbox('RSI (14) · Wilder smoothing', value=False, key='equity_show_rsi')
+        st.plotly_chart(equity_chart(prefix, features, symbol,
+                                    ema_periods=tuple(ema_selection), show_rsi=show_rsi),
+                        width='stretch', key='equity_candles')
+        st.caption('Indicators are descriptive, calculated only from the completed replay prefix. '
+                   'EMA 9/21/50/200 require that many available bars; RSI(14) requires 15 closes. '
+                   'Insufficient history is shown as unavailable, never backfilled.')
         st.caption('Chart display compresses nights, weekends and holidays. Each candle still represents '
                    'one actual completed 15-minute XNYS bar; hover timestamps are New York local time. '
                    'No missing market data is filled or fabricated.')
