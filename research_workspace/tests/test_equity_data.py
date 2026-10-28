@@ -131,5 +131,13 @@ class EquityUITests(unittest.TestCase):
         self.assertTrue(any('UNAVAILABLE DATA' in x.value for x in at.info))
         self.assertEqual(len(at.get('plotly_chart')), 0)
 
+    def test_provider_mode_does_not_fetch_automatically(self):
+        at = self.app().run()
+        at.radio(key='page').set_value('Equity Research').run()
+        at.radio(key='equity_mode').set_value('Alpaca historical (read-only)').run()
+        self.assertFalse(at.exception)
+        self.assertTrue(any('NO PROVIDER DATA LOADED' in x.value for x in at.info))
+        self.assertEqual(len(at.get('plotly_chart')), 0)
+
 if __name__ == '__main__':
     unittest.main()
