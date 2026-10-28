@@ -14,6 +14,7 @@ from research_workspace.equity_data import SYMBOLS, analyze_prefix, read_uploade
 from research_workspace.equity_provenance import manifest_json
 from research_workspace.equity_provider import read_alpaca_history
 from research_workspace.equity_indicators import EMA_PERIODS, indicator_frame
+from research_workspace.equity_zones import historical_zone_bands
 
 
 def _session_axis(visible):
@@ -69,25 +70,37 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False):
                 fig.add_hline(y=threshold, row=3, col=1,
                               line_dash='dot', line_color='#748094',
                               opacity=0.6)
-    latest = features['snapshots'][-1]
-    for zone in latest['zones']:
-        fig.add_hrect(y0=zone['lower'], y1=zone['upper'],
-                      fillcolor='#39cda1' if zone['kind']=='support' else '#ee8f8f',
-                      opacity=0.15, line_width=0, row=1, col=1)
+    # Draw each zone only across bars where its state is actually present in a
+    # completed-bar snapshot. Never extend the final snapshot backwards.
     first_index = len(prefix) - len(visible)
-    pivots = [p for p in features['pivots'] if first_index <= p['pivot_index'] < len(prefix)
-              and p['confirmed_index'] < len(prefix)]
+    for band in historical_zone_bands(features['snapshots'], visible_start=first_index):
+        first = band['start_index'] - first_index
+        last = band['end_index'] - first_index
+        fig.add_shape(
+            type='rect', xref='x', yref='y',
+            x0=bar_labels[first], x1=bar_labels[last],
+            x0shift=-0.5, x1shift=0.5,
+            y0=band['lower'], y1=band['upper'],
+            fillcolor='#39cda1' if band['kind'] == 'support' else '#ee8f8f',
+            opacity=0.13, line_width=0, layer='below',
+        )
+    # Mark the confirmation candle, NOT the earlier pivot candle: the latter
+    # was not identifiable until the required right-hand candles had closed.
+    pivots = [p for p in features['pivots']
+              if first_index <= p['confirmed_index'] < len(prefix)]
     for kind, color, shape in [('support', '#59e6b7', 'triangle-up'),
                                ('resistance', '#f3a2a5', 'triangle-down')]:
         selected = [p for p in pivots if p['kind'] == kind]
         if selected:
-            fig.add_trace(go.Scatter(x=[prefix.iloc[p['pivot_index']].timestamp.tz_convert(
+            fig.add_trace(go.Scatter(x=[prefix.iloc[p['confirmed_index']].timestamp.tz_convert(
                                          'America/New_York').strftime('%Y-%m-%d %H:%M')
                                          for p in selected],
                                      y=[p['price'] for p in selected], mode='markers',
                                      marker=dict(symbol=shape, size=9, color=color),
-                                     customdata=[p['confirmed_at'] for p in selected],
-                                     hovertemplate='Confirmed at %{customdata}<extra>'+kind+'</extra>',
+                                     customdata=[[p['pivot_at'], p['confirmed_at']] for p in selected],
+                                     hovertemplate=('Pivot bar: %{customdata[0]}'
+                                                    '<br>Confirmed: %{customdata[1]}'
+                                                    '<extra>'+kind+'</extra>'),
                                      name=kind, showlegend=False), row=1, col=1)
     fig.update_layout(template='plotly_dark', paper_bgcolor='#0b1322', plot_bgcolor='#0b1322',
                       height=570, margin=dict(l=18,r=18,t=54,b=20),
@@ -179,9 +192,19 @@ def render():
         st.caption('Chart display compresses nights, weekends and holidays. Each candle still represents '
                    'one actual completed 15-minute XNYS bar; hover timestamps are New York local time. '
                    'No missing market data is filled or fabricated.')
-        st.caption('Only confirmed pivots and currently active zones are shown. '
-                   'The research engine is recalculated using only bars visible at the selected replay cursor. '
-                   'Uploaded history has no independently established point-in-time availability.')
+        st.caption('S/R bands now show the zone state recorded at each completed candle: '
+                   'no zone is projected backward before its confirmation, and updated/invalidated '
+                   'levels do not overwrite their history. Pivot triangles are placed at the '
+                   'confirmation candle, not at the earlier pivot candle. '
+                   'These are bar-close states, not intrabar trade signals.')
+        st.caption('The V4 research engine is recalculated using only bars visible at the selected '
+                   'replay cursor. Uploaded history has no independently established point-in-time availability.')
+        with st.expander('S/R lifecycle events · audit trail'):
+            if features['lifecycle']:
+                st.dataframe(pd.DataFrame(features['lifecycle'][-50:]),
+                             hide_index=True, width='stretch')
+            else:
+                st.info('No confirmed S/R lifecycle events at this replay cursor.')
         st.subheader('Observed S/R research signals')
         signals = [s for s in features['signals'] if s['signal_index'] < len(prefix)]
         if not signals:
