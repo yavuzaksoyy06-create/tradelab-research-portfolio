@@ -11,6 +11,7 @@ The new **Equity Research** page is an isolated, read-only extension of the publ
 - Strict session coverage through the existing XNYS validator, including holidays, early closing times and UTC timestamps.
 - OHLCV checks for missing values, duplicate and unordered bars, invalid candles and unfinished bars. Missing scheduled bars are rejected, never filled.
 - Interactive candlestick and volume plots, replay slider, confirmed pivots, active support/resistance zones, ATR, and the existing research engine's signals.
+- Trading-session-compressed x-axis: bars and volume remain in the same chronological order with no blank overnight/weekend/holiday slots. New York local timestamps are visible; this is display-only and never fills missing scheduled candles.
 - Every replay cursor recalculates V4 causal features **only from completed bars visible at that cursor**.
 - Downloadable JSON **replay provenance manifest** includes the visible bar interval, SHA-256 content fingerprint, source status, and explicit non-verification safeguards. It never includes price rows and is not an authentication certificate.
 
