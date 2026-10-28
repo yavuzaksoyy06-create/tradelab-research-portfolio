@@ -48,15 +48,17 @@ The original Python package paths remain intact because the frozen research prot
 
 Spread and slippage costs are **model assumptions**, not measured execution costs. A daily risk lock does not prevent a loss larger than its threshold after a gap.
 
-### V4.1: 42-session inspected replay
+### V4.1: the complete 42-session research summary
 
-| Strategy | Signals | Executed trades | Active sessions | Net P&L | Net return | Max observed drawdown |
-|---|---:|---:|---:|---:|---:|---:|
-| **Support touch** | 103 | 53 | 28 | **-$93.36** | **-0.0934%** | 0.2335% |
-| **Rejection** | 20 | 9 | 7 | **-$131.15** | **-0.1312%** | 0.1312% |
-| **Trend filtered** | 6 | 4 | 4 | **-$24.88** | **-0.0249%** | 0.0520% |
+| Candidate | Universe / bars | Replay period | Cost / side | Trades | Net P&L | Net return | Max DD | 95% paired bootstrap interval* |
+|---|---|---|---:|---:|---:|---:|---:|---|
+| **Support touch** | MSFT, SPY, QQQ · 15m | 25 Aug–22 Oct 2026 · 42 sessions | 3 bp | **53** | **-$93.36** | **-0.0934%** | 0.2335% | **[-$0.2866, +$6.4930]/day** |
+| **Rejection** | MSFT, SPY, QQQ · 15m | 25 Aug–22 Oct 2026 · 42 sessions | 3 bp | **9** | **-$131.15** | **-0.1312%** | 0.1312% | Not estimated; sparse sample |
+| **Trend filtered** | MSFT, SPY, QQQ · 15m | 25 Aug–22 Oct 2026 · 42 sessions | 3 bp | **4** | **-$24.88** | **-0.0249%** | 0.0520% | Not estimated; sparse sample |
 
-These are three **separate candidate portfolios**, each initialized with $100,000. Their returns cannot be added to represent a single funded strategy.
+*The bootstrap interval is for the **average daily candidate-minus-matched-control P&L**, not for the total net return. It is descriptive, does not adjust for multiple comparisons, and crosses zero for support touch. The replay is previously inspected historical data—not a new unseen holdout.*
+
+Each candidate uses a **separate** $100,000 shared-cash portfolio across the three instruments; returns cannot be added as if the strategies were funded together. Signal counts were 103 (touch), 20 (rejection), and 6 (trend filtered); active sessions were 28, 7 and 4, respectively.
 
 ### Matched timing controls and uncertainty
 
