@@ -1,6 +1,9 @@
 """Read-only US equity inspection from synthetic or user-supplied complete bars."""
 from __future__ import annotations
 
+from datetime import date, timedelta
+import os
+
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -9,6 +12,7 @@ import streamlit as st
 from research_sr_v4.data import DataQualityError
 from research_workspace.equity_data import SYMBOLS, analyze_prefix, read_uploaded_csv, synthetic_fixture
 from research_workspace.equity_provenance import manifest_json
+from research_workspace.equity_provider import read_alpaca_history
 
 
 def equity_chart(prefix, features, symbol):
@@ -55,7 +59,7 @@ def render():
                'but their market-data origin, license, and historical availability are NOT verified.')
     c1, c2 = st.columns(2)
     symbol = c1.selectbox('Instrument', SYMBOLS, key='equity_symbol')
-    mode = c2.radio('Data source', ['Synthetic teaching example', 'Upload my OHLCV CSV'],
+    mode = c2.radio('Data source', ['Synthetic teaching example', 'Upload my OHLCV CSV', 'Alpaca historical (read-only)'],
                     horizontal=True, key='equity_mode')
     if mode == 'Upload my OHLCV CSV':
         st.caption('Required columns: timestamp,open,high,low,close,volume. '
@@ -64,11 +68,36 @@ def render():
         if uploaded is None:
             st.info('UNAVAILABLE DATA · No file selected. No chart or market result is invented.')
             return
+    if mode == 'Alpaca historical (read-only)':
+        st.caption('Explicit historical GET only, no broker orders, no disk cache. Local API credentials are read '
+                   'from environment variables; never enter them into GitHub or a shared Streamlit deployment.')
+        feed = st.selectbox('Alpaca feed', ['iex', 'sip'], key='equity_feed')
+        st.caption('IEX contains trades from one exchange; SIP may require additional entitlement. '
+                   'Full 15-minute XNYS sessions are required; incomplete provider coverage is rejected.')
+        latest = date.today() - timedelta(days=4)
+        start_date = st.date_input('First session date', value=latest-timedelta(days=8), key='equity_start')
+        end_date = st.date_input('Last session date', value=latest, key='equity_end')
+        request_identity = (symbol, feed, str(start_date), str(end_date))
     try:
         if mode == 'Synthetic teaching example':
             frame, meta = synthetic_fixture(symbol)
-        else:
+        elif mode == 'Upload my OHLCV CSV':
             frame, meta = read_uploaded_csv(uploaded.getvalue(), symbol)
+        else:
+            if st.button('Load historical candles (read-only GET)', key='equity_load_provider'):
+                # Credentials are not placed in session state, URL params, or manifests.
+                key = os.getenv('ALPACA_API_KEY') or os.getenv('APCA_API_KEY_ID')
+                secret = os.getenv('ALPACA_SECRET_KEY') or os.getenv('APCA_API_SECRET_KEY')
+                frame, meta = read_alpaca_history(
+                    symbol, str(start_date), str(end_date), feed=feed,
+                    api_key=key, api_secret=secret,
+                )
+                st.session_state['equity_provider_snapshot'] = (request_identity, frame, meta)
+            snapshot = st.session_state.get('equity_provider_snapshot')
+            if snapshot is None or snapshot[0] != request_identity:
+                st.info('NO PROVIDER DATA LOADED · Choose historical dates and select Load. No network request runs automatically.')
+                return
+            _, frame, meta = snapshot
         st.error(meta['origin']) if meta['synthetic'] else st.warning(meta['origin'])
         if meta['synthetic']:
             st.caption('Synthetic price levels near 100 are NOT SPY/MSFT/QQQ quotes or historical returns.')
