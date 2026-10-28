@@ -15,16 +15,35 @@ from research_workspace.equity_provenance import manifest_json
 from research_workspace.equity_provider import read_alpaca_history
 
 
+def _session_axis(visible):
+    """Give every completed bar one adjacent category; no off-session time slots.
+
+    NY-local labels are unique during regular XNYS hours (including DST changes).
+    Raw UTC timestamps and the causal feature engine are never changed.
+    """
+    bar_labels = [stamp.tz_convert('America/New_York').strftime('%Y-%m-%d %H:%M')
+                  for stamp in visible.timestamp]
+    tickvals, ticktext = [], []
+    previous_session = None
+    for bar_label, session in zip(bar_labels, visible.session):
+        if session != previous_session:
+            tickvals.append(bar_label)
+            ticktext.append(pd.Timestamp(session).strftime('%d %b'))
+            previous_session = session
+    return bar_labels, tickvals, ticktext
+
+
 def equity_chart(prefix, features, symbol):
     visible = prefix.tail(130)
+    bar_labels, day_ticks, day_labels = _session_axis(visible)
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.06,
                         row_heights=[0.78, 0.22])
-    fig.add_trace(go.Candlestick(x=visible.timestamp, open=visible.open,
+    fig.add_trace(go.Candlestick(x=bar_labels, open=visible.open,
                                   high=visible.high, low=visible.low, close=visible.close,
                                   increasing_line_color='#43d6a6', decreasing_line_color='#f27d88',
                                   name='OHLC'), row=1, col=1)
     colors = ['#43d6a6' if c >= o else '#f27d88' for c, o in zip(visible.close, visible.open)]
-    fig.add_trace(go.Bar(x=visible.timestamp, y=visible.volume, marker_color=colors,
+    fig.add_trace(go.Bar(x=bar_labels, y=visible.volume, marker_color=colors,
                          name='Volume', opacity=0.7), row=2, col=1)
     latest = features['snapshots'][-1]
     for zone in latest['zones']:
@@ -38,7 +57,9 @@ def equity_chart(prefix, features, symbol):
                                ('resistance', '#f3a2a5', 'triangle-down')]:
         selected = [p for p in pivots if p['kind'] == kind]
         if selected:
-            fig.add_trace(go.Scatter(x=[prefix.iloc[p['pivot_index']].timestamp for p in selected],
+            fig.add_trace(go.Scatter(x=[prefix.iloc[p['pivot_index']].timestamp.tz_convert(
+                                         'America/New_York').strftime('%Y-%m-%d %H:%M')
+                                         for p in selected],
                                      y=[p['price'] for p in selected], mode='markers',
                                      marker=dict(symbol=shape, size=9, color=color),
                                      customdata=[p['confirmed_at'] for p in selected],
@@ -48,6 +69,12 @@ def equity_chart(prefix, features, symbol):
                       height=570, margin=dict(l=18,r=18,t=54,b=20),
                       title=f'{symbol} · completed 15-minute bars · read-only',
                       xaxis_rangeslider_visible=False, hovermode='x unified', showlegend=False)
+    # Ordinal categories compress non-trading periods without inserting prices.
+    # Explicit ordering keeps candles, volume and confirmed pivots aligned.
+    fig.update_xaxes(type='category', categoryorder='array', categoryarray=bar_labels)
+    fig.update_xaxes(tickmode='array', tickvals=day_ticks, ticktext=day_labels,
+                     title_text='XNYS sessions · overnight/weekend gaps hidden',
+                     row=2, col=1)
     fig.update_yaxes(title_text='Price (source units)', row=1, col=1)
     fig.update_yaxes(title_text='Volume', row=2, col=1)
     return fig
@@ -112,6 +139,9 @@ def render():
         c.metric('ATR (research engine)', f'{last["atr"]:.3f}' if last['atr'] is not None else 'N/A')
         d.metric('Active S/R zones', len(last['zones']))
         st.plotly_chart(equity_chart(prefix, features, symbol), width='stretch', key='equity_candles')
+        st.caption('Chart display compresses nights, weekends and holidays. Each candle still represents '
+                   'one actual completed 15-minute XNYS bar; hover timestamps are New York local time. '
+                   'No missing market data is filled or fabricated.')
         st.caption('Only confirmed pivots and currently active zones are shown. '
                    'The research engine is recalculated using only bars visible at the selected replay cursor. '
                    'Uploaded history has no independently established point-in-time availability.')
