@@ -112,6 +112,8 @@ The original local V4.1 report records:
 
 The local freeze timestamp is part of historical project evidence; the GitHub commit proves public availability **from 27 October**, not preregistration before the already-inspected replay. Creating a tag later cannot retroactively establish a 23 October public timestamp.
 
+A [manual GitHub Actions workflow](.github/workflows/anchor-v41-public-snapshot.yml) is provided to create the annotated tag `v4.1-public-snapshot-2026-10-27` on that **first public snapshot commit** without moving the tag afterward. This is a public-source anchor, **not** a retroactively dated preregistration. The tag is not claimed to exist until the workflow has actually succeeded.
+
 The separate prospective protocol specifies **60 sessions from 26 October 2026 to 21 January 2027**, with an earliest completion gate of **21 January 2027, 21:15 UTC**. The clock alone is insufficient: complete validated data and unchanged protocol conditions are required. No prospective performance is reported.
 
 [Protocol and research provenance](docs/SR_RESEARCH_EVIDENCE.md)
