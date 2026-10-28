@@ -69,3 +69,7 @@ Added per-series descriptive quality summaries, missing cells relative to observ
 ## 13. Source publication references — 28 October 2026
 
 Reviewed official ECB calendar/currency sources and Treasury XML/developer notices. Added a bounded ECB TARGET comparison and a retrospective Treasury 2025 publication grid, with pinned reference metadata and ten new tests. The report exposes an existing omitted Treasury tenor without changing the collector or accepting new hashes for historical snapshots.
+
+## 14. Stage 5 Financial Analytics Lab — 28 October 2026
+
+Checkpoint d1a5c29 introduced offline v2 remediation; faa90de introduced validated financial transforms and Streamlit views. The final checkpoint supplies authentic screenshots, methods, case study, CV guidance and acceptance evidence. No new data was downloaded and frozen research remained unchanged.

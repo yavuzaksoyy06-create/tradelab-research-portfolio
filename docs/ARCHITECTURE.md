@@ -54,3 +54,7 @@ CREATE TABLE IF NOT EXISTS datasets (
 ```
 
 Writes use placeholders rather than interpolating metadata into SQL. This provides a small local dataset index, not normalized multi-table analytical modeling. The subsequent SQL catalog adds three related in-memory tables and fixed coverage/reconciliation queries; see [the SQL design](SQL_CATALOG.md). It is a separate later stage, not an achievement attributed to the historical ingestion implementation.
+
+## Stage 5 extension
+
+The Financial Analytics view is isolated from frozen engines. `treasury_v2.py` derives and reviews offline parent-linked revisions; `financial_analytics.py` owns pure descriptive transforms and metadata exports; `financial_ui.py` only reads catalogs and renders those results. The legacy collector is unchanged. See [equations and data flow](FINANCIAL_ANALYTICS.md).

@@ -45,3 +45,24 @@ test koşusu gibi sunma.
 Proje AI destekli geliştirilmiştir. Bu katkıyı gizlemek veya yapılmamış müşteri,
 ML ya da ileri SQL deneyimi eklemek yerine hangi tasarım kararlarını verdiğini,
 hangi testleri çalıştırdığını ve sınırlamaları nasıl yönettiğini anlat.
+
+
+## Stage 5 — doğrulanmış ek yetenekler
+
+- Python, SQL ve Streamlit ile doğrulanmış Treasury/ECB verileri üzerinde faiz
+  eğrisi, baz puan değişimi, döviz değişimi ve betimsel volatilite analizleri geliştirdim.
+- Hash kontrollerinden geçen bir normalizasyon kusurunu saptayıp eski sürümleri
+  koruyan ayrı revizyonla 218 eksik Treasury gözlemini geri kazandım.
+- Hesaplamaları elle doğrulanabilir örnekler, eksik veri ve UI regresyon testleriyle
+  sınadım; kaynak sürümü ve dönüşüm bilgisi taşıyan CSV çıktıları ürettim.
+
+### English CV bullets
+
+- Built a Python/SQL/Streamlit financial analytics lab for verified Treasury and ECB
+  snapshots, with yield spreads, basis-point changes, FX changes and rolling volatility.
+- Reproduced a hash-valid normalization omission and recovered 218 Treasury records
+  through a separately versioned derivative preserving legacy evidence and lineage.
+- Validated financial transformations and missing-data behavior with deterministic
+  tests; exposed versioned CSV exports and explicit cross-source compatibility gates.
+
+AI-assisted project; no client deployment, trading profit or predictive accuracy claimed.

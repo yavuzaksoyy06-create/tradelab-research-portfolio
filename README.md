@@ -116,6 +116,17 @@ Project owner: **Yavuz Kaan Aksoy**. Developed iteratively with AI coding assist
 
 Sources: [ECB reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html), [US Treasury XML feeds](https://home.treasury.gov/treasury-daily-interest-rate-xml-feed). Third-party libraries are installed separately and are not vendored here. No open-source license grant is added by this publication; public visibility alone is not a redistribution license for third-party data.
 
-## Stage 5 checkpoint 1
+## Stage 5 — Financial Analytics Lab
 
 Offline Treasury revision 2 uses explicit maturity definitions, including the 1.5-month tenor. It derives a separately pinned immutable snapshot from an already verified legacy version; original snapshots and collector remain unchanged. No automatic downloads. Financial Analytics now includes Treasury curves/spreads/basis-point changes, ECB simple/log changes and non-annualized rolling volatility, CSV metadata and explicit overlap rejection.
+
+
+- [Financial equations, data flow and authentic screens](docs/FINANCIAL_ANALYTICS.md)
+- [Treasury completeness remediation case study](docs/TREASURY_REMEDIATION.md)
+- [Stage 5 Turkish delivery report](docs/STAGE5_DELIVERY_TR.md)
+
+For a business audience: the lab turns verified public reference data into traceable
+interest-rate and currency summaries. It detects omitted data, preserves prior
+versions, explains calculations and declines comparisons when periods do not overlap.
+This supports trustworthy analytical communication; it does not claim deployed
+commercial impact, forecasting accuracy or investment performance.

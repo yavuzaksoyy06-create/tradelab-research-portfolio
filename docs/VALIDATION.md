@@ -9,10 +9,10 @@ The curated source copy was tested separately from the original checkout:
 | Macro source/document/event-study contracts | 115 | 0 | 0 |
 | Crypto calendar and manifests | 100 | 1 | 0 |
 | Forex calendar/DST/rollover | 31 | 0 | 0 |
-| Workspace adapters, evidence, real sources, SQL and UI | 100 | 0 | 0 |
-| **Total** | **346** | **1** | **all zero** |
+| Workspace adapters, evidence, real sources, SQL, finance and UI | 133 | 0 | 0 |
+| **Total** | **379** | **1** | **all zero** |
 
-**345 passed, 1 environment-dependent symlink test skipped.** Machine-readable
+**378 passed, 1 environment-dependent symlink test skipped.** Machine-readable
 start/end times and exit codes are in `evidence/public_test_results.json`.
 
 The test environment was the existing Windows Python 3.12 environment. Its
@@ -52,7 +52,7 @@ look valid.
 
 ## Source integrity
 
-`evidence/source_snapshot_sha256.json` records the current 84 source/test/config/reference
+`evidence/source_snapshot_sha256.json` records the current 89 source/test/config/reference
 files. The original export and initial SQL publication inventories are preserved
 in `evidence/archive/`. In the publication-reference stage, the SQL module and its UI integration changed;
 a new publication-reference module, test module and pinned metadata file were added. The newer bytes are
@@ -87,3 +87,32 @@ That stage’s publication checks and local test-log hashes are recorded in `evi
 ## Publication reference stage (28 October 2026)
 
 346 tests ran: 345 passed and one symlink-permission skip. Ten new tests cover reviewed profiles, tenor activation, entirely missing dates/series, TARGET holidays, unknown/partial ranges, reference tampering, version isolation and bounded output. The previous 336-test evidence is archived with prefix `8b45682_`. Current checks are in `evidence/calendar_checks.json`. Read-only integration found 218 absent 1.5-month Treasury observations; original snapshot files stayed byte-identical. ECB had zero missing pairs in the reviewed overlap, but one leading snapshot date was outside that reference. Neither result is a point-in-time or global completeness certification.
+
+
+## Stage 5 final acceptance — 28 October 2026
+
+Latest complete public run: 379 tests (378 passed, one Windows symlink-permission skip).
+Suite counts: macro 115, crypto 100, FX 31, workspace 133. Exact start/end UTC times
+and exit codes are in public_test_results.json. The final workspace suite ran in
+7.956 seconds per its local log (see the exact log summary if platform timing differs).
+Prior counts are historical, not additive. Checkpoint 1 ran 356; checkpoint 2 ran 379.
+The first checkpoint-2 run had one UI test failure because it counted the generic
+sidebar information box; the assertion was corrected to test the real-data label,
+and the unchanged behavior passed the full rerun.
+
+New deterministic tests cover 10 normalizer/lineage cases and 23 calculation/UI cases.
+Manual examples validate spread signs, percent-to-basis-point conversion, log/simple
+changes and ddof=1 rolling volatility. Prefix-invariance tests check that future
+observations do not alter earlier outputs. UI tests compare displayed dataframes to
+backend results and explicitly test no-data/rejected states.
+
+Read-only original-project verification checked 2,415 source/data files captured
+before Stage 5: none changed. The existing protected-artifact verifier independently
+checked 1,393 files with no changes. The prospective gate remains closed until at
+least 2027-01-21 21:15 UTC; evaluation is disabled. See stage5_acceptance.json.
+The new derivative resides only in Git-ignored public-workspace storage.
+
+Two authentic browser screenshots show the running verified-data application.
+No data is distributed as part of the repo; missing-data AppTest coverage verifies
+that a public clone remains usable without private caches. Existing installed Windows
+Python/calendar dependencies were used; fresh dependency installation was not tested.
