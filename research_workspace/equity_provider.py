@@ -150,6 +150,8 @@ def read_alpaca_history(
     eligible = raw.loc[timestamps.isin(grid.timestamp)].reset_index(drop=True)
     outside_count = len(raw) - len(eligible)
     clean = _validate_and_label(eligible, symbol, now=clock)
+    if list(clean.timestamp) != list(grid.timestamp):
+        raise EquityProviderError("Incomplete requested session coverage; missing edge sessions")
     return clean, {
         "symbol": symbol,
         "origin": f"ALPACA HISTORICAL {feed.upper()} API RESPONSE — NOT INDEPENDENTLY VERIFIED",

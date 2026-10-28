@@ -19,6 +19,7 @@ from research_workspace.equity_zones import historical_zone_bands
 from research_workspace.equity_volume import volume_frame
 from research_workspace.equity_structure import confirmed_swing_events, confirmed_trendline_segments
 from research_workspace.equity_commentary import commentary_report
+from research_workspace.stage7_ui import render_research
 
 
 def _session_axis(visible):
@@ -266,6 +267,7 @@ def render():
                    'begins at the second confirmation bar, and stops when a newer pivot changes '
                    'the pair. HH/HL/LH/LL labels appear at confirmation, never at a future-known '
                    'earlier pivot. These are mechanical descriptions, not price targets.')
+        render_research(frame, meta, count)
         report = commentary_report(prefix, features, meta)
         st.subheader('Otomatik grafik yorumu · kurala dayalı')
         st.caption('Türkçe analiz sadece replay anında tamamlanan mumları kullanır. '
