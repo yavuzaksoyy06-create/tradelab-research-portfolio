@@ -15,6 +15,7 @@ from research_workspace.equity_provenance import manifest_json
 from research_workspace.equity_provider import read_alpaca_history
 from research_workspace.equity_indicators import EMA_PERIODS, indicator_frame
 from research_workspace.equity_zones import historical_zone_bands
+from research_workspace.equity_volume import volume_frame
 
 
 def _session_axis(visible):
@@ -35,7 +36,8 @@ def _session_axis(visible):
     return bar_labels, tickvals, ticktext
 
 
-def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False):
+def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
+                 show_volume_average=False):
     if any(period not in EMA_PERIODS for period in ema_periods):
         raise ValueError('Unsupported EMA period')
     visible = prefix.tail(130)
@@ -52,18 +54,28 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False):
     colors = ['#43d6a6' if c >= o else '#f27d88' for c, o in zip(visible.close, visible.open)]
     fig.add_trace(go.Bar(x=bar_labels, y=visible.volume, marker_color=colors,
                          name='Volume', opacity=0.7), row=2, col=1)
+    if show_volume_average:
+        volume_analytics = volume_frame(prefix).tail(len(visible))
+        fig.add_trace(go.Scatter(
+            x=bar_labels, y=volume_analytics['prior_volume_mean_20'],
+            mode='lines', name='Prior 20-bar mean',
+            line=dict(color='#e8bd72', width=1.6, dash='dash'),
+            connectgaps=False,
+        ), row=2, col=1)
     if indicators is not None:
         visible_indicator_rows = indicators.tail(len(visible))
+        ema_colors = {9: '#39d7bf', 21: '#a788fa', 50: '#f4ae67', 200: '#71a9ee'}
         for period in ema_periods:
             fig.add_trace(go.Scatter(
                 x=bar_labels, y=visible_indicator_rows[f'ema_{period}'],
-                mode='lines', name=f'EMA {period}', line=dict(width=1.8),
+                mode='lines', name=f'EMA {period}',
+                line=dict(width=1.8, color=ema_colors[period]),
                 connectgaps=False,
             ), row=1, col=1)
         if show_rsi:
             fig.add_trace(go.Scatter(
                 x=bar_labels, y=visible_indicator_rows['rsi_14'],
-                mode='lines', name='RSI 14', line=dict(width=1.8),
+                mode='lines', name='RSI 14', line=dict(width=1.8, color='#f59e57'),
                 connectgaps=False,
             ), row=3, col=1)
             for threshold in (30, 70):
@@ -106,7 +118,7 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False):
                       height=570, margin=dict(l=18,r=18,t=54,b=20),
                       title=f'{symbol} · completed 15-minute bars · read-only',
                       xaxis_rangeslider_visible=False, hovermode='x unified',
-                      showlegend=bool(ema_periods or show_rsi))
+                      showlegend=bool(ema_periods or show_rsi or show_volume_average))
     # Ordinal categories compress non-trading periods without inserting prices.
     # Explicit ordering keeps candles, volume and confirmed pivots aligned.
     fig.update_xaxes(type='category', categoryorder='array', categoryarray=bar_labels)
@@ -173,19 +185,29 @@ def render():
                           key='equity_cursor')
         prefix, features = analyze_prefix(frame, count)
         last = features['snapshots'][-1]
-        a,b,c,d = st.columns(4)
+        volumes = volume_frame(prefix)
+        rvol = volumes['relative_volume_20'].iloc[-1]
+        a,b,c,d,e = st.columns(5)
         a.metric('Visible bars', str(len(prefix)))
         b.metric('Latest close', f'{prefix.close.iloc[-1]:.3f}')
         c.metric('ATR (research engine)', f'{last["atr"]:.3f}' if last['atr'] is not None else 'N/A')
         d.metric('Active S/R zones', len(last['zones']))
+        e.metric('RVOL / prior 20 bars', f'{rvol:.2f}x' if pd.notna(rvol) else 'N/A')
         ema_selection = st.multiselect(
             'Moving averages · EMA (15-minute bars)',
             options=list(EMA_PERIODS), default=[9, 21], key='equity_ema_overlays'
         )
         show_rsi = st.checkbox('RSI (14) · Wilder smoothing', value=False, key='equity_show_rsi')
+        show_volume_average = st.checkbox('Volume baseline · 20 prior bars',
+                                          value=True, key='equity_show_volume_average')
         st.plotly_chart(equity_chart(prefix, features, symbol,
-                                    ema_periods=tuple(ema_selection), show_rsi=show_rsi),
+                                    ema_periods=tuple(ema_selection), show_rsi=show_rsi,
+                                    show_volume_average=show_volume_average),
                         width='stretch', key='equity_candles')
+        st.caption('Relative volume = current 15-minute bar volume / mean of the previous '
+                   '20 completed 15-minute bars. This is NOT time-of-day adjusted; it is '
+                   'not evidence of an institutional trader. A missing or zero baseline '
+                   'is shown as N/A. IEX and SIP volumes cover different markets.')
         st.caption('Indicators are descriptive, calculated only from the completed replay prefix. '
                    'EMA 9/21/50/200 require that many available bars; RSI(14) requires 15 closes. '
                    'Insufficient history is shown as unavailable, never backfilled.')
