@@ -28,7 +28,7 @@ observed points with no interpolation. Users select valid observation dates to c
   Thus 4.00% to 4.10% is +10 bp, not 10% profit.
 
 The preceding date is the preceding date in that version's union of observations.
-Missing maturity cells are not filled. Date intervals are reported: a multi-day
+Missing maturity cells are not filled. Intervals crossing a known missing publication date suppress basis-point changes. Date intervals are reported: a multi-day
 interval must not be interpreted as a measured one-calendar-day move. No duration,
 price, accrued coupon or reinvestment model is used, so no bond total return is inferred.
 
@@ -49,7 +49,8 @@ history and rolling warm-up. An observation interval spanning a known missing
 scheduled/series date produces missing simple/log changes and breaks the rolling
 window. Weekend intervals remain observed-date intervals, not zero returns.
 Outside reviewed calendar scope, absence cannot be certified; interval day counts
-remain visible. Cumulative endpoint change remains descriptive even if an interior
+and an unreviewed-calendar status remain visible. Such changes are excluded from
+rolling volatility. Cumulative endpoint change remains descriptive even if an interior
 observation is missing. No future rows enter preceding rolling estimates.
 
 ## Compatibility and exports
@@ -61,7 +62,7 @@ correlation is fabricated. Collection/derivation timestamps are not historical
 publication timestamps.
 
 CSV downloads contain version, manifest hash, source URL, units, collection and
-availability timestamps and transformation/window settings. SQL coverage aggregates
+availability timestamps and transformation/window settings, analytic-code/reference hashes and a synthetic flag. SQL coverage aggregates
 actual observations per series in an in-memory query-only database. Null values
 remain blank; text cells are guarded against spreadsheet formula injection.
 

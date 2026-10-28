@@ -50,7 +50,7 @@ def render():
             st.caption('No curve interpolation. 10Y minus 2Y / 3M < 0 defines inversion. Rate changes are not bond total returns.')
             st.dataframe(result['spreads'],hide_index=True,key='spread_table')
             st.dataframe(result['changes_bp'],hide_index=True,key='bp_table')
-            st.caption('Basis-point change = 100 × difference in percent yields, versus the preceding observed date. Missing cells remain missing; intervals may span non-publication days.')
+            st.caption('Basis-point change = 100 × difference in percent yields, versus the preceding observed date. Missing cells and intervals crossing known missing publications remain missing. Interval assessments are included in the export.')
             for name in ['curves','spreads','changes_bp']:
                 st.download_button('Export '+name,export_csv(result[name],{**result['metadata'],'transformation':name}),file_name=name+'.csv',mime='text/csv',key='export_'+name)
         else:
@@ -62,7 +62,7 @@ def render():
             st.plotly_chart(px.scatter(table,x='date',y='quote_per_eur',title=series+' · reference rates'),width='stretch',key='reference_rates')
             st.plotly_chart(px.histogram(table,x='simple_return_pct',title='Observed reference-rate change distribution (%)'),width='stretch',key='return_distribution')
             st.dataframe(table,hide_index=True,key='fx_results')
-            st.caption('Quote currency units per EUR: a positive change means EUR appreciation. Simple = 100×(q/q_prev−1); log = ln(q/q_prev). Volatility is sample standard deviation of log changes, not annualized; requires a full window. Known missing intervals break the estimate. Reference changes are not executable trading returns.')
+            st.caption('Quote currency units per EUR: a positive change means EUR appreciation. Simple = 100×(q/q_prev−1); log = ln(q/q_prev). Volatility is sample standard deviation of log changes, not annualized; requires a full window. Known missing or unreviewed-calendar intervals break the volatility estimate. Reference changes are not executable trading returns.')
             st.download_button('Export FX analytics',export_csv(table,result['metadata']),file_name='fx_analytics.csv',mime='text/csv',key='export_fx')
         st.subheader('SQL observation coverage')
         st.dataframe(result['coverage'],hide_index=True)

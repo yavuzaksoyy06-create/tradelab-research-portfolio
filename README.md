@@ -76,7 +76,7 @@ Run the portable-source test selection on Windows:
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-Current Windows test selection: **379 tests, 378 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
+Current Windows test selection: **387 tests, 386 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
 
 Read [validation](docs/VALIDATION.md) before interpreting counts. Full archived research runners need excluded private caches/checkpoints and must not be represented as passing in a fresh clone.
 
@@ -130,3 +130,5 @@ interest-rate and currency summaries. It detects omitted data, preserves prior
 versions, explains calculations and declines comparisons when periods do not overlap.
 This supports trustworthy analytical communication; it does not claim deployed
 commercial impact, forecasting accuracy or investment performance.
+
+Stage 5 follow-up audit: publication-gap handling, conservative FX volatility eligibility and CSV reproducibility/security were tightened. See [audit findings](docs/STAGE5_AUDIT.md).

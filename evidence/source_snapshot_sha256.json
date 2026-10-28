@@ -85,7 +85,8 @@
   "research_workspace/reference_calendars/review_20261028.json": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76",
   "research_workspace/treasury_v2.py": "7e3ae4ced19d02a7c1fe3988927c73f3c8d6366701f4535cd027c3c17519a544",
   "research_workspace/tests/test_treasury_v2.py": "a7200f4b1699c044180e82e80f1f4b61b8ff37f51495b2ccd7fa6ee0eae17847",
-  "research_workspace/financial_analytics.py": "217abcf1bf2fa8ba7d27aa89bec0ec92aea670a3b9bc33d953766fc7e56c6956",
-  "research_workspace/financial_ui.py": "aec67f45e38f3dd1c3879271ecf012a6cec3c02612283ba18982c99ff9382a25",
-  "research_workspace/tests/test_financial_analytics.py": "491828e4a2b53c848195292766185c2f077fd7e71a61fbdc560652b2a12b647a"
+  "research_workspace/financial_analytics.py": "c9a5f4d25a2e7a2dd535169dab40eec94b8ea5f9cba944b85829a0bd79315f3e",
+  "research_workspace/financial_ui.py": "6f699829045e0ac83d3b8303814c5074feb46f71461b3109be172029fc6e8456",
+  "research_workspace/tests/test_financial_analytics.py": "491828e4a2b53c848195292766185c2f077fd7e71a61fbdc560652b2a12b647a",
+  "research_workspace/tests/test_stage5_audit.py": "3a2d2e6d453b0ddb5eff52f8f284a62225e6931b8c9eea1ef8b27db5cdc289ff"
 }

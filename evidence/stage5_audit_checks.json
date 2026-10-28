@@ -1,0 +1,19 @@
+{
+  "baseline": "f4a718ea2b5acb6602db31cf76e0d7afceb9d16d",
+  "original_files_unchanged": 2415,
+  "legacy_rows_verified": 3237,
+  "v2_rows_verified": 3455,
+  "source_hashes_verified": 90,
+  "tests": 387,
+  "passed": 386,
+  "skipped": 1,
+  "frozen_code_and_gate_unchanged": true,
+  "normalizers_unchanged": true,
+  "logs_sha256": {
+    "research_crypto.log": "47bd5b1e104772f11d40dd12a9bf93b24a69c37941d5c4e585982982ac0dfdeb",
+    "research_fx.log": "7cbc16f2b7a8d4a42cb05fd29957b2f0dc7c0f9144ba23c0437a2dd89a6d7bac",
+    "research_macro.log": "eb6d4cf4a12bcfed8a2607ac14eb23cbceaf9ab9e0d60846628c7892b36bcbdc",
+    "research_workspace.log": "efb0f037576117982f9761ce5c106accbcb4165fa627452ce1bb10c6a5012901"
+  },
+  "reproduction_log_sha256": "1061cdce5194f9d879d7455e61ff5c759b351f1fe72bf89f30db12720de6a7b3"
+}

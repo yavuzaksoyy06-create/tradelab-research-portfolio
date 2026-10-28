@@ -9,10 +9,10 @@ The curated source copy was tested separately from the original checkout:
 | Macro source/document/event-study contracts | 115 | 0 | 0 |
 | Crypto calendar and manifests | 100 | 1 | 0 |
 | Forex calendar/DST/rollover | 31 | 0 | 0 |
-| Workspace adapters, evidence, real sources, SQL, finance and UI | 133 | 0 | 0 |
-| **Total** | **379** | **1** | **all zero** |
+| Workspace adapters, evidence, real sources, SQL, finance and UI | 141 | 0 | 0 |
+| **Total** | **387** | **1** | **all zero** |
 
-**378 passed, 1 environment-dependent symlink test skipped.** Machine-readable
+**386 passed, 1 environment-dependent symlink test skipped.** Machine-readable
 start/end times and exit codes are in `evidence/public_test_results.json`.
 
 The test environment was the existing Windows Python 3.12 environment. Its
@@ -52,7 +52,7 @@ look valid.
 
 ## Source integrity
 
-`evidence/source_snapshot_sha256.json` records the current 89 source/test/config/reference
+`evidence/source_snapshot_sha256.json` records the current 90 source/test/config/reference
 files. The original export and initial SQL publication inventories are preserved
 in `evidence/archive/`. In the publication-reference stage, the SQL module and its UI integration changed;
 a new publication-reference module, test module and pinned metadata file were added. The newer bytes are
@@ -116,3 +116,7 @@ Two authentic browser screenshots show the running verified-data application.
 No data is distributed as part of the repo; missing-data AppTest coverage verifies
 that a public clone remains usable without private caches. Existing installed Windows
 Python/calendar dependencies were used; fresh dependency installation was not tested.
+
+## Stage 5 follow-up audit
+
+Current full run: 387 tests, 386 passed, one existing skip. Eight new tests reproduce and guard the follow-up findings in STAGE5_AUDIT.md. Source/data pins are unchanged except the analytical and presentation modules and new tests. Earlier Stage 5 counts above describe historical checkpoints.
