@@ -76,7 +76,7 @@ Run the portable-source test selection on Windows:
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-Current Windows test selection: **356 tests, 355 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
+Current Windows test selection: **379 tests, 378 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
 
 Read [validation](docs/VALIDATION.md) before interpreting counts. Full archived research runners need excluded private caches/checkpoints and must not be represented as passing in a fresh clone.
 
@@ -118,4 +118,4 @@ Sources: [ECB reference rates](https://www.ecb.europa.eu/stats/policy_and_exchan
 
 ## Stage 5 checkpoint 1
 
-Offline Treasury revision 2 uses explicit maturity definitions, including the 1.5-month tenor. It derives a separately pinned immutable snapshot from an already verified legacy version; original snapshots and collector remain unchanged. No automatic downloads. Financial Analytics UI is the next checkpoint.
+Offline Treasury revision 2 uses explicit maturity definitions, including the 1.5-month tenor. It derives a separately pinned immutable snapshot from an already verified legacy version; original snapshots and collector remain unchanged. No automatic downloads. Financial Analytics now includes Treasury curves/spreads/basis-point changes, ECB simple/log changes and non-annualized rolling volatility, CSV metadata and explicit overlap rejection.

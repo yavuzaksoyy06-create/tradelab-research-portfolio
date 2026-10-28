@@ -65,7 +65,7 @@
   "research_crypto/tests/test_manifest.py": "fc35161d4c57b3c6388f6ea163fc1436e6ceda26289906326154d883592b60ee",
   "research_crypto/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "research_workspace/adapters.py": "d550a99c07ee7c1cccdb03ee81849014ac6977eecec8cb3c79e2b817d869f42a",
-  "research_workspace/app.py": "b8651cef0c55afb1589e2a3d00ea17abb1c2f0f17d20af2099df5ea99b599a69",
+  "research_workspace/app.py": "96ee4e029ab4feaf3c1c66abc4b6efe56caa2bcafe4d89728dfcb223681994ca",
   "research_workspace/charts.py": "d1b82172bc6ce44aa0b9b251514929f4f105794ca40f464e186096850611ebf6",
   "research_workspace/evidence.py": "2c8e1f57237150ced9a233368b0a658f369256a6176c199d90fbf877aed54309",
   "research_workspace/learning.py": "5069cd761cca0fbfe33acbee879254ef87637e210e728276a85e2fac8ae6f100",
@@ -84,5 +84,8 @@
   "research_workspace/tests/test_publication_calendar.py": "3216cba79a2cd1c16877b916e736f4ae0fbae70ed3563decbb39ef499cd927b3",
   "research_workspace/reference_calendars/review_20261028.json": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76",
   "research_workspace/treasury_v2.py": "7e3ae4ced19d02a7c1fe3988927c73f3c8d6366701f4535cd027c3c17519a544",
-  "research_workspace/tests/test_treasury_v2.py": "a7200f4b1699c044180e82e80f1f4b61b8ff37f51495b2ccd7fa6ee0eae17847"
+  "research_workspace/tests/test_treasury_v2.py": "a7200f4b1699c044180e82e80f1f4b61b8ff37f51495b2ccd7fa6ee0eae17847",
+  "research_workspace/financial_analytics.py": "217abcf1bf2fa8ba7d27aa89bec0ec92aea670a3b9bc33d953766fc7e56c6956",
+  "research_workspace/financial_ui.py": "aec67f45e38f3dd1c3879271ecf012a6cec3c02612283ba18982c99ff9382a25",
+  "research_workspace/tests/test_financial_analytics.py": "491828e4a2b53c848195292766185c2f077fd7e71a61fbdc560652b2a12b647a"
 }

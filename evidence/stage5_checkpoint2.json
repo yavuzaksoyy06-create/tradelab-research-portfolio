@@ -1,0 +1,18 @@
+{
+  "phase": "financial calculations and UI",
+  "tests": 379,
+  "passed": 378,
+  "skipped": 1,
+  "normalization_recovery": {
+    "parent": "treasury_2025_20261026T205152721948Z",
+    "child": {
+      "version": "treasury_v2_20261028T111621213949Z",
+      "manifest_sha256": "2992e9be45af9ead35414f99ddec4fde3ff2534c8a1eb580a77d4f854375966c"
+    },
+    "old_rows": 3237,
+    "new_rows": 3455,
+    "recovered": 218,
+    "missing": 0,
+    "network_used": false
+  }
+}
