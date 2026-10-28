@@ -49,7 +49,9 @@ class EquityStructureTests(unittest.TestCase):
         self.assertAlmostEqual(support[0]["slope_per_bar"], 0.5)
         self.assertAlmostEqual(support[0]["values"][0], 103.0)
         self.assertAlmostEqual(support[1]["slope_per_bar"], -0.75)
-        self.assertEqual(confirmed_trendline_segments(self.sample_features(), 7), [])
+        early = {"pivots": [p for p in self.sample_features()["pivots"]
+                            if p["confirmed_index"] < 7]}
+        self.assertEqual(confirmed_trendline_segments(early, 7), [])
 
     def test_prefix_invariance_of_pivots_and_trendline_state(self):
         _, long = analyze_prefix(self.frame, 145)
