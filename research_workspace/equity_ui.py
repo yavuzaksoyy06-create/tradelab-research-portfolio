@@ -8,6 +8,7 @@ import streamlit as st
 
 from research_sr_v4.data import DataQualityError
 from research_workspace.equity_data import SYMBOLS, analyze_prefix, read_uploaded_csv, synthetic_fixture
+from research_workspace.equity_provenance import manifest_json
 
 
 def equity_chart(prefix, features, symbol):
@@ -91,6 +92,10 @@ def render():
             st.info('No qualifying signals at the current cursor; this is not a zero-return result.')
         else:
             st.dataframe(pd.DataFrame(signals[-25:]), hide_index=True, width='stretch')
+        st.download_button('Download replay provenance (JSON)',
+                           data=manifest_json(prefix, meta),
+                           file_name=f'equity_{symbol.lower()}_replay_manifest.json',
+                           mime='application/json', key='equity_manifest_download')
         with st.expander('Latest causal snapshot and data provenance'):
             st.json({'source':meta, 'cursor_known_at_utc':str(prefix.bar_end.iloc[-1]),
                      'latest_snapshot':last, 'signal_count_to_cursor':len(signals),
