@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+import json
 import os
 
 import pandas as pd
@@ -258,6 +259,9 @@ def render():
                    '20 completed 15-minute bars. This is NOT time-of-day adjusted; it is '
                    'not evidence of an institutional trader. A missing or zero baseline '
                    'is shown as N/A. IEX and SIP volumes cover different markets.')
+        st.caption('HH = Higher High (daha yüksek tepe), HL = Higher Low (daha yüksek dip); '
+                   'LH = Lower High, LL = Lower Low. EH/EL = yaklaşık eşit; H0/L0 = ilk onaylı '
+                   'tepe/dip. Etiketler pivotun bulunduğu değil, onaylandığı mumda görünür.')
         st.caption('Trendlines use the two most recent confirmed same-kind pivots; each segment '
                    'begins at the second confirmation bar, and stops when a newer pivot changes '
                    'the pair. HH/HL/LH/LL labels appear at confirmation, never at a future-known '
@@ -271,6 +275,11 @@ def render():
         with st.expander('Yorumun sayısal dayanakları ve veri sınırları'):
             st.json({'as_of_utc': report['as_of_utc'], 'method': report['method'],
                      'structure': report['structure'], 'evidence': report['evidence']})
+        st.download_button('Yorumu ve sayısal dayanakları JSON indir',
+                           data=json.dumps(report, ensure_ascii=False, indent=2) + '\n',
+                           mime='application/json',
+                           file_name=f'equity_{symbol.lower()}_commentary.json',
+                           key='equity_commentary_export')
         st.caption('Indicators are descriptive, calculated only from the completed replay prefix. '
                    'EMA 9/21/50/200 require that many available bars; RSI(14) requires 15 closes. '
                    'Insufficient history is shown as unavailable, never backfilled.')
