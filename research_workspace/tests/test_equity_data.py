@@ -96,7 +96,7 @@ class EquityUITests(unittest.TestCase):
         at = self.app().run()
         at.radio(key='page').set_value('Equity Research').run()
         self.assertFalse(at.exception)
-        self.assertTrue(any('SYNTHETIC EDUCATIONAL DATA' in x.message for x in at.error))
+        self.assertTrue(any('SYNTHETIC EDUCATIONAL DATA' in x.value for x in at.error))
         self.assertEqual(len(at.get('plotly_chart')), 1)
 
     def test_no_upload_means_no_chart(self):
@@ -104,7 +104,7 @@ class EquityUITests(unittest.TestCase):
         at.radio(key='page').set_value('Equity Research').run()
         at.radio(key='equity_mode').set_value('Upload my OHLCV CSV').run()
         self.assertFalse(at.exception)
-        self.assertTrue(any('UNAVAILABLE DATA' in x.message for x in at.info))
+        self.assertTrue(any('UNAVAILABLE DATA' in x.value for x in at.info))
         self.assertEqual(len(at.get('plotly_chart')), 0)
 
 if __name__ == '__main__':
