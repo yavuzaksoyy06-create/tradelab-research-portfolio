@@ -87,6 +87,8 @@ def read_alpaca_history(
         raise EquityProviderError("Use valid YYYY-MM-DD dates") from None
     if first > last or (last - first).days > 20:
         raise EquityProviderError("Select no more than 21 calendar days in chronological order")
+    if first < date(2000, 1, 1) or last > date(2035, 12, 31):
+        raise EquityProviderError("Dates must fall within the configured 2000–2035 XNYS calendar")
     grid = expected_grid(first.isoformat(), last.isoformat())
     session_count = int(grid.session.nunique()) if not grid.empty else 0
     if not 1 <= session_count <= 10 or len(grid) > MAX_BARS:
