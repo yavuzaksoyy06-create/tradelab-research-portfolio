@@ -16,6 +16,8 @@ from research_workspace.equity_provider import read_alpaca_history
 from research_workspace.equity_indicators import EMA_PERIODS, indicator_frame
 from research_workspace.equity_zones import historical_zone_bands
 from research_workspace.equity_volume import volume_frame
+from research_workspace.equity_structure import confirmed_swing_events, confirmed_trendline_segments
+from research_workspace.equity_commentary import commentary_report
 
 
 def _session_axis(visible):
@@ -37,7 +39,8 @@ def _session_axis(visible):
 
 
 def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
-                 show_volume_average=False):
+                 show_volume_average=False, show_trendlines=False,
+                 show_structure=False):
     if any(period not in EMA_PERIODS for period in ema_periods):
         raise ValueError('Unsupported EMA period')
     visible = prefix.tail(130)
@@ -114,11 +117,51 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
                                                     '<br>Confirmed: %{customdata[1]}'
                                                     '<extra>'+kind+'</extra>'),
                                      name=kind, showlegend=False), row=1, col=1)
+    if show_trendlines:
+        displayed = set()
+        for segment in confirmed_trendline_segments(features, len(prefix)):
+            if segment['end_index'] < first_index:
+                continue
+            start = max(segment['start_index'], first_index)
+            end = segment['end_index']
+            values = segment['values'][start - segment['start_index']:]
+            kind = segment['kind']
+            legend_label = ('Confirmed low trendline' if kind == 'support'
+                            else 'Confirmed high trendline')
+            fig.add_trace(go.Scatter(
+                x=bar_labels[start - first_index:end - first_index + 1],
+                y=values, mode='lines+markers' if len(values) == 1 else 'lines',
+                line=dict(width=1.8, dash='dot',
+                          color='#64edb8' if kind == 'support' else '#f5b087'),
+                marker=dict(size=5), name=legend_label,
+                legendgroup=kind + '-trend', showlegend=kind not in displayed,
+                hovertemplate='%{y:.3f} · confirmed-pivot line<extra>' + legend_label + '</extra>',
+                connectgaps=False,
+            ), row=1, col=1)
+            displayed.add(kind)
+    if show_structure:
+        events = [event for event in confirmed_swing_events(features, len(prefix))
+                  if event['confirmed_index'] >= first_index
+                  and event['label'] not in ('H0', 'L0')]
+        for kind, color in (('support', '#64edb8'), ('resistance', '#f5b087')):
+            selected = [event for event in events if event['kind'] == kind]
+            if selected:
+                fig.add_trace(go.Scatter(
+                    x=[bar_labels[e['confirmed_index'] - first_index] for e in selected],
+                    y=[e['price'] for e in selected],
+                    mode='markers+text', text=[e['label'] for e in selected],
+                    textposition='top center',
+                    marker=dict(size=6, color=color),
+                    textfont=dict(size=10, color=color),
+                    customdata=[e['confirmed_at'] for e in selected],
+                    hovertemplate='%{text} at %{customdata}<br>Pivot: %{y:.3f}<extra></extra>',
+                    name='Confirmed swing '+kind, showlegend=False,
+                ), row=1, col=1)
     fig.update_layout(template='plotly_dark', paper_bgcolor='#0b1322', plot_bgcolor='#0b1322',
                       height=570, margin=dict(l=18,r=18,t=54,b=20),
                       title=f'{symbol} · completed 15-minute bars · read-only',
                       xaxis_rangeslider_visible=False, hovermode='x unified',
-                      showlegend=bool(ema_periods or show_rsi or show_volume_average))
+                      showlegend=bool(ema_periods or show_rsi or show_volume_average or show_trendlines))
     # Ordinal categories compress non-trading periods without inserting prices.
     # Explicit ordering keeps candles, volume and confirmed pivots aligned.
     fig.update_xaxes(type='category', categoryorder='array', categoryarray=bar_labels)
@@ -200,14 +243,34 @@ def render():
         show_rsi = st.checkbox('RSI (14) · Wilder smoothing', value=False, key='equity_show_rsi')
         show_volume_average = st.checkbox('Volume baseline · 20 prior bars',
                                           value=True, key='equity_show_volume_average')
+        c_trend, c_structure = st.columns(2)
+        show_trendlines = c_trend.checkbox('Confirmed trendlines · no hindsight',
+                                           value=True, key='equity_show_trendlines')
+        show_structure = c_structure.checkbox('Market structure · HH/HL/LH/LL',
+                                               value=True, key='equity_show_structure')
         st.plotly_chart(equity_chart(prefix, features, symbol,
                                     ema_periods=tuple(ema_selection), show_rsi=show_rsi,
-                                    show_volume_average=show_volume_average),
+                                    show_volume_average=show_volume_average,
+                                    show_trendlines=show_trendlines,
+                                    show_structure=show_structure),
                         width='stretch', key='equity_candles')
         st.caption('Relative volume = current 15-minute bar volume / mean of the previous '
                    '20 completed 15-minute bars. This is NOT time-of-day adjusted; it is '
                    'not evidence of an institutional trader. A missing or zero baseline '
                    'is shown as N/A. IEX and SIP volumes cover different markets.')
+        st.caption('Trendlines use the two most recent confirmed same-kind pivots; each segment '
+                   'begins at the second confirmation bar, and stops when a newer pivot changes '
+                   'the pair. HH/HL/LH/LL labels appear at confirmation, never at a future-known '
+                   'earlier pivot. These are mechanical descriptions, not price targets.')
+        report = commentary_report(prefix, features, meta)
+        st.subheader('Otomatik grafik yorumu · kurala dayalı')
+        st.caption('Türkçe analiz sadece replay anında tamamlanan mumları kullanır. '
+                   'Tahmin modeli, yatırım tavsiyesi veya canlı işlem sinyali değildir.')
+        for section in report['sections']:
+            st.markdown('**' + section['heading'] + '** — ' + section['text'])
+        with st.expander('Yorumun sayısal dayanakları ve veri sınırları'):
+            st.json({'as_of_utc': report['as_of_utc'], 'method': report['method'],
+                     'structure': report['structure'], 'evidence': report['evidence']})
         st.caption('Indicators are descriptive, calculated only from the completed replay prefix. '
                    'EMA 9/21/50/200 require that many available bars; RSI(14) requires 15 closes. '
                    'Insufficient history is shown as unavailable, never backfilled.')
