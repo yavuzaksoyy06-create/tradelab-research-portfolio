@@ -1,0 +1,46 @@
+name: Public research tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-tests:
+    name: Python 3.12 / Windows (public source)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run public offline test selection
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONIOENCODING: "utf-8"
+          STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+        run: python -B tools/run_public_tests.py
+      - name: Upload source-only test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-test-evidence-windows
+          path: |
+            evidence/public_test_results.json
+            evidence/research_macro.log
+            evidence/research_crypto.log
+            evidence/research_fx.log
+            evidence/research_workspace.log
+          if-no-files-found: warn
+          retention-days: 7
