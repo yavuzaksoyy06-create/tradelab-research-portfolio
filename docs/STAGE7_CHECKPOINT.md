@@ -16,4 +16,24 @@ V4/V4.1 files remain unchanged. The prospective window starts 2026-10-26; its or
 
 ## Implementation progress
 
-Research protocol registered before outcomes; factual commentary audit added first. Implementation/test evidence will be recorded in STAGE7_VALIDATION_REPORT.md and this checkpoint when verified.
+Protocol/audit checkpoint: `821fee5`. Implementation checkpoint: `410d0f3`.
+
+- Added stage7_events.py, stage7_validation.py, stage7_scenarios.py, stage7_history.py, stage7_ui.py and tools/stage7_research.py.
+- Added three test modules (27 new tests); retained all earlier tests. Existing equity UI integration is two added lines. Existing provider has a two-line requested-calendar completeness fix.
+- Local full suite: 467 discovered / 466 passed / 1 pre-existing Windows symlink privilege skip, zero failures. Latest presentation change also passed targeted UI/prefix regression.
+- Source inventory: 115 files. All 23 tracked V4/V4.1 files byte-identical to the verified base; no private cache was read. The gate remains unchanged.
+- Real historical evaluation: not run. Real calibrated predictive value: not established. Scenario probabilities: always suppressed. No broker orders or Market Data API downloads performed.
+- Final holdout: never labeled/scored; no unlock switch. Offline code uses expanding training, fixed ten-session validation folds, 16-bar embargo and final 20-session holdout.
+- Six Turkish UI panels and JSON/CSV summary exports implemented. Explicit historical download writes a new private snapshot outside Git, with coverage and hash manifest.
+
+See [validation report](STAGE7_VALIDATION_REPORT.md), [limitations](STAGE7_LIMITATIONS.md) and [machine-readable checks](../evidence/stage7_checks.json). No Stage 5 audit changes were silently merged from the separate checkpoint branch.
+
+## Reproducibility
+
+On Windows / Python 3.12, use this development branch in a portfolio clone separate from the original TradeLab installation. Install requirements.txt, then run `python -B tools/run_public_tests.py`. The Streamlit entry point is `research_workspace/app.py`; choose Equity Research and the synthetic source for a fully offline check. Run only on 127.0.0.1.
+
+The optional collection/evaluation commands are in STAGE7_LIMITATIONS.md. They require explicit consent, local environment credentials and a new private destination; they were not executed against a real provider in this stage.
+
+## Upcoming work requiring actual evidence
+
+An independently reviewed licensed historical snapshot, fixed experiment registration per symbol/feed, real OOS calibration and stability review, and separately authorized final-holdout handling remain outstanding. More dashboard polish or synthetic test success cannot substitute for these.

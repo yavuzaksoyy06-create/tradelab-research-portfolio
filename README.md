@@ -194,11 +194,21 @@ These collect official *daily reference data*, not intraday prices. The legacy T
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-- **Last published local evidence:** 379 tests, 378 passed, 1 Windows symlink-permission skip (28 October 2026).
+- **Current development-branch local evidence:** 467 tests, 466 passed, 1 Windows symlink-permission skip (28 October 2026).
 - **GitHub Actions:** [Windows / Python 3.12 public-source workflow](.github/workflows/public-tests.yml). The badge above reflects GitHub's **actual workflow status**, not a manually asserted pass.
 - **Platform limits:** The public test runner excludes private cached-price and frozen original research reproduction. Windows is the documented platform; Linux/macOS compatibility is **not certified**. The full frozen historical replay cannot be reproduced without the excluded original evidence.
 
 [Validation scope and results](docs/VALIDATION.md) · [Recorded test evidence](evidence/public_test_results.json)
+
+## Stage 7: evidence-based scenario research (draft development branch)
+
+Stage 7 adds causal historical event records, fixed 4/16-completed-bar outcomes, chronological expanding-window validation with purging/embargo, an untouched final historical holdout, smoothed conditional frequencies, four transparent baselines, calibration and paired session-bootstrap diagnostics. The existing equity chart now includes six Turkish research panels with replay-safe outcome visibility and price-free summary exports.
+
+**No real Stage 7 predictive edge has been validated.** Scenario probabilities remain suppressed. Synthetic tests exercise the pipeline; they are not evidence about SPY, MSFT or QQQ future performance. Explicit private historical collection uses only Alpaca Market Data GET requests, retains feed/adjustment provenance and rejects incomplete scheduled sessions. Stage 7 never opens the frozen prospective period or creates orders.
+
+Continue on `feature/equity-lab-stage6-slice1`, [draft PR #1](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/pull/1); this slice is not merged into main. The default-branch badge is not proof of this PR's exact head. See the checkpoint for inspected Actions runs.
+
+[Checkpoint](docs/STAGE7_CHECKPOINT.md) · [Registered protocol](docs/STAGE7_RESEARCH_PROTOCOL.md) · [Validation report](docs/STAGE7_VALIDATION_REPORT.md) · [Limitations and private collection](docs/STAGE7_LIMITATIONS.md)
 
 ## Development history and limitations
 

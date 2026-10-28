@@ -52,7 +52,7 @@ look valid.
 
 ## Source integrity
 
-`evidence/source_snapshot_sha256.json` records the current 89 source/test/config/reference
+`evidence/source_snapshot_sha256.json` recorded the publication-reference stage’s 89 source/test/config/reference
 files. The original export and initial SQL publication inventories are preserved
 in `evidence/archive/`. In the publication-reference stage, the SQL module and its UI integration changed;
 a new publication-reference module, test module and pinned metadata file were added. The newer bytes are
@@ -91,7 +91,7 @@ That stage’s publication checks and local test-log hashes are recorded in `evi
 
 ## Stage 5 final acceptance — 28 October 2026
 
-Latest complete public run: 379 tests (378 passed, one Windows symlink-permission skip).
+Stage 5 historical complete public run: 379 tests (378 passed, one Windows symlink-permission skip).
 Suite counts: macro 115, crypto 100, FX 31, workspace 133. Exact start/end UTC times
 and exit codes are in public_test_results.json. The final workspace suite ran in
 7.956 seconds per its local log (see the exact log summary if platform timing differs).
@@ -116,3 +116,7 @@ Two authentic browser screenshots show the running verified-data application.
 No data is distributed as part of the repo; missing-data AppTest coverage verifies
 that a public clone remains usable without private caches. Existing installed Windows
 Python/calendar dependencies were used; fresh dependency installation was not tested.
+
+## Stage 7 development validation
+
+Current local selection: 467 discovered, 466 passed, one existing Windows symlink-privilege skip; zero failures. The current source inventory has 115 files and preserves the previous inventory under archive/3a646e3_. Twenty-three tracked V4/V4.1 files were compared byte-for-byte with Stage 6 base 3a646e3; none changed. No original private cache or prospective dataset was inspected. See [Stage 7 validation](STAGE7_VALIDATION_REPORT.md), [checkpoint](STAGE7_CHECKPOINT.md) and [checks](../evidence/stage7_checks.json). Earlier counts in this document describe their historical stages and are not additive.

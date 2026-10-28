@@ -1,0 +1,70 @@
+{
+  "stage": "7",
+  "base_commit": "3a646e3477f741a793a62460ec66fa82167600ab",
+  "implementation_commit": "410d0f361ac7597f53d6801e3463f3ea8e589646",
+  "source_inventory_files": 115,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_excludes_dates_on_or_after": "2026-10-26",
+  "real_market_downloads_performed": false,
+  "real_historical_evaluation_performed": false,
+  "final_holdout_evaluated": false,
+  "scenario_probabilities_released": false,
+  "orders_sent": false,
+  "local_test_results": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-28T16:51:55.854360+00:00",
+        "finished_at": "2026-10-28T16:51:56.343618+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-28T16:51:56.343618+00:00",
+        "finished_at": "2026-10-28T16:51:56.878320+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-28T16:51:56.878320+00:00",
+        "finished_at": "2026-10-28T16:51:57.212097+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 221,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-28T16:51:57.212097+00:00",
+        "finished_at": "2026-10-28T16:52:21.941859+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 467,
+    "skipped": 1
+  },
+  "local_log_sha256": {
+    "research_crypto.log": "a61c25695480c8c5dc4d0d442d4a4ba7d459ae15ca3755fee55381501c129156",
+    "research_fx.log": "7cbc16f2b7a8d4a42cb05fd29957b2f0dc7c0f9144ba23c0437a2dd89a6d7bac",
+    "research_macro.log": "b97881a2eed04e3d6b36ae7b5adbbce5367e7490abde38990f14a3031077e1a2",
+    "research_workspace.log": "079ab2ec97228f8034ea81efe7de7db4d433d84e210e9243acb15ad624249bd8"
+  },
+  "base_ci": {
+    "run": 44,
+    "id": 40725369312,
+    "job_id": 122947062110,
+    "tests": 440,
+    "skipped": 0,
+    "conclusion": "success",
+    "source": "directly inspected workflow job logs"
+  }
+}
