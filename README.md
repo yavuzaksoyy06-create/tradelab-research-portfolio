@@ -1,64 +1,138 @@
-# TradeLab — Auditable Quantitative Research Workspace
+# TradeLab
+### Quantitative Research & Financial Data Analytics
 
-**Python · applied statistics · data quality · reproducible experiments · Streamlit · SQL/SQLite**
+**Python · pandas · NumPy · SQL/SQLite · Streamlit · Plotly · Applied Statistics**
 
-A portfolio project about turning financial observations into **inspectable research evidence**. It combines causal support/resistance experiments, shared-capital portfolio accounting, calendar-aware validation, immutable dataset snapshots and an interactive research workspace.
+I started TradeLab to understand a question that kept coming up while I was learning about financial markets: **how do you know whether a trading idea is actually useful, rather than just convincing on a chart?**
 
-The central question is not “can a chart look convincing?” It is **“what was known at the decision time, which assumptions produced this result, and can someone verify it?”**
+With a background in Economics and an interest in trading and quantitative research, I wanted to build something practical. What began as a support-and-resistance experiment gradually became a research workspace for testing ideas, studying financial data, and checking whether the results can be trusted.
 
-> Research software, not an investment product. No robust trading advantage has been demonstrated. No live, paper or replay orders were submitted. Historical observations already inspected are not an untouched holdout.
+The focus is not on finding a perfect strategy. It is on working with data carefully, making assumptions explicit, and being able to explain *why* a result should—or should not—be taken seriously.
 
-## Start here
+> **Current scope:** Research and education. The project has not demonstrated a robust profitable trading edge. It does not place live, paper, or replay orders.
 
-- [Development stages and decisions](docs/DEVELOPMENT_STAGES.md)
-- [Architecture and data contracts](docs/ARCHITECTURE.md)
-- [Statistical methodology and limitations](docs/METHODOLOGY.md)
-- [Validation evidence and reproduction boundaries](docs/VALIDATION.md)
-- [Data provenance, security and publication policy](docs/DATA_AND_SECURITY.md)
-- [Türkçe proje özeti ve CV metni](docs/CV_TR.md)
+---
 
-## What is implemented
+## What I've built
 
-| Area | Implemented capability | Important boundary |
-|---|---|---|
-| Causal features | Confirmation-time pivots, ATR-based zones, completed-bar signals, lifecycle tracking | No future candles used to confirm a current signal |
-| Offline simulation | Next-bar entries, transaction costs, gaps, ambiguous intrabar ordering, cash/equity reconciliation | Hypothetical fills; no broker execution |
-| Portfolio research | Shared cash, deterministic allocation, aggregate exposure, daily risk lock and ledgers | Losses can exceed planned risk during gaps |
-| Applied statistics | Chronological diagnostics, matched timing controls, session-block bootstrap, sample-size gates, sensitivity analysis | Descriptive uncertainty is not proof of causality or alpha |
-| Data engineering | OHLCV validation, exchange/session calendars, UTC normalization, hashes and versioned manifests | Byte integrity does not prove economic truth |
-| Macro research | Source/document review schema, availability timestamps, incomplete-window rejection | Workspace event-study examples are synthetic |
-| Multi-market calendars | Crypto 24/7 grid and Forex NY/DST/rollover handling | FX provider profile is explicitly hypothetical |
-| Real public sources | ECB daily reference FX and US Treasury historical daily par yields | Not intraday OHLCV or point-in-time release vintages |
-| Communication | Turkish learning mode, charts, data tables, rejection reasons and audit views | No invented values for unavailable evidence |
-| Relational SQL catalog | Verified sources, versions and observations; JOIN/GROUP BY coverage, row reconciliation, observed-grid quality and gap diagnostics in SQLite | In-memory, fixed read-only reports; no warehouse or predictive ML pipeline |
+### 1. Financial Analytics Lab
+
+A read-only Streamlit workspace for exploring verified public financial reference data.
+
+**US Treasury**
+- Compare observed yield curves across selected dates and available maturities.
+- Calculate the **10Y–2Y** and **10Y–3M** yield spreads in basis points.
+- Examine observed yield-curve inversions and changes between observations.
+- Review data coverage, missing maturities, and source/version information.
+
+**ECB foreign exchange**
+- Explore EUR/USD, EUR/GBP, EUR/JPY, and other available ECB reference series.
+- Calculate simple percentage changes, log returns, and cumulative changes.
+- Study rolling descriptive volatility using clearly specified observation windows.
+- Export analytical tables with source and dataset-version metadata.
+
+These are **daily reference observations**, not executable trading prices. Treasury yield changes are not bond returns, and ECB rate changes are not broker trading results.
+
+### 2. Strategy research and hypothetical execution
+
+The original part of TradeLab investigates support/resistance behavior using causal, rule-based signals.
+
+- Pivot and support/resistance zones are only usable **after** the required bars have closed.
+- Entry and exit assumptions, transaction costs, gaps, and uncertain intrabar order are handled explicitly.
+- Experiments use chronological diagnostics, comparison groups, and uncertainty checks.
+- Portfolio simulations share the same cash and exposure limits instead of treating each symbol as an independently funded account.
+
+An important finding: the tested V4.1 candidates **lost money after the assumed costs** in the inspected historical replay. I kept that result rather than presenting a misleading success story. It is part of the research, not something to hide.
+
+### 3. Data quality, SQL and reproducibility
+
+I've also worked on the less visible part of financial analysis: knowing whether the inputs are reliable.
+
+- Validating timestamps, market calendars, missing observations, and duplicate records.
+- Keeping source files and normalized datasets in separately verified versions.
+- Using SHA-256 manifests and data-lineage records to detect unexpected changes.
+- Building a small **read-only SQLite catalog** with JOIN/GROUP BY coverage and reconciliation reports.
+- Making missing or rejected data visible instead of silently filling gaps.
+
+The workspace includes separate foundations for US equities, crypto calendars, Forex sessions, and macroeconomic event studies. Some of these are research or synthetic teaching modules—not live market feeds.
+
+---
+
+## A real data-quality problem I found
+
+One of the most useful parts of this project was discovering an issue in the US Treasury data pipeline.
+
+The original dataset passed its file-integrity checks, but a normalization rule was silently skipping the **1.5-month Treasury maturity** (`BC_1_5MONTH`). The old pattern recognized integer maturity names but not that field.
+
+I reproduced the issue, reviewed the expected Treasury series, and added a separately versioned normalizer with an explicit tenor mapping.
+
+| | Observations |
+|---|---:|
+| Original verified version | 3,237 |
+| Valid 1.5-month observations recovered | **218** |
+| New independently verified derivative | **3,455** |
+
+I kept the original snapshot, manifest, and collector unchanged. The corrected data lives in a new version with its own verification and a link to the parent source.
+
+**The main lesson:** a file can be unchanged and correctly hashed while the data extracted from it is still incomplete.
+
+[Read the case study](docs/TREASURY_REMEDIATION.md) · [Financial analytics methodology](docs/FINANCIAL_ANALYTICS.md)
+
+---
 
 ## Screenshots
 
-The screenshots below were captured from the original local application, not generated mockups. Raw provider datasets are intentionally not redistributed in this repository.
+These screenshots were captured from the local application using verified existing reference snapshots. The underlying raw datasets are not distributed in this repository.
 
-### Real daily reference data
+**US Treasury — observed yield curves**
 
-![US Treasury daily par yields](docs/images/treasury-daily-yields.png)
+![US Treasury yield curves in TradeLab](docs/images/stage5-treasury.png)
 
-### Synthetic event-study teaching lab
+**ECB — daily FX reference data**
 
-![Synthetic event study, visibly labeled](docs/images/synthetic-event-study.png)
+![ECB FX analytics in TradeLab](docs/images/stage5-ecb.png)
 
-## Run the public workspace
+**Macro event-study learning module — synthetic example**
 
-Recommended environment: **Windows, Python 3.12**. The immutable publisher deliberately relies on Windows no-replace rename semantics. Do not interpret it as portable write-once storage.
+![Synthetic macro event-study module](docs/images/synthetic-event-study.png)
+
+---
+
+## Tech stack
+
+| Area | Tools and methods |
+|---|---|
+| Programming and analysis | Python, pandas, NumPy |
+| Statistics | Chronological testing, paired comparisons, block bootstrap, descriptive volatility |
+| Financial research | Support/resistance, portfolio accounting, yield curves, FX returns |
+| Data | SQLite, SQL joins/aggregations, validation rules, versioned manifests |
+| Interface | Streamlit, Plotly |
+| Quality and reproducibility | Unit/integration tests, SHA-256, source and availability tracking |
+
+This is a local research application, not a production data warehouse or deployed trading platform.
+
+## Run the Research Workspace
+
+The documented development environment is **Windows with Python 3.12**.
 
 ```powershell
+git clone https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio.git
+cd tradelab-research-portfolio
+
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -B -m streamlit run research_workspace/app.py --server.address 127.0.0.1 --server.port 8502 --server.headless true --browser.gatherUsageStats false --theme.base dark
 ```
 
-Open `http://127.0.0.1:8502/`.
+Open **http://127.0.0.1:8502/**.
 
-The synthetic calendar and event-study pages work without provider accounts. In this public copy, frozen private-cache evidence is **unavailable**, not green: protected original outputs, historical price caches and workstation test evidence are intentionally absent. The older Terminal 0.2.0 requires that excluded local evidence and is included as source for inspection, not as a ready-to-run public historical dashboard.
+The teaching and calendar modules can run without private market data. The Financial Analytics screens need locally available **verified** public reference snapshots to display real observations. A fresh clone will show unavailable-data messages rather than fabricated charts.
 
-Optional public reference collection (explicit network access, no credentials):
+The original Research Terminal 0.2.0 also depends on private historical research evidence that is intentionally not included in the public repository.
+
+### Optional: collect public daily reference data
+
+These commands **make external requests** to the documented official sources. They are optional and are not run automatically.
 
 ```powershell
 .\.venv\Scripts\python.exe -B -m research_workspace.real_sources collect --source ecb_fx
@@ -66,67 +140,52 @@ Optional public reference collection (explicit network access, no credentials):
 .\.venv\Scripts\python.exe -B -m research_workspace.real_sources review
 ```
 
-These commands create new local versions; they do not update frozen V4.1 research. The Treasury adapter is deliberately fixed to **2025**; the ECB feed contains the most recent 90 days. Collection results will differ by collection time. Hash verification requires the collector code to remain unchanged after collection.
+The Treasury collector above is the original 2025 collector. The revised Treasury v2 dataset is produced separately from an already verified original snapshot, without rewriting it. See the [methodology](docs/FINANCIAL_ANALYTICS.md) for the offline derivation procedure.
 
-On the **Gerçek Veri** page, expand **SQL katalog raporu** and click **SQL raporunu doğrula ve göster**. Each request revalidates snapshots before loading an ephemeral SQLite database. Rejected versions retain their rejection reason but contribute no observations. With no collected data, reports are empty rather than successful data verification. See [SQL catalog design and limitations](docs/SQL_CATALOG.md).
-
-Run the portable-source test selection on Windows:
+### Run the published test selection
 
 ```powershell
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-Current Windows test selection: **379 tests, 378 passed, 1 symlink-permission skip**. Quality reports compare series against dates observed within the same version; a pinned ECB TARGET profile and Treasury 2025 published-date reference now supplement that grid. Unreviewed ranges remain unknown. See [publication reference review](docs/PUBLICATION_CALENDARS.md).
+**Last published full test result (28 October 2026): 379 tests, 378 passed and 1 Windows symlink-permission skip.**
 
-Read [validation](docs/VALIDATION.md) before interpreting counts. Full archived research runners need excluded private caches/checkpoints and must not be represented as passing in a fresh clone.
+This is the recorded result from the documented Windows environment, not a guarantee that every fresh installation or platform will produce identical results. [Validation details](docs/VALIDATION.md).
 
-## Repository structure
+---
 
-```text
-research_sr/          early support/resistance prototype
-research_sr_v2/       revised causal feature experiments
-research_sr_v3/       explicit hypothetical execution model
-research_sr_v4/       calendar/data quality, causal engine, experiments
-research_sr_v4_1/     synchronized portfolio, controls, statistics, frozen protocol
-research_terminal/   historical replay, decision inspector, provenance/intake
-research_crypto/     24/7 calendar and strict dataset manifest contracts
-research_macro/      event/source/document availability and event studies
-research_fx/         NY sessions, DST and rollover validation
-research_workspace/  synthetic labs, audit view, real daily source snapshots
-docs/                development narrative, methodology and publication boundaries
-evidence/            source fingerprints and public-package test evidence
-tools/               explicitly scoped public reproduction commands
-```
+## How the project evolved
 
-## Research results: what can and cannot be claimed
+1. **Support/resistance prototypes (V1–V2):** Defining price zones and eliminating future-looking pivot signals.
+2. **Execution research (V3–V4):** Turning chart ideas into testable rules with costs, calendars, and data checks.
+3. **Portfolio research (V4.1):** Shared-cash accounting, exposure limits, and statistical comparisons.
+4. **Research Terminal and Workspace:** Building an interface to inspect the data, assumptions, and research evidence.
+5. **Real reference data and SQL:** Working with official daily Treasury/ECB sources and verifying their coverage.
+6. **Financial Analytics Lab (Stage 5):** Recovering omitted Treasury observations and adding yield-curve and FX analytics.
 
-In the original 42-session observed replay, all three V4.1 candidate variants lost money after the configured costs. The touch candidate's descriptive paired interval against matched timing controls included zero; other candidate samples were too sparse for the interval gate. This is a useful negative research result, not a profitable strategy claim. [Archived methodology and results](docs/v41-historical-research.md).
+The older historical samples have already been examined. They cannot be treated as fresh out-of-sample evidence. The separate V4.1 prospective protocol stays frozen, with its time gate no earlier than **21 January 2027, 21:15 UTC**.
 
-The frozen prospective window cannot complete before **21 January 2027, 21:15 UTC**. Passing that clock threshold alone is insufficient: complete validated data and all protocol requirements remain necessary. The workspace contains no prospective evaluator and no bypass.
+[Full development history](docs/DEVELOPMENT_STAGES.md)
 
-## Relevance to analytics consulting
+## What I'm taking away from it
 
-This project demonstrates a workflow transferable to transaction-level business analytics: define a data contract, reject unreliable inputs, distinguish observation time from availability, compare against controls, quantify uncertainty, preserve an audit trail and communicate limitations to decision makers.
+TradeLab has taught me as much about **questioning a result** as calculating one. A convincing backtest can still be misleading if timestamps, execution costs, missing data, or portfolio constraints are handled poorly. The same principle applies to financial and business analytics: a useful conclusion needs reliable inputs and assumptions that someone else can examine.
 
-It does **not** demonstrate a client engagement, deployed credit/insurance model, production-scale database, multivariate predictive model or measured business uplift. SQL evidence now includes a small relational catalog, parameterized loading, version-isolated aggregation and tested rejection paths; it does not imply production-scale database experience. Future work is clearly separated in the development document.
+I'm continuing to work on stronger data-quality checks and research validation. My goal is to keep building analytical tools that are useful, understandable, and honest about their limitations.
 
-## Attribution and authorship
+## Documentation
 
-Project owner: **Yavuz Kaan Aksoy**. Developed iteratively with AI coding assistance (including Codex). This repository records implementation and test evidence; authorship does not imply every line was written unaided. Interview explanations should focus on design choices and limitations the owner can personally defend.
+- [Architecture and data contracts](docs/ARCHITECTURE.md)
+- [Statistical methodology and limitations](docs/METHODOLOGY.md)
+- [Financial Analytics methodology](docs/FINANCIAL_ANALYTICS.md)
+- [Treasury data-quality case study](docs/TREASURY_REMEDIATION.md)
+- [SQL catalog and data-quality reports](docs/SQL_CATALOG.md)
+- [Validation evidence](docs/VALIDATION.md)
+- [Data provenance and publication boundaries](docs/DATA_AND_SECURITY.md)
+- [Stage 5 delivery report (Turkish)](docs/STAGE5_DELIVERY_TR.md)
 
-Sources: [ECB reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html), [US Treasury XML feeds](https://home.treasury.gov/treasury-daily-interest-rate-xml-feed). Third-party libraries are installed separately and are not vendored here. No open-source license grant is added by this publication; public visibility alone is not a redistribution license for third-party data.
+## A note on development
 
-## Stage 5 — Financial Analytics Lab
+I developed TradeLab iteratively with AI-assisted coding tools, including Codex. The repository documents the research questions, decisions, implementation, tests, and limitations of that process; it is not a claim that every line was written without assistance.
 
-Offline Treasury revision 2 uses explicit maturity definitions, including the 1.5-month tenor. It derives a separately pinned immutable snapshot from an already verified legacy version; original snapshots and collector remain unchanged. No automatic downloads. Financial Analytics now includes Treasury curves/spreads/basis-point changes, ECB simple/log changes and non-annualized rolling volatility, CSV metadata and explicit overlap rejection.
-
-
-- [Financial equations, data flow and authentic screens](docs/FINANCIAL_ANALYTICS.md)
-- [Treasury completeness remediation case study](docs/TREASURY_REMEDIATION.md)
-- [Stage 5 Turkish delivery report](docs/STAGE5_DELIVERY_TR.md)
-
-For a business audience: the lab turns verified public reference data into traceable
-interest-rate and currency summaries. It detects omitted data, preserves prior
-versions, explains calculations and declines comparisons when periods do not overlap.
-This supports trustworthy analytical communication; it does not claim deployed
-commercial impact, forecasting accuracy or investment performance.
+Public sources used for the reference-data modules include the [European Central Bank](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html) and the [US Treasury](https://home.treasury.gov/treasury-daily-interest-rate-xml-feed). Raw provider datasets, private research caches, and credentials are not part of this repository. No open-source license has been granted for reuse of the repository code.
