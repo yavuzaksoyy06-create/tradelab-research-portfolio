@@ -110,6 +110,35 @@ class EquityDataTests(unittest.TestCase):
             replay_manifest(prefix.iloc[:0], self.meta)
 
 
+
+class EquityChartTests(unittest.TestCase):
+    def test_regular_session_axis_removes_calendar_gaps_and_aligns_traces(self):
+        from research_workspace.equity_ui import equity_chart
+        frame, _ = synthetic_fixture('SPY')
+        prefix, features = analyze_prefix(frame, 100)
+        fig = equity_chart(prefix, features, 'SPY')
+        bars = list(fig.data[0].x)
+        volume = list(fig.data[1].x)
+        self.assertEqual(len(bars), 100)
+        self.assertEqual(bars, volume)
+        self.assertEqual(len(bars), len(set(bars)))
+        self.assertEqual(fig.layout.xaxis.type, 'category')
+        self.assertEqual(fig.layout.xaxis2.type, 'category')
+        self.assertEqual(list(fig.layout.xaxis2.categoryarray), bars)
+        self.assertGreater(len(fig.layout.xaxis2.tickvals), 1)
+        self.assertLess(len(fig.layout.xaxis2.tickvals), len(bars))
+        for pivot_trace in fig.data[2:]:
+            self.assertTrue(set(pivot_trace.x).issubset(set(bars)))
+
+    def test_replay_axis_contains_only_visible_bars(self):
+        from research_workspace.equity_ui import equity_chart
+        frame, _ = synthetic_fixture('SPY')
+        prefix, features = analyze_prefix(frame, 31)
+        fig = equity_chart(prefix, features, 'SPY')
+        self.assertEqual(len(fig.data[0].x), 31)
+        self.assertEqual(list(fig.layout.xaxis2.categoryarray), list(fig.data[0].x))
+
+
 class EquityUITests(unittest.TestCase):
     def app(self):
         from pathlib import Path
