@@ -13,6 +13,14 @@ Instead of building a system that just draws buy/sell arrows, I built a research
 
 > **Research status:** No profitable trading edge has been established. Stage 7's probabilistic research pipeline has **not** been validated on real market outcomes, so its scenario probabilities remain disabled. This repository contains **no broker-order execution**, real or paper.
 
+## Interactive demo — explore the research terminal
+
+A **public-facing, synthetic-only Streamlit demo** is prepared in [`demo_app.py`](demo_app.py). It offers a working 15-minute chart replay, causal support/resistance and indicators, deterministic commentary, archived portfolio findings, Treasury/ECB research examples and an interactive expected-value calculator.
+
+**Status:** source and automated smoke tests are available; a public `streamlit.app` URL is **not yet claimed** until the repository owner authorizes deployment in Streamlit Community Cloud. No API credentials, real or paper orders, uploaded files or private price data are used.
+
+**Try it:** `streamlit run demo_app.py` after installing `requirements.txt`. [Demo walkthrough & one-time deployment instructions](docs/PUBLIC_DEMO.md).
+
 ## Results worth seeing first
 
 | Finding | Verified scope | Why it matters |
