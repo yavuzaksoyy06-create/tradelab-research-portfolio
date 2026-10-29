@@ -1,6 +1,8 @@
 # TradeLab
 ### Quantitative Trading Research · Financial Data Engineering · Statistical Validation
 
+**[▶ Launch Interactive Demo](https://demoapppy-c4xpccskhaougpyy4uwddk.streamlit.app/)** · [Explore the source](demo_app.py) · [Data and methods](docs/DEMO_REAL_DATA.md)
+
 [![Public research tests](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml/badge.svg?branch=main)](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml)
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB)
 ![Research only](https://img.shields.io/badge/status-research%20only-64748b)
@@ -21,7 +23,7 @@ The interface shows **daily candle replay, EMA20/50/200, Wilder RSI, relative vo
 
 **Scientific boundary:** the public AAPL DAILY example is **not** a 15-minute V4/V4.1 research input and does not establish a trading edge. Original provider/adjustment provenance is not independently audited. No real-time API, credentials, uploads or broker orders are present in the demo.
 
-**Run:** `streamlit run demo_app.py` · [Data provenance & methods](docs/DEMO_REAL_DATA.md) · [Deploy guide](docs/PUBLIC_DEMO.md). A hosted `streamlit.app` URL is not claimed until owner-authorized deployment is verified.
+**Run:** `streamlit run demo_app.py` · [Data provenance & methods](docs/DEMO_REAL_DATA.md) · [Deploy guide](docs/PUBLIC_DEMO.md). **Live Streamlit deployment:** [Open the interactive research terminal](https://demoapppy-c4xpccskhaougpyy4uwddk.streamlit.app/). The public URL was supplied by the repository owner; deployment availability is separate from the code and CI checks.
 
 ## Results worth seeing first
 
@@ -31,7 +33,7 @@ The interface shows **daily candle replay, EMA20/50/200, Wilder RSI, relative vo
 | **36 diagnostic configurations; no statistical edge declared** | 3 entry rules × 3 zone widths × 4 cost settings; paired bootstrap interval for the principal comparison **crossed zero** | A backtest can overstate certainty after repeated trials |
 | **218 valid Treasury observations recovered** | Missing `BC_1_5MONTH` tenor; a separate version grew from **3,237 → 3,455** rows | A matching file hash does not prove a complete financial dataset |
 | **A future-data leak was discovered and corrected** | Stage 7 replay/holdout audit; **9 adversarial regression tests** added | A green test suite is not enough without checking information timing |
-| **477 Windows CI tests passed** | [Actions #47](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/40858054701), 0 failed, 0 skipped | Public software contracts are tested; **not** a proof of trading profitability |
+| **485 Windows CI tests passed** | [Main branch Actions](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/40872736674), 0 failed, 0 skipped; isolated Linux demo smoke tests passed | Public software contracts are tested; **not** a proof of trading profitability |
 
 **Where to start:** **2 minutes** — read the findings above and the figures below; **5 minutes** — open the [Treasury remediation](docs/TREASURY_REMEDIATION.md) and [look-ahead audit](docs/STAGE7_AUDIT.md); **15 minutes** — inspect the [S/R evidence](docs/SR_RESEARCH_EVIDENCE.md), [Stage 7 protocol](docs/STAGE7_RESEARCH_PROTOCOL.md), and run the offline test suite.
 
