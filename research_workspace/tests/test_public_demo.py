@@ -1,46 +1,46 @@
-"""Security and interaction smoke tests for the public demo entrypoint."""
+"""Smoke tests for the real historical AAPL portfolio demonstration."""
 from pathlib import Path
 import unittest
 
 from streamlit.testing.v1 import AppTest
 
-
 DEMO = Path(__file__).resolve().parents[2] / "demo_app.py"
 
 
 class PublicDemoTests(unittest.TestCase):
-    def test_landing_replay_and_research_tabs_render_without_credentials(self):
-        app = AppTest.from_file(str(DEMO), default_timeout=90).run()
-        self.assertFalse(app.exception)
-        self.assertEqual(len(app.get("plotly_chart")), 1)
-        self.assertEqual(app.selectbox(key="demo_symbol").value, "SPY")
-        self.assertGreater(len(app.get("metric")), 3)
-        text = "\n".join(str(element.value) for element in app.markdown)
-        self.assertIn("TradeLab Research Terminal", text)
-        self.assertGreaterEqual(len(app.warning), 1)
-        self.assertIn("SYNTHETIC", DEMO.read_text(encoding="utf-8"))
+    def test_real_sample_landing_renders_without_credentials(self):
+        at = AppTest.from_file(str(DEMO), default_timeout=90).run()
+        self.assertFalse(at.exception)
+        self.assertEqual(len(at.get("plotly_chart")), 1)
+        self.assertEqual(at.slider(key="demo_cursor").value, 350)
+        self.assertGreaterEqual(len(at.get("metric")), 5)
+        rendered = "\n".join(str(item.value) for item in at.markdown)
+        self.assertIn("TradeLab", rendered)
+        self.assertIn("Historical Market Replay", rendered)
 
-    def test_replay_cursor_works_without_future_in_metrics(self):
-        app = AppTest.from_file(str(DEMO), default_timeout=90).run()
-        app.slider(key="demo_cursor").set_value(100).run()
-        self.assertFalse(app.exception)
-        self.assertEqual(app.slider(key="demo_cursor").value, 100)
-        metric_values = [str(item.value) for item in app.get("metric")]
-        self.assertTrue(any(value.startswith("100 / ") for value in metric_values))
+    def test_replay_changes_historical_observation_and_not_a_forecast(self):
+        at = AppTest.from_file(str(DEMO), default_timeout=90).run()
+        first = [str(item.value) for item in at.get("metric")]
+        at.slider(key="demo_cursor").set_value(260).run()
+        self.assertFalse(at.exception)
+        self.assertEqual(at.slider(key="demo_cursor").value, 260)
+        after = [str(item.value) for item in at.get("metric")]
+        self.assertNotEqual(first[1], after[1])
 
     def test_risk_controls_recalculate_ev(self):
-        app = AppTest.from_file(str(DEMO), default_timeout=90).run()
-        app.slider(key="ev_probability").set_value(50).run()
-        self.assertFalse(app.exception)
-        values = [str(item.value) for item in app.get("metric")]
-        self.assertIn("+0.500 R", values)
+        at = AppTest.from_file(str(DEMO), default_timeout=90).run()
+        at.slider(key="ev_probability").set_value(50).run()
+        self.assertFalse(at.exception)
+        self.assertIn("+0.500 R", [str(item.value) for item in at.get("metric")])
 
-    def test_public_entrypoint_has_no_data_collection_or_order_controls(self):
-        content = DEMO.read_text(encoding="utf-8")
+    def test_public_entrypoint_has_no_secret_or_order_path(self):
+        source = DEMO.read_text(encoding="utf-8")
         for forbidden in ("ALPACA_API_KEY", "APCA_API_SECRET_KEY", "read_alpaca_history(",
-                          "st.file_uploader(", "st.secrets", "submit_order(", "requests.get("):
-            self.assertNotIn(forbidden, content)
-        self.assertIn("synthetic_fixture", content)
+                          "st.file_uploader(", "st.secrets", "submit_order(", "requests.get(",
+                          "synthetic_fixture"):
+            self.assertNotIn(forbidden, source)
+        self.assertIn("load_daily_sample", source)
+        self.assertIn("english_report", source)
 
 
 if __name__ == "__main__":
