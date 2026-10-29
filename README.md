@@ -155,7 +155,7 @@ Stage 7 compares fixed 4- and 16-bar outcomes with four baselines using chronolo
 ## Reliability, reproducibility and boundaries
 
 - **Software tests:** [477 passed, zero skipped/failed on Windows CI](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/40858054701) at the audited checkpoint; local Windows evidence had one environment-dependent symlink skip. CI covers causal feature timing, holdout isolation, data and manifest validation, provider GET transport, numerical checks and Streamlit UI behavior.
-- **Cross-platform CI:** Windows **and** Linux jobs are configured in the current development branch. Their latest status is shown by the workflow; do not infer Linux compatibility from the older Windows-only checkpoint.
+- **Platform scope:** Windows / Python 3.12 is CI-verified. An exploratory Ubuntu run exposed **14 Windows-only immutable-publication test errors** (`No-replace publication requires Windows`); Linux is **not certified**. The source-integrity guard was not weakened, and the Windows test selection remains intact.
 - **No look-ahead by construction:** features and signals follow completed-bar confirmation; the reserved historical holdout is hidden across eligible long-data replay, training and diagnostics.
 - **Public-data limits:** frozen historical market-price caches and original licensed evidence are excluded. A fresh clone can run the clearly labeled synthetic UI and public tests, **not reproduce the original private-price backtest**.
 - **Research scope:** no broker execution; no validated trading alpha; no calibrated bullish/bearish probabilities or real Stage 7 performance statements. The frozen V4.1 prospective evaluation gate is **21 January 2027, 21:15 UTC**. Stage 7 independently rejects dates on/after 26 October 2026.
@@ -175,7 +175,7 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -B -m streamlit run research_workspace/app.py --server.address 127.0.0.1 --server.port 8502 --browser.gatherUsageStats false
 ```
 
-**Linux / macOS** (same source; only platforms with successful CI runs are confirmed):
+**Linux / macOS — exploratory, not certified:** These commands are provided as guidance only. The existing immutable-publication workflow includes a Windows-specific safety primitive; full tests may fail on Linux.
 
 ```bash
 git clone https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio.git
