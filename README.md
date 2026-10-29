@@ -194,7 +194,7 @@ These collect official *daily reference data*, not intraday prices. The legacy T
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-- **Current development-branch local evidence:** 468 tests, 467 passed, 1 Windows symlink-permission skip (28 October 2026).
+- **Current development-branch local evidence:** 477 tests, 476 passed, 1 Windows symlink-permission skip (28 October 2026).
 - **GitHub Actions:** [Windows / Python 3.12 public-source workflow](.github/workflows/public-tests.yml). The badge above reflects GitHub's **actual workflow status**, not a manually asserted pass.
 - **Platform limits:** The public test runner excludes private cached-price and frozen original research reproduction. Windows is the documented platform; Linux/macOS compatibility is **not certified**. The full frozen historical replay cannot be reproduced without the excluded original evidence.
 
@@ -230,3 +230,7 @@ I use this project to practice making research decisions auditable: when a test 
 - [Data provenance and publication policy](docs/DATA_AND_SECURITY.md)
 
 Public references: [European Central Bank](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html) and [US Treasury](https://home.treasury.gov/treasury-daily-interest-rate-xml-feed). No raw provider files, credentials, or private historical market caches are distributed in this repository. Public visibility does not, by itself, grant an open-source license.
+
+### Stage 7 leakage audit (29 October 2026)
+
+The follow-up audit fixed holdout labels exposed through replay, moving replay partitions, negative observation indices and unsafe private-manifest metadata copying. Chart, commentary, labels and evaluation now share the full-snapshot holdout boundary; new private snapshots bind it to a canonical fingerprint. See [audit findings and limits](docs/STAGE7_AUDIT.md). Previously viewed data cannot become unseen again. No predictive probabilities are released.

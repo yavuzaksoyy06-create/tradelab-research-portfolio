@@ -25,3 +25,7 @@ Minimum candidate evidence before a future probability release review: >=60 dist
 ## Exports and provenance
 
 Versioned research records carry causal prefix SHA256 and full input fingerprint separately: future appends change input identity but never prefix feature identity. Default JSON/CSV exports contain metadata, hashes, counts and protocol, no price/return rows. Raw records stay in process memory. Explicit local historical download CLI writes only to a new folder outside any Git repository, with CSV SHA256 and manifest; no retries on rate-limit/entitlement errors, sanitized failure and manual retry. Maximum 120 sessions, 10 per request batch, 8 pages per batch; no feed fallback. Secrets come only from environment and never enter metadata.
+
+## Enforcement addendum — 29 October 2026
+
+The leakage audit does not tune any hypothesis, horizon or model parameter. For snapshots with at least 80 sessions, the same final-20-session boundary now applies to charts, commentary, event labels and validation. Replay evaluation receives the complete snapshot plus a visible count; only completed visible folds are scored. New private snapshots bind the partition to canonical numeric data and reject replacement/truncation. Long actual-history evaluation without registration is refused. See STAGE7_AUDIT.md for demonstrated earlier defects and the rule that already inspected periods cannot be called untouched.

@@ -120,3 +120,7 @@ Python/calendar dependencies were used; fresh dependency installation was not te
 ## Stage 7 development validation
 
 Current local selection: 468 discovered, 467 passed, one existing Windows symlink-privilege skip; zero failures. The current source inventory has 115 files and preserves the previous inventory under archive/3a646e3_. Twenty-three tracked V4/V4.1 files were compared byte-for-byte with Stage 6 base 3a646e3; none changed. No original private cache or prospective dataset was inspected. See [Stage 7 validation](STAGE7_VALIDATION_REPORT.md), [checkpoint](STAGE7_CHECKPOINT.md) and [checks](../evidence/stage7_checks.json). Earlier counts in this document describe their historical stages and are not additive.
+
+## Stage 7 leakage audit — 29 October 2026
+
+Current local selection: 477 tests, 476 passed, one Windows symlink-privilege skip. Nine new audit tests. All 23 tracked frozen V4/V4.1 files unchanged; 116 source inventory hashes. No real data download/evaluation or orders. Prior Stage 7 evidence is archived under 4d6f0c1. See [audit](STAGE7_AUDIT.md) and [machine-readable evidence](../evidence/stage7_audit_checks.json).

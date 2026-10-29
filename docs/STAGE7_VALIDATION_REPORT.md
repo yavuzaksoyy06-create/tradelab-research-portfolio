@@ -49,3 +49,7 @@ No new statistical result table is presented as market evidence: no qualifying r
 Ten hypothesis/horizon diagnostics are registered; running all three symbols adds multiple comparisons and must not be treated as ten independent confirmatory tests. No p-values or significance declarations are made. Session bootstrap recognizes intraday overlapping labels, but cross-session dependence and distribution shift remain. Split adjustment is not a historical vintage certificate and excludes dividends. Binary ties are not-positive. Metrics are direction diagnostics, not transaction P&L.
 
 See [checkpoint](STAGE7_CHECKPOINT.md) for GitHub Actions verification and immutable source checks.
+
+## Follow-up leakage audit — 29 October 2026
+
+The initial implementation evidence above is historical. Nine new tests reproduce and guard against holdout exposure through chart/replay, moving partitions, invalid indices and unsafe private-writer inputs. Current local suite: 477 discovered, 476 passed, one existing Windows privilege skip; zero failures. See STAGE7_AUDIT.md and evidence/stage7_audit_checks.json. The audit found real software defects despite the earlier green suite; no real-market predictive claim follows from either test run.
