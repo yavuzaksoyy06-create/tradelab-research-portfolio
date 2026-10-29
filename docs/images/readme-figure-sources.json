@@ -1,0 +1,50 @@
+{
+  "historical_results": {
+    "source": "docs/v41-historical-research.md",
+    "sha256": "4f4bd32e67736446f33a540fe9d30d4c9b6e9dcdd123a1eb87d0d6ba224befc4",
+    "replay": {
+      "rejection": [
+        -131.15,
+        9
+      ],
+      "touch": [
+        -93.36,
+        53
+      ],
+      "trend_filtered": [
+        -24.88,
+        4
+      ]
+    },
+    "validation_cost_cases": [
+      [
+        0,
+        30.45
+      ],
+      [
+        3,
+        -167.63
+      ],
+      [
+        6,
+        -364.79
+      ],
+      [
+        10,
+        -649.89
+      ]
+    ]
+  },
+  "replay_example": {
+    "source": "research_workspace/equity_data.py::synthetic_fixture",
+    "synthetic": true,
+    "visible_bars": 160,
+    "first_displayed_bar_index": 60,
+    "as_of": "2026-10-13T14:30:00+00:00",
+    "orders_enabled": false
+  },
+  "figures": {
+    "research-results.png": "8d98d8a142778f87783cd3ed42ee0752d2b9cf441e69087a56f64e74e5d92472",
+    "causal-replay.png": "67039d9fd893710fbdc5f08a56912fd4289e01c244d78b547882ee80ba9a65e5"
+  }
+}
