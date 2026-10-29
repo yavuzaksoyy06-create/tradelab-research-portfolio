@@ -9,7 +9,7 @@ import pandas as pd
 from research_sr_v4.data import expected_grid
 from research_workspace.equity_data import REQUIRED, SYMBOLS, MAX_BYTES, _validate_and_label
 from research_workspace.equity_provider import read_alpaca_history, EquityProviderError
-from research_workspace.stage7_events import SEALED_START, VERSION, validated_history
+from research_workspace.stage7_events import SEALED_START, VERSION, validated_history, research_partition
 
 
 def collect_history(symbol, start, end, *, feed, api_key, api_secret,
@@ -60,13 +60,27 @@ def collect_history(symbol, start, end, *, feed, api_key, api_secret,
 
 def save_private(frame, metadata, directory):
     """Exclusive new directory, outside every Git tree; caller supplies licensed storage."""
+    clean = validated_history(frame, metadata)
+    if metadata.get("research_partition") is not None and metadata["research_partition"] != research_partition(clean):
+        raise ValueError("Registered snapshot changed")
     target = Path(directory).expanduser().resolve()
     if any((parent / ".git").exists() for parent in (target, *target.parents)):
         raise ValueError("Private data must be outside all Git repositories")
     if target.exists():
         raise ValueError("Immutable snapshot requires a new directory")
-    payload = frame[list(REQUIRED)].to_csv(index=False, lineterminator="\n").encode("utf-8")
-    manifest = {**metadata, "csv_sha256": hashlib.sha256(payload).hexdigest(),
+    payload = clean[list(REQUIRED)].to_csv(index=False, lineterminator="\n", float_format="%.17g").encode("utf-8")
+    # Do not serialize arbitrary caller metadata such as credentials or request headers.
+    fields = ("symbol", "origin", "provider", "synthetic", "feed", "adjustment",
+              "dividends_adjusted", "provider_api_response", "feed_verified",
+              "point_in_time_archive_verified", "orders_enabled", "expected_bars",
+              "received_bars", "missing_bars", "sessions", "retrieved_at_utc")
+    source = {key: metadata[key] for key in fields if key in metadata}
+    # Batch receipts are independently allowlisted; no transport headers/bodies.
+    receipt_fields = ("first_session", "last_session", "bars", "retrieved_at_utc", "outside_rth_excluded")
+    source["batches"] = [{k: row[k] for k in receipt_fields if k in row}
+                         for row in metadata.get("batches", [])]
+    manifest = {**source, "schema": VERSION, "research_partition": research_partition(clean),
+                "csv_sha256": hashlib.sha256(payload).hexdigest(),
                 "file": "bars.csv", "bytes": len(payload)}
     target.mkdir(parents=True, exist_ok=False)
     (target / "bars.csv").write_bytes(payload)
@@ -91,7 +105,9 @@ def load_private(directory):
     dates = pd.to_datetime(stamps.timestamp, utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
     if (dates >= SEALED_START).any():
         raise ValueError("Sealed period is not eligible")
-    frame = validated_history(pd.read_csv(BytesIO(payload)), meta)
+    frame = validated_history(pd.read_csv(BytesIO(payload), float_precision="round_trip"), meta)
     if len(frame) != meta.get("received_bars") or len(frame) != meta.get("expected_bars"):
         raise ValueError("Manifest coverage mismatch")
+    if meta.get("research_partition") is not None and meta["research_partition"] != research_partition(frame):
+        raise ValueError("Registered snapshot partition mismatch")
     return frame, meta

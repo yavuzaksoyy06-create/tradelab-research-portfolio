@@ -3,21 +3,21 @@ from __future__ import annotations
 import numpy as np
 from research_workspace.stage7_events import (
     HORIZONS, VERSION, INSUFFICIENT, validated_history, fingerprint, causal_features, outcome,
+    replay_limit, research_partition, HOLDOUT_SESSIONS, MIN_RESEARCH_SESSIONS,
 )
 
 TRAIN_SESSIONS = 40
 FOLD_SESSIONS = 10
-HOLDOUT_SESSIONS = 20
 EMBARGO_BARS = 16
 
 
 def split_plan(frame):
     sessions = list(dict.fromkeys(frame.session))
-    if len(sessions) < 80:
+    if len(sessions) < MIN_RESEARCH_SESSIONS:
         return {"status": INSUFFICIENT, "folds": [], "holdout_start": None}
     starts = {s: int(np.flatnonzero(frame.session.to_numpy() == s)[0]) for s in sessions}
     holdout_session = len(sessions) - HOLDOUT_SESSIONS
-    holdout_start = starts[sessions[holdout_session]]
+    holdout_start = replay_limit(frame)
     folds = []
     for offset in range(TRAIN_SESSIONS, holdout_session, FOLD_SESSIONS):
         start = starts[sessions[offset]]
@@ -102,9 +102,18 @@ def block_interval(labels, model_p, baseline_p, sessions):
             "sessions": len(unique), "estimate": float(difference.mean())}
 
 
-def evaluate_history(frame, metadata):
+def evaluate_history(frame, metadata, *, visible_count=None):
     clean = validated_history(frame, metadata)
+    n = len(clean) if visible_count is None else visible_count
+    if type(n) is not int or not 1 <= n <= len(clean):
+        raise ValueError("Invalid evaluation replay cursor")
+    registered = metadata.get("research_partition")
+    if registered is not None and registered != research_partition(clean):
+        raise ValueError("Registered snapshot changed; research partition cannot move")
     plan = split_plan(clean)
+    visible = clean.iloc[:n]
+    complete_count = int((visible.session_close <= visible.bar_end.iloc[-1]).sum())
+    plan["folds"] = [fold for fold in plan["folds"] if fold["stop"] <= complete_count]
     result = {"schema": VERSION, "dataset_sha256": fingerprint(clean),
               "symbol": metadata["symbol"], "feed": metadata.get("feed", "unspecified"),
               "synthetic": metadata["synthetic"], "plan": plan, "horizons": {},
@@ -117,8 +126,11 @@ def evaluate_history(frame, metadata):
         return result
     if not plan["folds"]:
         return result
+    if not metadata["synthetic"] and registered is None:
+        result["reason"] = "Immutable snapshot research partition registration required"
+        return result
     # Never even build holdout feature vectors or outcomes.
-    development = clean.iloc[:plan["holdout_start"]]
+    development = clean.iloc[:min(plan["holdout_start"], complete_count)]
     features = causal_features(development, metadata)
     for horizon in HORIZONS:
         rows = [{"features": r, "outcome": outcome(development, r, horizon)}

@@ -20,6 +20,7 @@ from research_workspace.equity_volume import volume_frame
 from research_workspace.equity_structure import confirmed_swing_events, confirmed_trendline_segments
 from research_workspace.equity_commentary import commentary_report
 from research_workspace.stage7_ui import render_research
+from research_workspace.stage7_events import replay_limit, validated_history
 
 
 def _session_axis(visible):
@@ -225,8 +226,12 @@ def render():
         st.error(meta['origin']) if meta['synthetic'] else st.warning(meta['origin'])
         if meta['synthetic']:
             st.caption('Synthetic price levels near 100 are NOT SPY/MSFT/QQQ quotes or historical returns.')
+        frame = validated_history(frame, meta)
+        limit = replay_limit(frame)
+        if limit < len(frame):
+            st.info('Son 20 seans araştırma için ayrılmıştır; grafik, yorum ve sonuçlarda gösterilmez.')
         count = st.slider('As-of replay · completed bars visible', min_value=1,
-                          max_value=len(frame), value=len(frame), step=1,
+                          max_value=limit, value=limit, step=1,
                           key='equity_cursor')
         prefix, features = analyze_prefix(frame, count)
         last = features['snapshots'][-1]

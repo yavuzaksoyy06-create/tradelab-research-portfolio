@@ -17,6 +17,24 @@ VERSION = "tradelab.stage7.v1"
 HORIZONS = (4, 16)
 SEALED_START = "2026-10-26"
 INSUFFICIENT = "INSUFFICIENT OUT-OF-SAMPLE EVIDENCE"
+MIN_RESEARCH_SESSIONS = 80
+HOLDOUT_SESSIONS = 20
+
+
+def replay_limit(frame):
+    """Reserve against the full immutable snapshot, never against a replay prefix."""
+    sessions = list(dict.fromkeys(frame.session))
+    if len(sessions) < MIN_RESEARCH_SESSIONS:
+        return len(frame)
+    first = sessions[-HOLDOUT_SESSIONS]
+    return next(i for i, session in enumerate(frame.session) if session == first)
+
+
+def research_partition(frame):
+    boundary = replay_limit(frame)
+    return {"dataset_sha256": fingerprint(frame), "bars": len(frame),
+            "holdout_start": boundary,
+            "holdout_first_session": str(frame.session.iloc[boundary]) if boundary < len(frame) else None}
 
 
 def fingerprint(frame):
@@ -36,11 +54,17 @@ def validated_history(frame, metadata, *, now=None):
     if type(metadata.get("synthetic")) is not bool:
         raise ValueError("Explicit synthetic/actual classification required")
     clean = _validate_and_label(frame[list(REQUIRED)], metadata["symbol"], now=now)
+    if metadata.get("research_partition") is not None and metadata["research_partition"] != research_partition(clean):
+        raise ValueError("Registered snapshot changed; research partition cannot move")
     return clean
 
 
 def classify_event(bars, snapshots, i, last_break):
     """Frozen pre-crossing geometry; ambiguous bars never get an invented order."""
+    if type(i) is not int or not 0 <= i < len(bars) or len(snapshots) <= i:
+        raise ValueError("Event index outside observed history")
+    if last_break is not None and not 0 <= last_break["index"] < i:
+        raise ValueError("Break must be known before retest")
     candidates = []
     if i >= 2:
         a, b, c = (float(bars.close.iloc[j]) for j in (i - 2, i - 1, i))
@@ -122,8 +146,12 @@ def causal_features(prefix, metadata):
 
 
 def outcome(prefix, record, horizon):
-    if horizon not in HORIZONS:
+    if type(horizon) is not int or horizon not in HORIZONS:
         raise ValueError("Only registered horizons 4 and 16")
+    if type(record["index"]) is not int or not 0 <= record["index"] < len(prefix):
+        raise ValueError("Observation index outside visible history")
+    if not math.isfinite(record["close"]) or record["close"] <= 0:
+        raise ValueError("Invalid observed close")
     end = record["index"] + horizon
     if end >= len(prefix):
         return {"available_at": None, "return": None, "up": None, "sr_outcome": "pending"}
@@ -150,6 +178,7 @@ def event_dataset(frame, metadata, *, visible_count=None):
     n = len(clean) if visible_count is None else visible_count
     if type(n) is not int or not 1 <= n <= len(clean):
         raise ValueError("Invalid replay cursor")
+    n = min(n, replay_limit(clean))
     prefix = clean.iloc[:n]
     records = causal_features(prefix, metadata)
     return {"schema": VERSION, "dataset_sha256": fingerprint(clean),

@@ -38,10 +38,10 @@ def render_research(frame, metadata, visible_count):
         if complete.empty:
             st.info("Henüz tamamlanmış seans yok.")
         else:
-            diagnostic = evaluate_history(complete, metadata)
+            diagnostic = evaluate_history(frame, metadata, visible_count=visible_count)
             st.json(diagnostic)
             st.caption("Bu tanılama gerçek veri kaynağının bağımsız doğrulanması veya olasılık yayın onayı değildir. "
-                       "Replay ilerlediğinde yeniden hesaplama gerekir; son 20 seans puanlanmaz.")
+                       "Test dönemi tam veri kümesine sabittir; replay ilerleyince sınırı kaymaz.")
     st.subheader("Tahmin ve Gerçekleşen Sonuç")
     # Never include hidden suffix outcomes. This table contains conditional observations,
     # not a retroactively fitted numerical prediction.
