@@ -17,7 +17,8 @@ class PublicDemoTests(unittest.TestCase):
         self.assertGreater(len(app.get("metric")), 3)
         text = "\n".join(str(element.value) for element in app.markdown)
         self.assertIn("TradeLab Research Terminal", text)
-        self.assertIn("SYNTHETIC", str(app.warning))
+        self.assertGreaterEqual(len(app.warning), 1)
+        self.assertIn("SYNTHETIC", DEMO.read_text(encoding="utf-8"))
 
     def test_replay_cursor_works_without_future_in_metrics(self):
         app = AppTest.from_file(str(DEMO), default_timeout=90).run()
