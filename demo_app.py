@@ -1,8 +1,8 @@
-"""Public, synthetic-only TradeLab portfolio demo.
+"""TradeLab employer-facing portfolio demo: real historical daily AAPL sample.
 
-Standalone Streamlit entry point. Uses the repository's real, causal
-analysis and plotting code; never loads Alpaca keys, private market caches,
-user uploads or order endpoints. Illustrative educational prices only.
+Separate public example (Plotly MIT sample, 2015–2017); does not use
+private 15-minute research caches, brokerage APIs or market orders.
+Original provider/adjustment provenance is not independently certified.
 """
 from __future__ import annotations
 
@@ -11,123 +11,127 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from research_workspace.equity_data import SYMBOLS, analyze_prefix, synthetic_fixture
-from research_workspace.equity_ui import equity_chart
-from research_workspace.equity_commentary import commentary_report
-from research_workspace.equity_volume import volume_frame
+from demo_daily import (
+    SOURCE_URL, daily_indicators, english_report, load_daily_sample, market_chart
+)
 
 ROOT = Path(__file__).resolve().parent
 REPO = "https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio"
 
 st.set_page_config(
-    page_title="TradeLab | Interactive Research Demo",
-    page_icon="📊",
+    page_title="TradeLab | Quantitative Research Terminal",
+    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 st.markdown(
     """
     <style>
-      .stApp { background: #091321; color: #e4edf9; }
-      [data-testid="stSidebar"] { background: #0d1a2b; }
-      .block-container { max-width: 1480px; padding-top: 1.55rem; }
-      h1,h2,h3 { letter-spacing: -0.025em; }
-      [data-testid="stMetric"] {
-        background: #122239; border: 1px solid #263b56;
-        border-radius: 11px; padding: 10px 14px;
-      }
+      .stApp { background: #080f1c; color: #e5ebf6; }
+      [data-testid="stSidebar"] { background: #0e1a2c; border-right:1px solid #1f3049; }
+      .block-container { max-width: 1520px; padding-top: 1.4rem; }
+      h1,h2,h3 { letter-spacing: -0.03em; }
+      h1 { font-weight: 700 !important; }
+      [data-testid="stMetric"] { background: #102137; border:1px solid #253951;
+           border-radius: 12px; padding: 12px 14px; }
+      .tl-kicker { font-size: .8rem; font-weight: 700; letter-spacing: .18em;
+          color: #6ce0c4; }
+      .tl-summary { color:#aabed6; font-size:1.04rem; }
     </style>
-    """,
-    unsafe_allow_html=True,
+    """, unsafe_allow_html=True,
 )
 
 
 @st.cache_data(show_spinner=False)
-def educational_bars(symbol: str):
-    """Reuse deterministic complete-session fixture; no network requests."""
-    return synthetic_fixture(symbol)
+def historical_sample():
+    """Immutable bundled historical example; no network access."""
+    return load_daily_sample()
 
 
-def render_replay(symbol: str):
-    st.subheader("Causal Market Replay")
+def render_replay():
+    frame = historical_sample()
+    st.markdown("### Historical Market Replay · AAPL")
     st.caption(
-        "Educational 15-minute candles · XNYS calendar · all prices are SYNTHETIC "
-        "and follow the same generated pattern for each symbol label. "
-        "They are not historical SPY/MSFT/QQQ quotes."
+        "506 observed daily OHLCV candles · 17 Feb 2015 – 16 Feb 2017 · USD/share · "
+        "Source: Plotly historical AAPL dataset (MIT repository). Not live market data."
     )
-    frame, metadata = educational_bars(symbol)
-
     if "demo_cursor" not in st.session_state:
-        st.session_state.demo_cursor = min(125, len(frame))
-    st.session_state.demo_cursor = max(25, min(int(st.session_state.demo_cursor), len(frame)))
-
-    left, right = st.columns([5, 2], gap="large")
-    with left:
-        count = st.slider(
-            "Completed bars visible — future bars stay hidden",
-            min_value=25, max_value=len(frame),
-            key="demo_cursor",
-        )
-    with right:
+        st.session_state.demo_cursor = 350
+    st.session_state.demo_cursor = max(220, min(int(st.session_state.demo_cursor), len(frame)))
+    c1, c2, c3 = st.columns([7, 1.35, 1.55], gap="small")
+    with c1:
+        count = st.slider("As-of date · reveal completed trading days only",
+                          min_value=220, max_value=len(frame), key="demo_cursor")
+    with c2:
         st.write("")
-        if st.button("Advance one bar →", use_container_width=True,
-                     disabled=count >= len(frame), key="advance_demo"):
-            st.session_state.demo_cursor = min(len(frame), count + 1)
+        if st.button("Next day", key="advance_demo", use_container_width=True,
+                     disabled=count >= len(frame)):
+            st.session_state.demo_cursor = min(count+1, len(frame))
             st.rerun()
-
-    prefix, features = analyze_prefix(frame, count)
-    last = features["snapshots"][-1]
-    rvol = volume_frame(prefix)["relative_volume_20"].iloc[-1]
-    columns = st.columns(4)
-    columns[0].metric("Visible bars", f"{count} / {len(frame)}")
-    columns[1].metric("Last synthetic close", f"{prefix.close.iloc[-1]:.2f}")
-    columns[2].metric("Confirmed active S/R zones", str(len(last["zones"])))
-    columns[3].metric("RVOL · previous 20 bars", f"{rvol:.2f}×" if pd.notna(rvol) else "N/A")
-
-    with st.expander("Chart layers", expanded=False):
-        a, b, c = st.columns(3)
-        overlays = a.multiselect("EMA periods · 15-minute bars", [9, 21, 50, 200],
-                                 default=[9, 21], key="demo_ema")
-        show_rsi = b.checkbox("RSI 14", value=True, key="demo_rsi")
-        show_structure = c.checkbox("HH / HL / LH / LL", value=True, key="demo_structure")
-        show_trendlines = a.checkbox("Confirmed trendlines", value=True, key="demo_trendlines")
-        show_vol_baseline = b.checkbox("Prior-volume baseline", value=True, key="demo_volume")
-    st.plotly_chart(
-        equity_chart(
-            prefix, features, symbol,
-            ema_periods=tuple(overlays), show_rsi=show_rsi,
-            show_structure=show_structure, show_trendlines=show_trendlines,
-            show_volume_average=show_vol_baseline,
-        ),
-        width="stretch", key="demo_equity_chart",
-    )
+    with c3:
+        st.write("")
+        if st.button("Show full history", key="finish_demo", use_container_width=True,
+                     disabled=count >= len(frame)):
+            st.session_state.demo_cursor = len(frame)
+            st.rerun()
+    prefix = frame.iloc[:count].copy()
+    observed = prefix.iloc[-1]
+    report = english_report(prefix)
+    p_change = report["daily_change"]
+    m1,m2,m3,m4,m5 = st.columns(5)
+    m1.metric("Observation date", observed.date.strftime("%d %b %Y"))
+    m2.metric("Observed close", f"USD {observed.close:,.2f}",
+              f"{p_change:+.2f}%" if p_change is not None else None)
+    m3.metric("Observed volume", f"{observed.volume/1_000_000:.2f}M")
+    m4.metric("RSI(14), daily", f"{report['rsi']:.1f}" if report["rsi"] is not None else "N/A")
+    m5.metric("RVOL, prior 20 days", f"{report['rvol']:.2f}x" if report["rvol"] is not None else "N/A")
+    with st.expander("Configure analysis layers", expanded=False):
+        c1,c2,c3,c4 = st.columns(4)
+        emas = c1.multiselect("EMA · trading days", [20,50,200], default=[20,50], key="demo_ema")
+        show_rsi = c2.checkbox("RSI 14", value=True, key="demo_rsi")
+        show_structure = c3.checkbox("Confirmed HH/HL/LH/LL", value=True, key="demo_structure")
+        show_levels = c4.checkbox("Confirmed high/low levels", value=True, key="demo_levels")
+    if not emas:
+        st.info("Select at least one EMA period to draw the chart.")
+        return
+    fig = market_chart(prefix, periods=tuple(emas), show_rsi=show_rsi,
+                       show_structure=show_structure, show_levels=show_levels)
+    st.plotly_chart(fig, width="stretch", key="daily_aapl_chart")
     st.caption(
-        "A pivot appears only when enough later bars have closed to confirm it; "
-        "its label is displayed at the **confirmation** candle. The replay "
-        "does not draw current zones into earlier candles. There are no orders, "
-        "live signals, return predictions or real market prices in this demo."
+        "Causal marker timing: a 2-left / 2-right daily swing is marked at "
+        "its CONFIRMATION DATE, never backdated to the candidate swing. "
+        "Only the previous 110 observed dates are displayed; calculations "
+        "use the entire revealed prefix. Daily periods are not 15-minute periods."
     )
-
-    st.markdown("#### Evidence-based chart commentary")
+    st.markdown("#### Research Commentary · As-Of Evidence")
     st.caption(
-        "This is the repository's deterministic Turkish analysis engine — "
-        "not an LLM, not a trade recommendation."
+        "English, deterministic observations from the visible daily sample — "
+        "not an AI forecast, profitability claim, or trading recommendation."
     )
-    report = commentary_report(prefix, features, metadata)
-    left, right = st.columns(2)
-    for index, section in enumerate(report["sections"]):
-        with (left if index % 2 == 0 else right):
-            with st.expander(section["heading"], expanded=index < 2):
+    cols = st.columns(2)
+    for i, section in enumerate(report["sections"]):
+        with cols[i % 2]:
+            with st.container(border=True):
+                st.markdown("**"+section["heading"]+"**")
                 st.write(section["text"])
-    with st.expander("Inspect as-of numerical evidence"):
-        st.json(report["evidence"], expanded=False)
+    with st.expander("Data source, reproducibility and limitations"):
+        st.markdown(
+            "The chart uses actual historical daily sample rows hosted by Plotly, "
+            "**not invented prices**. The sample was redistributed with attribution "
+            "to Plotly's MIT-licensed datasets repository. Original exchange/vendor "
+            "provenance and adjustment consistency are not independently validated. "
+            "No data is downloaded, no broker credentials are read and no orders "
+            "are submitted. This sample is not the source of the V4.1 15-minute results."
+        )
+        st.link_button("Open original AAPL sample", SOURCE_URL)
+        st.link_button("Inspect reproducible data and methodology", f"{REPO}/blob/main/docs/DEMO_REAL_DATA.md")
 
 
 def render_results():
     st.subheader("Research findings · actual archived analysis")
     st.caption(
         "The figures and P&L below are taken from previously inspected "
-        "historical research, not from the synthetic replay or a live backtest."
+        "historical research, not from the separate AAPL daily sample or a live backtest."
     )
     st.image(str(ROOT / "docs/images/research-results.png"),
              caption="Archived V4.1 hypothetical results and separate cost-sensitivity experiment")
@@ -210,38 +214,44 @@ def render_ev_lab():
     st.caption("R is the defined risk unit. Input probabilities are assumptions, not estimates from TradeLab.")
 
 
-st.sidebar.markdown("## ◈ TRADELAB")
-st.sidebar.caption("INTERACTIVE PORTFOLIO DEMO · SYNTHETIC ONLY")
-st.sidebar.warning("No live prices · No credentials · No trades")
-symbol = st.sidebar.selectbox("Illustrative instrument label", SYMBOLS, key="demo_symbol")
-st.sidebar.caption("All three labels share the same synthetic educational price path.")
-st.sidebar.link_button("View source on GitHub", REPO, use_container_width=True)
 
-st.markdown("# TradeLab Research Terminal")
-st.write(
-    "**A transparent quantitative research workflow**, from causal chart features "
-    "to portfolio evaluation and financial data quality."
+st.sidebar.markdown("## ◈ TRADELAB")
+st.sidebar.caption("QUANTITATIVE RESEARCH · PUBLIC PORTFOLIO")
+st.sidebar.markdown("**AAPL / Historical Daily**")
+st.sidebar.caption("Observed sample: 2015–2017 · 506 sessions")
+st.sidebar.info("Offline historical sample · No account, no API credentials, no orders")
+st.sidebar.link_button("GitHub source", REPO, use_container_width=True)
+st.sidebar.link_button("Research methodology", f"{REPO}/blob/main/docs/SR_RESEARCH_EVIDENCE.md",
+                       use_container_width=True)
+
+st.markdown('<div class="tl-kicker">FINANCIAL RESEARCH / INTERACTIVE CASE STUDIES</div>',
+            unsafe_allow_html=True)
+st.title("TradeLab · Quantitative Research Terminal")
+st.markdown(
+    '<div class="tl-summary">From observed market data and causal analysis to '
+    'execution-aware portfolio tests, statistical uncertainty and verified financial '
+    'data quality.</div>', unsafe_allow_html=True)
+st.info(
+    "AAPL MARKET REPLAY: historical DAILY market sample (2015–2017). "
+    "Separate archived strategy results: MSFT/SPY/QQQ 15-minute research. "
+    "No live data, no orders, no demonstrated profitable edge."
 )
-st.warning(
-    "PUBLIC DEMO · ALL INTERACTIVE PRICE DATA IS SYNTHETIC. "
-    "No Alpaca login, broker connection, private source files or market orders."
-)
+
 tab_replay, tab_results, tab_data, tab_ev = st.tabs([
-    "📈 Market Replay", "📊 Research Evidence", "🏦 Financial Data Quality", "🧮 Probability & Risk"
+    "📈 Market Replay · AAPL", "📊 Strategy Research", "🏦 Data Quality", "🧮 Risk & Probability",
 ])
 with tab_replay:
-    render_replay(symbol)
+    render_replay()
 with tab_results:
     render_results()
 with tab_data:
     render_data_quality()
 with tab_ev:
     render_ev_lab()
-
 st.divider()
 st.caption(
-    "Stage 7 event/probability research is not demonstrated as market-validated: "
-    "real historical calibration has not been completed; predictive probabilities "
-    "are disabled. The archived research results and the synthetic replay are "
-    "deliberately separate."
+    "TradeLab is an independent financial research project. The historical daily AAPL "
+    "sample is not used to infer trading alpha. Archived 15-minute portfolio P&L remains "
+    "a separate, previously inspected hypothetical study. Stage 7 predictive probabilities "
+    "are disabled pending qualifying market-data validation."
 )
