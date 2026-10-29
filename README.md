@@ -13,6 +13,20 @@ My starting point was **support and resistance**. I wanted to turn discretionary
 
 > **Scope:** Offline quantitative research, hypothetical execution and descriptive financial analytics. No profitable edge has been established; no broker orders have been sent. The historical research samples have already been examined and are not untouched out-of-sample evidence.
 
+## What I built, and why it matters
+
+I did not set out to build another chart that labels every support touch as a buying opportunity. I wanted to know **whether the signal was available at the time, whether an actual portfolio could have taken it, and whether any apparent advantage survived costs and comparison with a control**. Each unsuccessful experiment informed the next layer of the platform.
+
+| Research question | What I implemented | Evidence or current boundary |
+|---|---|---|
+| **Can support/resistance rules survive realistic execution?** | Completed-bar signals, next-bar hypothetical fills, intraday session rules, shared cash and position limits; three V4.1 candidate portfolios | A **142-session, 3-symbol** research dataset; the inspected 42-session replay produced **negative net P&L for all three candidates** at an assumed 3 bp per side |
+| **How much apparent performance comes from specification choices?** | A **36-cell** V4 diagnostic grid, five matched timing-control seeds, block-bootstrap uncertainty and explicit multiple-testing disclosures | The reported touch-versus-control confidence interval crosses zero; **no significant edge** or multiplicity-adjusted result is claimed |
+| **Can I inspect past decisions without rewriting history?** | Read-only **Equity Research** charts for SPY/MSFT/QQQ: 15-minute candles, causal S/R zone histories, confirmed HH/HL/LH/LL pivots and trendlines, EMA 9/21/50/200, RSI(14), RVOL(20), replay and evidence-linked Turkish commentary | Synthetic offline mode works publicly; optional historical Alpaca GET and user CSV require explicit source handling. Indicators are descriptive, **not validated signals** |
+| **Can an exploratory scenario study avoid future leakage?** | Stage 7 event labels at **4/16 completed-bar** horizons, expanding chronological diagnostics with purging/embargo, four baselines, calibration and a reserved final **20-session holdout** | Audited holdout/replay leaks were fixed and regression-tested. **No real Stage 7 historical evaluation, calibrated probabilities or predictive edge** has been established |
+| **Can external financial data be trusted before it reaches analysis?** | Treasury/ECB normalization, SHA-256 provenance, SQL reconciliation, yield curves, term spreads, FX returns and volatility | A parser audit recovered **218 missing valid Treasury observations**, with the original source snapshot preserved |
+
+The distinction between **implemented**, **tested offline**, and **validated on real market outcomes** is intentional. Passing a software test is not evidence of a profitable trading strategy.
+
 ## Repository map
 
 | Where to start | Directory | Purpose |
@@ -20,7 +34,7 @@ My starting point was **support and resistance**. I wanted to turn discretionary
 | **Core quantitative research** | [`research_sr_v4_1/`](research_sr_v4_1/) | Shared-cash portfolio, positions, risk constraints, timing controls and statistics |
 | Research engine | [`research_sr_v4/`](research_sr_v4/) | Causal S/R features, trading sessions, signal rules, hypothetical fills |
 | Explore results | [`research_terminal/`](research_terminal/) | Historical replay and research inspection; private original cache not included |
-| **Financial research UI** | [`research_workspace/`](research_workspace/) | Treasury/ECB analysis, SQL catalog, data integrity and teaching modules |
+| **Financial and equity research UI** | [`research_workspace/`](research_workspace/) | Treasury/ECB analytics, SQL/data integrity, read-only equity chart replay and rule-based commentary |
 | Earlier experiments | [`research_sr/`](research_sr/), [`research_sr_v2/`](research_sr_v2/), [`research_sr_v3/`](research_sr_v3/) | Historical prototypes, retained for source comparisons |
 | Other research foundations | [`research_fx/`](research_fx/), [`research_crypto/`](research_crypto/), [`research_macro/`](research_macro/) | Calendars, availability rules and synthetic event-study contracts |
 | Methods and evidence | [`docs/`](docs/), [`evidence/`](evidence/) | Historical reports, test records, reproducibility boundaries |
@@ -194,21 +208,29 @@ These collect official *daily reference data*, not intraday prices. The legacy T
 .\.venv\Scripts\python.exe -B tools/run_public_tests.py
 ```
 
-- **Current development-branch local evidence:** 477 tests, 476 passed, 1 Windows symlink-permission skip (28 October 2026).
-- **GitHub Actions:** [Windows / Python 3.12 public-source workflow](.github/workflows/public-tests.yml). The badge above reflects GitHub's **actual workflow status**, not a manually asserted pass.
+- **Current development-branch local evidence (29 October 2026):** 477 tests discovered, **476 passed and 1 existing Windows symlink-permission skip**; zero failures. [Machine-readable record](evidence/stage7_audit_checks.json).
+- **Exact development-head CI:** [GitHub Actions run #47](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/40858054701), Windows / Python 3.12 at commit [`82f4c22`](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/commit/82f4c22dc7234da1bfd7d9e279d77d416d2c96f6): **477 passed, 0 skipped, 0 failures**. Verified from the completed workflow's job logs. The default-branch badge at the top does **not** attest to this draft PR.
 - **Platform limits:** The public test runner excludes private cached-price and frozen original research reproduction. Windows is the documented platform; Linux/macOS compatibility is **not certified**. The full frozen historical replay cannot be reproduced without the excluded original evidence.
 
 [Validation scope and results](docs/VALIDATION.md) · [Recorded test evidence](evidence/public_test_results.json)
 
 ## Stage 7: evidence-based scenario research (draft development branch)
 
-Stage 7 adds causal historical event records, fixed 4/16-completed-bar outcomes, chronological expanding-window validation with purging/embargo, an untouched final historical holdout, smoothed conditional frequencies, four transparent baselines, calibration and paired session-bootstrap diagnostics. The existing equity chart now includes six Turkish research panels with replay-safe outcome visibility and price-free summary exports.
+After building replay-safe charts, I wanted to investigate a harder question: **can observable market structure support a calibrated statement about what tends to happen next, rather than merely an explanation of what just happened?** I separated that question from strategy P&L and registered fixed hypotheses, observation horizons and validation rules before any real Stage 7 evaluation.
+
+Stage 7 adds causal historical event records, fixed **4/16-completed-bar** outcomes, chronological expanding-window validation with **16-bar embargo and purged labels**, a reserved final **20-session historical holdout**, smoothed conditional frequencies, four transparent baselines, calibration and paired session-bootstrap diagnostics. The existing equity chart now includes six Turkish research panels with replay-safe outcome visibility and price-free summary exports.
 
 **No real Stage 7 predictive edge has been validated.** Scenario probabilities remain suppressed. Synthetic tests exercise the pipeline; they are not evidence about SPY, MSFT or QQQ future performance. Explicit private historical collection uses only Alpaca Market Data GET requests, retains feed/adjustment provenance and rejects incomplete scheduled sessions. Stage 7 never opens the frozen prospective period or creates orders.
 
 Continue on `feature/equity-lab-stage6-slice1`, [draft PR #1](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/pull/1); this slice is not merged into main. The default-branch badge is not proof of this PR's exact head. See the checkpoint for inspected Actions runs.
 
-[Checkpoint](docs/STAGE7_CHECKPOINT.md) · [Registered protocol](docs/STAGE7_RESEARCH_PROTOCOL.md) · [Validation report](docs/STAGE7_VALIDATION_REPORT.md) · [Limitations and private collection](docs/STAGE7_LIMITATIONS.md)
+### What the 29 October leakage audit found
+
+The first implementation withheld the final 20 sessions from model validation, but **replay could still display their outcome labels**. Worse, replay-prefix truncation **moved the holdout boundary** as the cursor advanced. The audit also reproduced invalid negative-index access and a private-manifest writer that accepted unvalidated dates and arbitrary metadata fields.
+
+I addressed these with a **fixed, full-snapshot partition**, shared chart/label/evaluation visibility guards, registered input fingerprints, strict index/date checks and metadata allowlisting before private writes. **Nine additional adversarial regression tests** cover these pathways; [CI #47](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/40858054701) passed all 477 public offline tests. This is **software integrity evidence**, not an independent market-data study or a security certification. Previously viewed data cannot become untouched again.
+
+**Read more:** [Equity Research Lab](docs/EQUITY_RESEARCH_LAB.md) · [Chart commentary methods](docs/EQUITY_STRUCTURE_COMMENTARY.md) · [Stage 7 protocol](docs/STAGE7_RESEARCH_PROTOCOL.md) · [Leakage audit](docs/STAGE7_AUDIT.md) · [Validation](docs/STAGE7_VALIDATION_REPORT.md) · [Checkpoint](docs/STAGE7_CHECKPOINT.md) · [Limitations and private collection](docs/STAGE7_LIMITATIONS.md)
 
 ## Development history and limitations
 
@@ -231,6 +253,3 @@ I use this project to practice making research decisions auditable: when a test 
 
 Public references: [European Central Bank](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html) and [US Treasury](https://home.treasury.gov/treasury-daily-interest-rate-xml-feed). No raw provider files, credentials, or private historical market caches are distributed in this repository. Public visibility does not, by itself, grant an open-source license.
 
-### Stage 7 leakage audit (29 October 2026)
-
-The follow-up audit fixed holdout labels exposed through replay, moving replay partitions, negative observation indices and unsafe private-manifest metadata copying. Chart, commentary, labels and evaluation now share the full-snapshot holdout boundary; new private snapshots bind it to a canonical fingerprint. See [audit findings and limits](docs/STAGE7_AUDIT.md). Previously viewed data cannot become unseen again. No predictive probabilities are released.
