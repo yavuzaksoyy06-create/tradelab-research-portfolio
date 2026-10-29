@@ -1,0 +1,65 @@
+{
+  "base_commit": "4d6f0c1f09c09022ec18724195dec14ea1b9a623",
+  "implementation_commit": "23e71df4e2f845f31f7df4088952e9eb580e3fe2",
+  "audit_date": "2026-10-29",
+  "initial_regressions": {
+    "tests": 6,
+    "assertion_failures": 5,
+    "api_signature_errors": 1
+  },
+  "new_audit_tests": 9,
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-29T10:26:58.677669+00:00",
+        "finished_at": "2026-10-29T10:26:59.524020+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-29T10:26:59.525026+00:00",
+        "finished_at": "2026-10-29T10:26:59.826889+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-29T10:26:59.826889+00:00",
+        "finished_at": "2026-10-29T10:27:00.080650+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 231,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-29T10:27:00.080650+00:00",
+        "finished_at": "2026-10-29T10:27:37.781951+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 477,
+    "skipped": 1
+  },
+  "source_inventory_files": 116,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_excludes_dates_on_or_after": "2026-10-26",
+  "real_data_evaluated": false,
+  "orders_sent": false,
+  "probabilities_released": false,
+  "local_log_sha256": {
+    "research_crypto.log": "99d26a84c8bcf53f3e5c157800ec7da3ad5b1ab0000168bc5089e1a19b9d810a",
+    "research_fx.log": "b51e22d313c0d17c83a9349c6d0517cb98a7657a173ca6ef934ea810d88ffec8",
+    "research_macro.log": "dce070884fc265faa57f564aa9b97ac34b55b0e9d6725adb6f69f15e911d3792",
+    "research_workspace.log": "7be5c267ec0593a2cea6d55c63e4fb2e29a1c06c76825b3b915d2b779f269d96"
+  }
+}

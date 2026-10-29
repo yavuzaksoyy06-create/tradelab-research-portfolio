@@ -1,0 +1,31 @@
+# Stage 7 registered research protocol — v1
+
+Registered before any Stage 7 outcome evaluation, 2026-10-28. Base: 3a646e3477f741a793a62460ec66fa82167600ab. No real historical dataset has been evaluated under this protocol. Synthetic fixtures exercise software only.
+
+## Scope and immutable safety boundary
+
+SPY, MSFT, QQQ; one symbol/feed per experiment; completed 15-minute XNYS regular-session bars, split-adjusted, no dividends/costs/execution. Only dates strictly before 2026-10-26 are eligible. This conservative boundary remains closed even after the frozen prospective gate of 2027-01-21 21:15 UTC. Stage 7 never opens frozen caches. Full-session validation occurs before slicing replay prefixes. Incomplete IEX coverage is rejected, never imputed or silently excluded. Historical retrieval is not point-in-time authentication.
+
+## Registered questions and definitions
+
+Five descriptive hypotheses, at exactly two horizons (4, 16 completed trading bars): falling HH/HL structure's counterpart LH+LL; a downward EMA9/21 cross; confirmed S/R events; RVOL>=1.5 modification of S/R events; a fixed combined structural/EMA/RVOL conditional-frequency estimator versus baselines. Ten hypothesis/horizon comparisons, one model family, one smoothing strength (Beta(1,1)), no parameter search. No significance or profitable-edge declaration; future confirmatory inference requires a separately registered multiplicity correction. RSI is recorded, not threshold-tuned. EMA warm-up 21, RSI warm-up 15, RVOL current volume divided by preceding 20 bars (not same-clock adjusted).
+
+Each completed bar after warm-up produces a record for each horizon, including no qualifying S/R event. Predictors use only its prefix. A breakout/breakdown requires two consecutive closes strictly beyond the same boundary of a zone that was active BEFORE the first crossing; the preceding close must not already have crossed it. Fix that zone's bounds at the pre-crossing cutoff. A retest is a later intersection with that fixed zone within 16 bars of a confirmed break, followed by a close on the break side. Multiple qualifying zones or an intrabar range spanning both bounds is ambiguous; do not infer intrabar order. No event is not an exclusion from the general direction study.
+
+Direction label: close[t+h] > close[t], binary 1, otherwise 0 (ties retained as not-positive). Realized return = close[t+h]/close[t]-1. Outcome availability = bar_end[t+h]; unavailable until that bar is visible. S/R continuation means endpoint strictly on break side of the frozen boundary, reversal strictly beyond opposite boundary, inside is unresolved. If any future bar spans both zone bounds, S/R path outcome is ambiguous, even if endpoint direction is measurable. No transaction performance is implied. Overnight/weekend time may pass while counting trading bars.
+
+## Chronological validation, frozen decisions
+
+Reserve the last 20 complete sessions as an untouched historical holdout. This implementation NEVER calculates or scores its labels. Initial train: 40 sessions; nonoverlapping validation windows: 10 sessions each, expanding training, at least 80 total sessions to run (otherwise insufficient). Remove training labels whose endpoint reaches validation start minus 16 bars. All validation labels must complete before the next window/holdout begins. Session/block membership, not random shuffling, defines splits. No tuning occurs between folds.
+
+Model key: (structure, EMA sign, RVOL high/ordinary); Beta(1,1) conditional frequency, fallback to smoothed unconditional train frequency for cells with <30 observations. Baselines: unconditional frequency, hard majority class (clipped only for log loss), previous-bar direction persistence, EMA9>EMA21 indicator. Per-horizon reports: counts/coverage, class balance, Brier, log loss, accuracy, balanced accuracy, five fixed calibration bins, fold stability. Paired Brier improvement uncertainty: 500 deterministic resamples of whole validation sessions, seed 7; overlapping labels are not treated as independent observations. This does not remove all dependence across overnight boundaries. No prediction intervals or price targets claimed.
+
+Minimum candidate evidence before a future probability release review: >=60 distinct OOS sessions and >=1000 outcomes per horizon, >=100 each class, positive lower paired Brier-improvement interval and ECE<=0.05; each symbol/feed must qualify separately. These are necessary, not sufficient, conditions. This slice deliberately has NO probability-publication path: calibration, independent vintage, regime stability and final-holdout release require a further explicit review. Scenario probabilities remain null even if synthetic diagnostics pass thresholds. Final holdout cannot be unlocked through a UI control.
+
+## Exports and provenance
+
+Versioned research records carry causal prefix SHA256 and full input fingerprint separately: future appends change input identity but never prefix feature identity. Default JSON/CSV exports contain metadata, hashes, counts and protocol, no price/return rows. Raw records stay in process memory. Explicit local historical download CLI writes only to a new folder outside any Git repository, with CSV SHA256 and manifest; no retries on rate-limit/entitlement errors, sanitized failure and manual retry. Maximum 120 sessions, 10 per request batch, 8 pages per batch; no feed fallback. Secrets come only from environment and never enter metadata.
+
+## Enforcement addendum — 29 October 2026
+
+The leakage audit does not tune any hypothesis, horizon or model parameter. For snapshots with at least 80 sessions, the same final-20-session boundary now applies to charts, commentary, event labels and validation. Replay evaluation receives the complete snapshot plus a visible count; only completed visible folds are scored. New private snapshots bind the partition to canonical numeric data and reject replacement/truncation. Long actual-history evaluation without registration is refused. See STAGE7_AUDIT.md for demonstrated earlier defects and the rule that already inspected periods cannot be called untouched.

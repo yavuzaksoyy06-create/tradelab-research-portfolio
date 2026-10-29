@@ -52,16 +52,6 @@ Exported reviewed source and tests into a separate repository without the origin
 
 Published the locally tested relational catalog and UI integration. Reports revalidate source snapshots, keep versions separate, reconcile declared and loaded rows, and exclude rejected observations. Added 12 SQL/UI tests; preserved strict collector hashes and the frozen V4.1 protocol. No source datasets are redistributed. [Design and limits](SQL_CATALOG.md).
 
-## Next development priorities — not implemented in this snapshot
-
-1. Independently reviewed publisher calendars and expected series lists for stronger completeness checks.
-2. Provider-specific real intraday calendars and licensed OHLCV acquisition, if justified by research needs.
-3. Point-in-time vintage evidence before using historical macro values in backtests.
-4. Pre-registered new hypotheses and untouched samples; no parameter tuning against an already-inspected replay.
-5. Independent review and broader dependency/platform testing.
-
-None of these priorities authorizes broker orders or bypassing the frozen prospective gate.
-
 ## 12. Observed-grid quality diagnostics — 28 October 2026
 
 Added per-series descriptive quality summaries, missing cells relative to observed dates, and calendar-gap diagnostics. Unknown publisher calendars remain explicitly unknown; no calendar completeness claim is made. Eight new tests accompany the read-only UI reports.
@@ -73,3 +63,22 @@ Reviewed official ECB calendar/currency sources and Treasury XML/developer notic
 ## 14. Stage 5 Financial Analytics Lab — 28 October 2026
 
 Checkpoint d1a5c29 introduced offline v2 remediation; faa90de introduced validated financial transforms and Streamlit views. The final checkpoint supplies authentic screenshots, methods, case study, CV guidance and acceptance evidence. No new data was downloaded and frozen research remained unchanged.
+
+## 15. Stage 6 — read-only causal Equity Research Lab, 28 October 2026
+
+Added an isolated Streamlit page for SPY, MSFT and QQQ. Synthetic fixtures, optional explicitly loaded Alpaca historical IEX/SIP bars and user CSVs share strict completed-bar XNYS validation. Chart replay includes historical S/R zone bands, confirmed swing/structure labels, non-backdated trendlines, EMA 9/21/50/200, Wilder RSI and RVOL, as well as descriptive Turkish commentary. Provider GET never sends orders or stores public price caches. The frozen V4/V4.1 source, outputs and prospective gate were left untouched. [Equity contract](EQUITY_RESEARCH_LAB.md).
+
+## 16. Stage 7 — registered conditional-outcome research and leakage audit, 28–29 October 2026
+
+Registered fixed 4/16-bar descriptive outcomes, expanding chronological diagnostics with purging/embargo, four baselines, smoothed conditional frequencies, calibration and a reserved final 20-session historical holdout. Initial tests verified mechanics but a subsequent adversarial review found replay label leakage and a cursor-dependent holdout boundary. These paths, invalid indices and unsafe metadata publication were fixed with nine additional tests. [Audit](STAGE7_AUDIT.md), [protocol](STAGE7_RESEARCH_PROTOCOL.md).
+
+The final audited Windows CI checkpoint passed 477 public offline tests; a separate Linux probe exposed Windows-only no-replace publication behavior and does not establish Linux portability. **No qualifying real historical Stage 7 predictive study has been run, no scenario probabilities released and no broker orders sent.** The separate frozen prospective gate remains 21 January 2027, 21:15 UTC.
+
+## Open research and engineering work — not yet completed
+
+1. Independently archived point-in-time market-data vintage and licensing/entitlement review.
+2. Qualifying real-data calibration and cross-symbol stability review under a freshly registered protocol; no retrospectively invented out-of-sample period.
+3. Linux implementation of immutable publication without weakening no-overwrite guarantees, followed by full cross-platform CI.
+4. A separately opted-in, synthetic-only public demo if deployment is suitable; no real keys or private market caches in a hosted app.
+
+None of these next steps authorizes broker orders or changes frozen historical research.

@@ -1,0 +1,88 @@
+{
+  "stage": "7",
+  "base_commit": "3a646e3477f741a793a62460ec66fa82167600ab",
+  "implementation_commit": "410d0f361ac7597f53d6801e3463f3ea8e589646",
+  "source_inventory_files": 115,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_excludes_dates_on_or_after": "2026-10-26",
+  "real_market_downloads_performed": false,
+  "real_historical_evaluation_performed": false,
+  "final_holdout_evaluated": false,
+  "scenario_probabilities_released": false,
+  "orders_sent": false,
+  "local_test_results": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-28T17:02:16.304382+00:00",
+        "finished_at": "2026-10-28T17:02:16.696671+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-28T17:02:16.696671+00:00",
+        "finished_at": "2026-10-28T17:02:16.976225+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-28T17:02:16.976225+00:00",
+        "finished_at": "2026-10-28T17:02:17.226966+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 222,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-28T17:02:17.226966+00:00",
+        "finished_at": "2026-10-28T17:02:40.184553+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 468,
+    "skipped": 1
+  },
+  "local_log_sha256": {
+    "research_crypto.log": "1cb6f2115702171df57382eaf27216fd55eef8cf8b3fdb20e85955e2f54c6516",
+    "research_fx.log": "b51e22d313c0d17c83a9349c6d0517cb98a7657a173ca6ef934ea810d88ffec8",
+    "research_macro.log": "9a0a1c16377c18683160c75421dedd28209dfc20b28e4b5ddb1d646111a566f4",
+    "research_workspace.log": "20d22c818798317a83fdde4c0b392976f194fbac1f27897d4abfda160279a057"
+  },
+  "base_ci": {
+    "run": 44,
+    "id": 40725369312,
+    "job_id": 122947062110,
+    "tests": 440,
+    "skipped": 0,
+    "conclusion": "success",
+    "source": "directly inspected workflow job logs"
+  },
+  "ci_checkpoint": {
+    "commit": "2fcc36200b45eda76db2497a02730fe80c492595",
+    "run": 45,
+    "id": 40731528521,
+    "job_id": 122968833270,
+    "conclusion": "success",
+    "tests": 467,
+    "skipped": 0,
+    "source": "workflow status and direct job logs",
+    "scope": "Before the added GET-only transport regression test; final head is checked separately in PR checks"
+  },
+  "publication_scan": {
+    "changed_files_at_2fcc362": 22,
+    "credential_pattern_matches": 0,
+    "personal_path_matches": 0,
+    "price_dataset_additions": 0,
+    "limitations": "Pattern scan plus manual diff inspection; not an independent security certification"
+  }
+}
