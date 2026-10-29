@@ -1,7 +1,7 @@
 # TradeLab
 ### Quantitative Trading Research · Financial Data Engineering · Statistical Validation
 
-[![Public research tests](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml/badge.svg?branch=feature%2Fequity-lab-stage6-slice1)](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml)
+[![Public research tests](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml/badge.svg?branch=main)](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml)
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB)
 ![Research only](https://img.shields.io/badge/status-research%20only-64748b)
 
