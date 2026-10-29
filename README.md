@@ -191,9 +191,6 @@ Open **http://127.0.0.1:8502/** and choose **Equity Research** for the synthetic
 
 [Full setup and reader constraints](docs/EQUITY_RESEARCH_LAB.md) · [Optional private Stage 7 collection](docs/STAGE7_LIMITATIONS.md) · [Validation evidence](docs/VALIDATION.md)
 
-### Responsible development note
-
-I used AI-assisted tooling during portions of implementation and review. I remain responsible for understanding the financial assumptions, inspecting the code's behavior, evaluating tests, documenting limitations and presenting only evidence that the repository can support. **Passing software tests is not proof of a tradable edge.**
 
 ### Reference index
 
