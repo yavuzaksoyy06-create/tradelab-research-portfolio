@@ -11,19 +11,9 @@ permissions:
 
 jobs:
   public-tests:
-    name: Python 3.12 / ${{ matrix.label }} (public source)
-    runs-on: ${{ matrix.os }}
+    name: Python 3.12 / Windows (public source)
+    runs-on: windows-latest
     timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            label: Windows
-            artifact: windows
-          - os: ubuntu-latest
-            label: Linux
-            artifact: linux
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -45,7 +35,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: public-test-evidence-${{ matrix.artifact }}
+          name: public-test-evidence-windows
           path: |
             evidence/public_test_results.json
             evidence/research_macro.log
