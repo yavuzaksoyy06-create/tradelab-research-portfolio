@@ -1,50 +1,32 @@
-# TradeLab interactive portfolio demo
+# TradeLab public Streamlit demonstration
 
-**Entry point:** [`demo_app.py`](../demo_app.py) · **data:** deterministic synthetic educational fixtures only.
+The default TradeLab demo uses an **offline, bundled, real historical daily OHLCV example**, not the former synthetic illustration.
 
-## Purpose
+## Source and redistribution
 
-A potential employer can inspect a real interactive Streamlit/Plotly interface, move the historical replay cursor, view causally confirmed support/resistance and indicators, read deterministic Turkish evidence commentary, inspect archived strategy research results, and experiment with theoretical expected value.
+- Upstream file: [Plotly datasets / finance-charts-apple.csv](https://github.com/plotly/datasets/blob/master/finance-charts-apple.csv)
+- Upstream repository: [Plotly datasets](https://github.com/plotly/datasets) (MIT license; see upstream LICENSE)
+- Bundled selection: [demo_data/aapl_daily_2015_2017.csv](../demo_data/aapl_daily_2015_2017.csv)
+- Stock: Apple Inc. (AAPL); **506 DAILY candles, 2015-02-17 through 2017-02-16**.
+- Preserved fields: date, open, high, low, close, volume (the upstream extra bands/direction columns were excluded).
+- All demo chart data is read from the bundled CSV without making external HTTP requests. The example is historical; NOT live market data.
 
-The interactive candles **are not SPY, MSFT or QQQ market prices**; each symbol label shares the same generated educational path. The old study figures and Treasury/ECB screenshots are separate archival outputs, not data being downloaded or newly evaluated by the public app.
+**Limits:** Plotly's sample repository is MIT-licensed, but the original quote vendor, corporate-action adjustment conventions and point-in-time fidelity are not independently established by TradeLab. These columns are not treated as certified exchange records or a basis for trading signals. The chart cannot be used to reproduce V4.1's separate 15-minute research.
 
-## Privacy and research boundaries
+## Observable-only features
 
-- The demo has **no Alpaca API key, data collection, uploaded-user-file, brokerage-order or portfolio execution path**.
-- No `secrets.toml`, private datasets, accounts, or licensed OHLCV snapshots are required or embedded.
-- No live forecast probabilities, AI trading signals, investment advice or validated edge are published.
-- This hosted demo is not a substitute for the original V4.1 historical backtest or any Stage 7 confirmatory evaluation.
+- The replay slider advances **one observed daily row at a time**; the visible price prefix is the only input to indicators, pivot detection and English commentary.
+- EMA 20/50/200 use daily closes with warm-up; Wilder RSI(14) has warm-up; RVOL divides current daily volume by the mean of the **20 preceding daily volumes**.
+- Confirmed pivots use 2 completed days before and 2 completed days after the candidate; the label is plotted at **the confirmation date** and the level starts no earlier than that date. No retrospective backdated labels.
+- The price viewport shows the most recent 110 visible daily observations for readability; indicators use the entire visible replay prefix.
+- The narrative is deterministic descriptive English, not an AI-generated forecast, alpha claim, or buy/sell advice.
 
-## Run locally
+The original SPY/MSFT/QQQ 15-minute code, frozen V4.1 research and Stage 7 holdout safeguards remain independent and unchanged.
 
-From the root of this public repository, with Python 3.12:
+## Deployment
 
-```powershell
-py -3.12 -m venv .venv
-.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt
-.\\.venv\\Scripts\\python.exe -B -m streamlit run demo_app.py
-```
+Install from root `requirements.txt`, then run `streamlit run demo_app.py`. For Streamlit Community Cloud select repository `yavuzaksoyy06-create/tradelab-research-portfolio`, branch `main`, entrypoint `demo_app.py`, Python 3.12, and **no secrets**.
 
-The public source test runner includes `test_public_demo.py`, a Streamlit AppTest and a static entrypoint check. The project's complete offline test contract is currently validated on Windows; the original immutable snapshot publisher is Windows-specific.
+The app is not hosted merely because the code is in GitHub. The owner must authorize deployment; do not claim or guess a public `streamlit.app` URL before verification.
 
-## Deploy to Streamlit Community Cloud
-
-The repository is public. Log into [Streamlit Community Cloud](https://share.streamlit.io/) with GitHub, choose **Create app → I have an app**, then configure:
-
-| Setting | Value |
-|---|---|
-| Repository | `yavuzaksoyy06-create/tradelab-research-portfolio` |
-| Branch | `main` |
-| Main file path | `demo_app.py` |
-| Python | `3.12` if selectable |
-| Secrets | **Leave empty** |
-
-Select **Deploy**. Only the owner of the Streamlit Community Cloud account can authorize deployment and choose/confirm the public URL. A repository commit does **not** automatically create a hosted app URL.
-
-When a public deployment exists, update the root README with its **verified** URL and test it in an unauthenticated browser. Do not guess a `streamlit.app` subdomain.
-
-## Hosting note
-
-The deployed runtime is Linux. The demo code itself is synthetic, read-only and uses no Windows-only publishing operation, but the full original project's test suite has documented Windows-specific publisher tests; cross-platform reliability of the hosted demo must be verified from its actual deployment logs rather than assumed.
-
-[Main project](../README.md) · [Data source contracts](EQUITY_RESEARCH_LAB.md) · [Validation limitations](STAGE7_LIMITATIONS.md)
+[Demo technical entrypoint](../demo_app.py) · [README](../README.md) · [Historical research evidence](SR_RESEARCH_EVIDENCE.md).

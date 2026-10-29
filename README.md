@@ -13,13 +13,15 @@ Instead of building a system that just draws buy/sell arrows, I built a research
 
 > **Research status:** No profitable trading edge has been established. Stage 7's probabilistic research pipeline has **not** been validated on real market outcomes, so its scenario probabilities remain disabled. This repository contains **no broker-order execution**, real or paper.
 
-## Interactive demo — explore the research terminal
+## Interactive demo — real historical AAPL market replay
 
-A **public-facing, synthetic-only Streamlit demo** is prepared in [`demo_app.py`](demo_app.py). It offers a working 15-minute chart replay, causal support/resistance and indicators, deterministic commentary, archived portfolio findings, Treasury/ECB research examples and an interactive expected-value calculator.
+The [Streamlit demo](demo_app.py) now opens with **506 real historical AAPL daily OHLCV observations (17 Feb 2015–16 Feb 2017)** from [Plotly's MIT-licensed sample-datasets repository](https://github.com/plotly/datasets/blob/master/finance-charts-apple.csv). **The chart is no longer synthetic**, and English evidence-based commentary describes the visible history.
 
-**Status:** source and automated smoke tests are available; a public `streamlit.app` URL is **not yet claimed** until the repository owner authorizes deployment in Streamlit Community Cloud. No API credentials, real or paper orders, uploaded files or private price data are used.
+The interface shows **daily candle replay, EMA20/50/200, Wilder RSI, relative volume and post-confirmation swing structure**, alongside separate archived strategy results, the Treasury/ECB data-quality case, and an expected-value sandbox. Its as-of cursor hides future days and plots pivots only after confirmation.
 
-**Try it:** `streamlit run demo_app.py` after installing `requirements.txt`. [Demo walkthrough & one-time deployment instructions](docs/PUBLIC_DEMO.md).
+**Scientific boundary:** the public AAPL DAILY example is **not** a 15-minute V4/V4.1 research input and does not establish a trading edge. Original provider/adjustment provenance is not independently audited. No real-time API, credentials, uploads or broker orders are present in the demo.
+
+**Run:** `streamlit run demo_app.py` · [Data provenance & methods](docs/DEMO_REAL_DATA.md) · [Deploy guide](docs/PUBLIC_DEMO.md). A hosted `streamlit.app` URL is not claimed until owner-authorized deployment is verified.
 
 ## Results worth seeing first
 
