@@ -27,6 +27,6 @@ The original SPY/MSFT/QQQ 15-minute code, frozen V4.1 research and Stage 7 holdo
 
 Install from root `requirements.txt`, then run `streamlit run demo_app.py`. For Streamlit Community Cloud select repository `yavuzaksoyy06-create/tradelab-research-portfolio`, branch `main`, entrypoint `demo_app.py`, Python 3.12, and **no secrets**.
 
-The app is not hosted merely because the code is in GitHub. The owner must authorize deployment; do not claim or guess a public `streamlit.app` URL before verification.
+**Owner-provided public deployment:** [TradeLab Interactive Research Terminal](https://demoapppy-c4xpccskhaougpyy4uwddk.streamlit.app/). This URL was supplied by the project owner on 29 October 2026; the website's live page rendering was not independently verified here. For deployment or availability problems, consult Streamlit Community Cloud logs. Never put API secrets or private market-data snapshots in the hosted app.
 
 [Demo technical entrypoint](../demo_app.py) · [README](../README.md) · [Historical research evidence](SR_RESEARCH_EVIDENCE.md).
