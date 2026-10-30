@@ -47,3 +47,7 @@ Publication review: no price dataset additions, no credential-pattern or worksta
 ## Follow-up audit — 29 October 2026
 
 Implementation checkpoint: `23e71df`. Nine added adversarial tests; full local suite 477 tests, 476 passed and one existing Windows privilege skip, zero failures. Shared replay/holdout boundary, immutable snapshot binding, invalid-index rejection and private-writer validation/metadata allowlisting are implemented. All 23 tracked V4/V4.1 files remain byte-identical to 4d6f0c1; the source inventory now has 116 files. See [audit report](STAGE7_AUDIT.md) and [test evidence](../evidence/stage7_audit_checks.json). Prior evidence is archived under 4d6f0c1. Actual final-head Actions status is recorded in PR #1 checks; earlier runs above remain historical.
+
+## Offline preparation checkpoint — 30 October 2026
+
+Implementation: `84eeb56`, based on `8f79be7` including the independently updated README and architecture. Added offline collection planning and bounded read-only snapshot review, with eight new tests. Full local regression: 485 tests, 484 passed, one existing Windows symlink privilege skip, zero failures. Source inventory: 118 files. All 23 frozen V4/V4.1 files are byte-identical to the base; the gate remains unchanged. No real data collected/evaluated and no orders sent. See [workflow](STAGE7_DATA_REVIEW.md) and [checks](../evidence/stage7_review_checks.json). GitHub CI status must be checked for the published head; prior run results above remain historical.

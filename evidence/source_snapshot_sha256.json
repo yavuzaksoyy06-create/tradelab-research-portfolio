@@ -89,7 +89,8 @@
   "research_workspace/real_sources.py": "1f64378ccd00f6b6a7c5891b3e573e13f63c2524e46d358c9cec6d1ac2e36ce3",
   "research_workspace/reference_calendars/review_20261028.json": "b4a650d62039da107d2b98a66c47f3c7751d0f64d8c42d5dc38770975013bd76",
   "research_workspace/stage7_events.py": "ff72babbbb067add123d020a3003a1f5ded54934f1d662bbfaff9577b711f395",
-  "research_workspace/stage7_history.py": "0c5478747ee695d4e72734a79632d579aa2c47cb318125be4dfe232815a849d8",
+  "research_workspace/stage7_history.py": "c3856ca10d71f76fe73b0e4313ae80dbd27ffea6135d1f1b36ee69788008aa01",
+  "research_workspace/stage7_review.py": "08fcf458f6c6dd4fd1ea265b327834560b9fc5093242cbc12cc70503bdae36ed",
   "research_workspace/stage7_scenarios.py": "b74aa45d36b131309430e50ab917ee31bd22b47f37b0a2fa10e32fa4480cff5a",
   "research_workspace/stage7_ui.py": "8943e548976aaf947a4063b114bc50c08add74648f60ac9918cb24762dc3ce45",
   "research_workspace/stage7_validation.py": "4b622a9bdd30ce70ed6457fd249043a426827f0b16334c8ac609baf8363c7c0e",
@@ -111,8 +112,9 @@
   "research_workspace/tests/test_stage7_audit.py": "b948967d5a509729ab31273475ad870fd8331e351554475f0eae0a96c618bbad",
   "research_workspace/tests/test_stage7_commentary_audit.py": "d745eab9759ed1b6e0b4147fad0f1dc9d988653521253b391b2bae4c9aafc304",
   "research_workspace/tests/test_stage7_research.py": "534106207f42a766f5df4fbb0603e2ba16ccea746eb0df38f1511297a90dd8ea",
+  "research_workspace/tests/test_stage7_review.py": "67e04b9247e857e6d351de41dd8b651780fb2cb02df394a2a9a82bc7ee0068ff",
   "research_workspace/tests/test_stage7_ui.py": "035a6b3715c688a8a098b5c93a51214b88ac3d6425d826b2494114f59b7150aa",
   "research_workspace/tests/test_treasury_v2.py": "a7200f4b1699c044180e82e80f1f4b61b8ff37f51495b2ccd7fa6ee0eae17847",
   "research_workspace/treasury_v2.py": "7e3ae4ced19d02a7c1fe3988927c73f3c8d6366701f4535cd027c3c17519a544",
-  "tools/stage7_research.py": "d5b207f549fac383268a302da9ffd82016f533c2fafdcd0c42c2ece0d22e1214"
+  "tools/stage7_research.py": "6a1825af10aa9e90ebdac3c9f2cb544ef8bfd3d9af779466bede8cf26c06d345"
 }
