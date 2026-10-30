@@ -12,10 +12,8 @@ from research_workspace.equity_provider import read_alpaca_history, EquityProvid
 from research_workspace.stage7_events import SEALED_START, VERSION, validated_history, research_partition
 
 
-def collect_history(symbol, start, end, *, feed, api_key, api_secret,
-                    explicit_download=False, request_page=None):
-    if explicit_download is not True:
-        raise ValueError("Explicit user-initiated download required")
+def collection_plan(symbol, start, end, *, feed):
+    """Calendar-only plan; no credentials, network, storage or price access."""
     if symbol not in SYMBOLS or feed not in ("iex", "sip"):
         raise ValueError("Explicit supported symbol and a single feed required")
     first, last = pd.Timestamp(start), pd.Timestamp(end)
@@ -27,23 +25,39 @@ def collect_history(symbol, start, end, *, feed, api_key, api_secret,
     sessions = list(dict.fromkeys(grid.session))
     if not 1 <= len(sessions) <= 120:
         raise ValueError("Collection requires 1–120 complete sessions")
+    return {"schema": "tradelab.stage7.collection-plan.v1", "symbol": symbol, "feed": feed,
+            "adjustment": "split", "sessions": len(sessions), "expected_bars": len(grid),
+            "first_session": sessions[0], "last_session": sessions[-1],
+            "batches": [{"first_session": sessions[i], "last_session": sessions[min(i+9, len(sessions)-1)],
+                         "expected_bars": int(grid.session.isin(sessions[i:i+10]).sum())}
+                        for i in range(0, len(sessions), 10)],
+            "network_requests_performed": 0, "entitlement_verified": False,
+            "orders_enabled": False}
+
+
+def collect_history(symbol, start, end, *, feed, api_key, api_secret,
+                    explicit_download=False, request_page=None):
+    if explicit_download is not True:
+        raise ValueError("Explicit user-initiated download required")
+    plan = collection_plan(symbol, start, end, feed=feed)
+    grid = expected_grid(plan["first_session"], plan["last_session"])
     frames, receipts = [], []
-    for offset in range(0, len(sessions), 10):
-        batch = sessions[offset:offset + 10]
+    for batch in plan["batches"]:
         try:
             frame, meta = read_alpaca_history(
-                symbol, batch[0], batch[-1], feed=feed, api_key=api_key,
+                symbol, batch["first_session"], batch["last_session"], feed=feed, api_key=api_key,
                 api_secret=api_secret, request_page=request_page)
         except Exception:
             # Provider bodies/headers or custom transports must not leak secrets.
             raise EquityProviderError(
                 "Historical batch failed: coverage, entitlement, rate limit or network. "
                 "No automatic retry; no partial dataset accepted.") from None
-        expected = grid.loc[grid.session.isin(batch), "timestamp"]
+        expected = grid.loc[(grid.session >= batch["first_session"]) &
+                            (grid.session <= batch["last_session"]), "timestamp"]
         if list(frame.timestamp) != list(expected):
             raise EquityProviderError("Incomplete requested session coverage; dataset rejected")
         frames.append(frame)
-        receipts.append({"first_session": batch[0], "last_session": batch[-1],
+        receipts.append({"first_session": batch["first_session"], "last_session": batch["last_session"],
                          "bars": len(frame), "retrieved_at_utc": datetime.now(timezone.utc).isoformat(),
                          "outside_rth_excluded": meta["outside_regular_session_bars_excluded"]})
     clean = _validate_and_label(pd.concat(frames, ignore_index=True)[list(REQUIRED)], symbol)
@@ -54,7 +68,7 @@ def collect_history(symbol, start, end, *, feed, api_key, api_secret,
                    "provider_api_response": True, "feed_verified": False,
                    "point_in_time_archive_verified": False, "orders_enabled": False,
                    "expected_bars": len(grid), "received_bars": len(clean), "missing_bars": 0,
-                   "sessions": len(sessions), "batches": receipts,
+                   "sessions": plan["sessions"], "batches": receipts,
                    "retrieved_at_utc": datetime.now(timezone.utc).isoformat()}
 
 
@@ -88,25 +102,38 @@ def save_private(frame, metadata, directory):
     return manifest
 
 
-def load_private(directory):
+def load_private(directory, *, expected_digests=None):
     """Hash-checked local snapshot; reject sealed timestamps before reading numeric columns."""
     folder = Path(directory)
-    if (folder / "manifest.json").stat().st_size > 100_000 or (folder / "bars.csv").stat().st_size > MAX_BYTES:
-        raise ValueError("Snapshot exceeds bounded input size")
-    meta = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+    # Enforce bounds on the bytes actually consumed, not a racy earlier stat.
+    content = {}
+    for name, limit in (("manifest.json", 100_000), ("bars.csv", MAX_BYTES)):
+        with (folder / name).open("rb") as stream:
+            content[name] = stream.read(limit + 1)
+        if len(content[name]) > limit:
+            raise ValueError("Snapshot exceeds bounded input size")
+    digests = {name: hashlib.sha256(payload).hexdigest() for name, payload in content.items()}
+    if expected_digests is not None and digests != expected_digests:
+        raise ValueError("Snapshot changed during review")
+    meta = json.loads(content["manifest.json"].decode("utf-8"))
     if (meta.get("schema") != VERSION or meta.get("feed") not in ("iex", "sip") or
             meta.get("adjustment") != "split" or meta.get("synthetic") is not False or
             meta.get("orders_enabled") is not False):
         raise ValueError("Unsupported source manifest")
-    payload = (folder / "bars.csv").read_bytes()
+    payload = content["bars.csv"]
     if hashlib.sha256(payload).hexdigest() != meta.get("csv_sha256"):
         raise ValueError("Snapshot fingerprint mismatch")
+    if type(meta.get("bytes")) is not int or meta["bytes"] != len(payload):
+        raise ValueError("Manifest byte count mismatch")
     stamps = pd.read_csv(BytesIO(payload), usecols=["timestamp"])
     dates = pd.to_datetime(stamps.timestamp, utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
     if (dates >= SEALED_START).any():
         raise ValueError("Sealed period is not eligible")
     frame = validated_history(pd.read_csv(BytesIO(payload), float_precision="round_trip"), meta)
-    if len(frame) != meta.get("received_bars") or len(frame) != meta.get("expected_bars"):
+    counts = {"received_bars": len(frame), "expected_bars": len(frame)}
+    counts.update({k: v for k, v in (("sessions", int(frame.session.nunique())), ("missing_bars", 0))
+                   if k in meta})
+    if any(type(meta.get(key)) is not int or meta[key] != count for key, count in counts.items()):
         raise ValueError("Manifest coverage mismatch")
     if meta.get("research_partition") is not None and meta["research_partition"] != research_partition(frame):
         raise ValueError("Registered snapshot partition mismatch")

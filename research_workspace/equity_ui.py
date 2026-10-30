@@ -20,6 +20,7 @@ from research_workspace.equity_volume import volume_frame
 from research_workspace.equity_structure import confirmed_swing_events, confirmed_trendline_segments
 from research_workspace.equity_commentary import commentary_report
 from research_workspace.stage7_ui import render_research
+from research_workspace.stage7_preparation_ui import render_preparation
 from research_workspace.stage7_events import replay_limit, validated_history
 
 
@@ -180,6 +181,7 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
 
 def render():
     st.caption('US Equity Research · XNYS · 15-minute candles · no orders / no live feed')
+    render_preparation()
     st.warning('Educational, read-only inspection. Uploaded files are structurally checked, '
                'but their market-data origin, license, and historical availability are NOT verified.')
     c1, c2 = st.columns(2)

@@ -16,6 +16,8 @@
 
 ## Safe local research commands (optional, separate from installation)
 
+Start with the offline `plan` and read-only `review` commands in [snapshot preparation](STAGE7_DATA_REVIEW.md). They neither collect data nor evaluate a model. A successful structural review is not independent provenance verification or permission to release the holdout.
+
 Run from the portfolio clone, with its Python environment activated. Supply credentials through the local process environment; never put their values in commands committed to Git or in a shared Streamlit server. These commands are examples and were **not executed against Alpaca**.
 
 ```powershell

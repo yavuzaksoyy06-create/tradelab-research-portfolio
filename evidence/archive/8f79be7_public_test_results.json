@@ -1,0 +1,40 @@
+{
+  "scope": "public source selection, no original private data or checkpoints",
+  "suites": [
+    {
+      "suite": "research_macro",
+      "tests": 115,
+      "skipped": 0,
+      "exit_code": 0,
+      "started_at": "2026-10-29T10:26:58.677669+00:00",
+      "finished_at": "2026-10-29T10:26:59.524020+00:00"
+    },
+    {
+      "suite": "research_crypto",
+      "tests": 100,
+      "skipped": 1,
+      "exit_code": 0,
+      "started_at": "2026-10-29T10:26:59.525026+00:00",
+      "finished_at": "2026-10-29T10:26:59.826889+00:00"
+    },
+    {
+      "suite": "research_fx",
+      "tests": 31,
+      "skipped": 0,
+      "exit_code": 0,
+      "started_at": "2026-10-29T10:26:59.826889+00:00",
+      "finished_at": "2026-10-29T10:27:00.080650+00:00"
+    },
+    {
+      "suite": "research_workspace",
+      "tests": 231,
+      "skipped": 0,
+      "exit_code": 0,
+      "started_at": "2026-10-29T10:27:00.080650+00:00",
+      "finished_at": "2026-10-29T10:27:37.781951+00:00"
+    }
+  ],
+  "passed": true,
+  "tests": 477,
+  "skipped": 1
+}

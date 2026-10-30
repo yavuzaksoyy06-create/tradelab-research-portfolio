@@ -206,6 +206,10 @@ Open **http://127.0.0.1:8502/** and choose **Equity Research** for the synthetic
 
 ### Reference index
 
+**BIST daily research:** I added an entitled-CSV workflow for THYAO, GARAN and ASELS, with XIST coverage checks, source-bound hashes, real-data chart rendering and a fixed delayed EMA20/60 backtest with cost sensitivity and block-bootstrap diagnostics. The 2025 holdout stays excluded. No licensed BIST dataset was available during implementation, so no real BIST performance is claimed. [Lab and reproducibility](docs/BIST_RESEARCH_LAB.md) · [Registered protocol](docs/BIST_RESEARCH_PROTOCOL.md)
+
+**Stage 7 preparation:** I added an offline collection planner and read-only snapshot reviewer to check expected coverage, SHA-256 integrity and registered holdout boundaries before evaluation. Both are available as explicit forms in the local Equity Research workspace; private folder review requires a loopback bind. [Workflow and limitations](docs/STAGE7_DATA_REVIEW.md) · [CLI evidence](evidence/stage7_review_checks.json) · [UI evidence](evidence/stage7_preparation_ui_checks.json)
+
 [Research evidence](docs/SR_RESEARCH_EVIDENCE.md) · [Methodology](docs/METHODOLOGY.md) · [Architecture and data contracts](docs/ARCHITECTURE.md) · [Financial analytics](docs/FINANCIAL_ANALYTICS.md) · [SQL catalog](docs/SQL_CATALOG.md) · [Stage 7 checkpoint](docs/STAGE7_CHECKPOINT.md) · [Figure provenance](docs/images/README.md)
 
 **Author:** Yavuz Kaan Aksoy — Economics graduate, quantitative trading and financial analytics research.
