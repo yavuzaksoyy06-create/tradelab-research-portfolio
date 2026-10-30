@@ -1,0 +1,14 @@
+{
+  "schema": "tradelab.bist.source-policy.v1",
+  "exchange": "XIST",
+  "symbols": ["THYAO", "GARAN", "ASELS"],
+  "timeframe": "1d",
+  "currency": "TRY",
+  "import_method": "entitled_local_csv",
+  "required_source_fields": ["provider", "source_url", "license_reference", "usage_rights", "adjustment", "csv_sha256"],
+  "independent_source_authentication": false,
+  "automatic_downloads": false,
+  "raw_redistribution_permitted": false,
+  "historical_access_reference": "https://datastore.borsaistanbul.com/",
+  "source_rights_review": "docs/BIST_RESEARCH_PROTOCOL.md"
+}
