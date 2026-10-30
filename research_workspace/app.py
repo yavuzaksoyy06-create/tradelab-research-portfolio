@@ -16,6 +16,7 @@ from research_workspace.learning import TOPICS
 from research_workspace.real_data_ui import render as render_real_data
 from research_workspace.financial_ui import render as render_financial
 from research_workspace.equity_ui import render as render_equity
+from research_workspace.bist_ui import render as render_bist
 
 st.set_page_config(page_title='TradeLab · Research Workspace',page_icon='◈',layout='wide',initial_sidebar_state='expanded')
 st.markdown('''<style>
@@ -27,7 +28,7 @@ st.markdown('''<style>
 </style>''',unsafe_allow_html=True)
 st.sidebar.markdown('## ◈ TRADELAB')
 st.sidebar.caption('RESEARCH WORKSPACE\n\n0.3.0 Preview · localhost')
-page=st.sidebar.radio('Çalışma alanı',['Genel Bakış','Equity Research','Gerçek Veri','Financial Analytics','Forex Takvimi','Makro Laboratuvarı','Araştırma Denetimi'],key='page')
+page=st.sidebar.radio('Çalışma alanı',['Genel Bakış','Equity Research','BIST Research','Gerçek Veri','Financial Analytics','Forex Takvimi','Makro Laboratuvarı','Araştırma Denetimi'],key='page')
 learning=st.sidebar.toggle('Öğrenme modu',value=False,key='learning')
 st.sidebar.divider()
 st.sidebar.info('Salt okunur araştırma\n\nCanlı veri bağlantısı ve emir işlevi yok.')
@@ -78,6 +79,9 @@ if page=='Genel Bakış':
 
 elif page=='Equity Research':
     render_equity()
+
+elif page=='BIST Research':
+    render_bist()
 
 elif page=='Financial Analytics':
     render_financial()
