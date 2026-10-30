@@ -6,7 +6,8 @@ import os
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from research_workspace.stage7_history import collect_history, save_private, load_private
+from research_workspace.stage7_history import collect_history, save_private, load_private, collection_plan
+from research_workspace.stage7_review import review_snapshot
 from research_workspace.stage7_validation import evaluate_history
 
 
@@ -22,9 +23,22 @@ def main():
     collect.add_argument("--allow-download", action="store_true")
     evaluate = sub.add_parser("evaluate")
     evaluate.add_argument("--snapshot", required=True)
+    review = sub.add_parser("review")
+    review.add_argument("--snapshot", required=True)
+    plan = sub.add_parser("plan")
+    plan.add_argument("--symbol", choices=["SPY", "MSFT", "QQQ"], required=True)
+    plan.add_argument("--feed", choices=["iex", "sip"], required=True)
+    plan.add_argument("--start", required=True)
+    plan.add_argument("--end", required=True)
     args = parser.parse_args()
     try:
-        if args.action == "collect":
+        if args.action == "plan":
+            print(json.dumps(collection_plan(args.symbol, args.start, args.end, feed=args.feed), indent=2))
+        elif args.action == "review":
+            report = review_snapshot(args.snapshot)
+            print(json.dumps(report, indent=2, allow_nan=False))
+            return 1 if report["status"] == "rejected" else 0
+        elif args.action == "collect":
             frame, meta = collect_history(
                 args.symbol, args.start, args.end, feed=args.feed,
                 api_key=os.getenv("ALPACA_API_KEY") or os.getenv("APCA_API_KEY_ID"),

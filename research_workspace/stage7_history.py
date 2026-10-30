@@ -12,10 +12,8 @@ from research_workspace.equity_provider import read_alpaca_history, EquityProvid
 from research_workspace.stage7_events import SEALED_START, VERSION, validated_history, research_partition
 
 
-def collect_history(symbol, start, end, *, feed, api_key, api_secret,
-                    explicit_download=False, request_page=None):
-    if explicit_download is not True:
-        raise ValueError("Explicit user-initiated download required")
+def collection_plan(symbol, start, end, *, feed):
+    """Calendar-only plan; no credentials, network, storage or price access."""
     if symbol not in SYMBOLS or feed not in ("iex", "sip"):
         raise ValueError("Explicit supported symbol and a single feed required")
     first, last = pd.Timestamp(start), pd.Timestamp(end)
@@ -27,23 +25,39 @@ def collect_history(symbol, start, end, *, feed, api_key, api_secret,
     sessions = list(dict.fromkeys(grid.session))
     if not 1 <= len(sessions) <= 120:
         raise ValueError("Collection requires 1–120 complete sessions")
+    return {"schema": "tradelab.stage7.collection-plan.v1", "symbol": symbol, "feed": feed,
+            "adjustment": "split", "sessions": len(sessions), "expected_bars": len(grid),
+            "first_session": sessions[0], "last_session": sessions[-1],
+            "batches": [{"first_session": sessions[i], "last_session": sessions[min(i+9, len(sessions)-1)],
+                         "expected_bars": int(grid.session.isin(sessions[i:i+10]).sum())}
+                        for i in range(0, len(sessions), 10)],
+            "network_requests_performed": 0, "entitlement_verified": False,
+            "orders_enabled": False}
+
+
+def collect_history(symbol, start, end, *, feed, api_key, api_secret,
+                    explicit_download=False, request_page=None):
+    if explicit_download is not True:
+        raise ValueError("Explicit user-initiated download required")
+    plan = collection_plan(symbol, start, end, feed=feed)
+    grid = expected_grid(plan["first_session"], plan["last_session"])
     frames, receipts = [], []
-    for offset in range(0, len(sessions), 10):
-        batch = sessions[offset:offset + 10]
+    for batch in plan["batches"]:
         try:
             frame, meta = read_alpaca_history(
-                symbol, batch[0], batch[-1], feed=feed, api_key=api_key,
+                symbol, batch["first_session"], batch["last_session"], feed=feed, api_key=api_key,
                 api_secret=api_secret, request_page=request_page)
         except Exception:
             # Provider bodies/headers or custom transports must not leak secrets.
             raise EquityProviderError(
                 "Historical batch failed: coverage, entitlement, rate limit or network. "
                 "No automatic retry; no partial dataset accepted.") from None
-        expected = grid.loc[grid.session.isin(batch), "timestamp"]
+        expected = grid.loc[(grid.session >= batch["first_session"]) &
+                            (grid.session <= batch["last_session"]), "timestamp"]
         if list(frame.timestamp) != list(expected):
             raise EquityProviderError("Incomplete requested session coverage; dataset rejected")
         frames.append(frame)
-        receipts.append({"first_session": batch[0], "last_session": batch[-1],
+        receipts.append({"first_session": batch["first_session"], "last_session": batch["last_session"],
                          "bars": len(frame), "retrieved_at_utc": datetime.now(timezone.utc).isoformat(),
                          "outside_rth_excluded": meta["outside_regular_session_bars_excluded"]})
     clean = _validate_and_label(pd.concat(frames, ignore_index=True)[list(REQUIRED)], symbol)
@@ -54,7 +68,7 @@ def collect_history(symbol, start, end, *, feed, api_key, api_secret,
                    "provider_api_response": True, "feed_verified": False,
                    "point_in_time_archive_verified": False, "orders_enabled": False,
                    "expected_bars": len(grid), "received_bars": len(clean), "missing_bars": 0,
-                   "sessions": len(sessions), "batches": receipts,
+                   "sessions": plan["sessions"], "batches": receipts,
                    "retrieved_at_utc": datetime.now(timezone.utc).isoformat()}
 
 

@@ -197,6 +197,8 @@ I used AI-assisted tooling during portions of implementation and review. I remai
 
 ### Reference index
 
+**Stage 7 preparation:** I added an offline collection planner and read-only snapshot reviewer to check expected coverage, SHA-256 integrity and registered holdout boundaries before evaluation. Neither command downloads data or fits a model. [Commands and limitations](docs/STAGE7_DATA_REVIEW.md) · [Regression evidence](evidence/stage7_review_checks.json)
+
 [Research evidence](docs/SR_RESEARCH_EVIDENCE.md) · [Methodology](docs/METHODOLOGY.md) · [Architecture and data contracts](docs/ARCHITECTURE.md) · [Financial analytics](docs/FINANCIAL_ANALYTICS.md) · [SQL catalog](docs/SQL_CATALOG.md) · [Stage 7 checkpoint](docs/STAGE7_CHECKPOINT.md) · [Figure provenance](docs/images/README.md)
 
 **Author:** Yavuz Kaan Aksoy — Economics graduate, quantitative trading and financial analytics research.
