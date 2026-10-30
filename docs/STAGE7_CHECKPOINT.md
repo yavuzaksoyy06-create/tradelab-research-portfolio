@@ -51,3 +51,9 @@ Implementation checkpoint: `23e71df`. Nine added adversarial tests; full local s
 ## Offline preparation checkpoint — 30 October 2026
 
 Implementation: `84eeb56`, based on `8f79be7` including the independently updated README and architecture. Added offline collection planning and bounded read-only snapshot review, with eight new tests. Full local regression: 485 tests, 484 passed, one existing Windows symlink privilege skip, zero failures. Source inventory: 118 files. All 23 frozen V4/V4.1 files are byte-identical to the base; the gate remains unchanged. No real data collected/evaluated and no orders sent. See [workflow](STAGE7_DATA_REVIEW.md) and [checks](../evidence/stage7_review_checks.json). GitHub CI status must be checked for the published head; prior run results above remain historical.
+
+## Local preparation interface — 31 October 2026
+
+Implementation checkpoint: `a469da1`, based on `bdb1dd1`. Added explicit plan/review forms before chart-source early returns. Local review requires a literal loopback bind and rejects remote, relative and symlink/junction paths, including both snapshot files. Reports clear on a subsequent rerun; no automatic collection, model evaluation or holdout release. An independent code review identified the child-file link gap before publication; it was fixed and regression-tested.
+
+Eleven new UI tests. Local full public suite: 496 tests, 495 passed, one pre-existing Windows symlink privilege skip, zero failures. All 120 source inventory hashes verified; all 23 frozen V4/V4.1 files remain byte-identical to `4d6f0c1`. No real data collection/evaluation or orders. Prior evidence archived under `bdb1dd1`. See [UI workflow](STAGE7_DATA_REVIEW.md) and [UI checks](../evidence/stage7_preparation_ui_checks.json). CI results for the published head are recorded in PR #4; historical counts above are not relabeled as current results.

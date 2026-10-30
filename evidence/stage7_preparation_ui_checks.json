@@ -1,0 +1,64 @@
+{
+  "base_commit": "bdb1dd17fd732b6a3fe797988d5410b7110d34d9",
+  "implementation_commit": "a469da14856e0378d8f7e027b4f8dc699f04b360",
+  "review_date": "2026-10-31",
+  "new_ui_tests": 11,
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-30T22:09:50.858865+00:00",
+        "finished_at": "2026-10-30T22:09:51.247242+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-30T22:09:51.247242+00:00",
+        "finished_at": "2026-10-30T22:09:51.522313+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-30T22:09:51.522313+00:00",
+        "finished_at": "2026-10-30T22:09:51.774970+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 250,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-30T22:09:51.774970+00:00",
+        "finished_at": "2026-10-30T22:10:26.621101+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 496,
+    "skipped": 1
+  },
+  "source_inventory_files": 120,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "frozen_comparison": "Exact bytes against 4d6f0c1",
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_excludes_dates_on_or_after": "2026-10-26",
+  "read_only_review_test_data": "simulated fixtures only",
+  "real_data_collected": false,
+  "real_data_evaluated": false,
+  "orders_sent": false,
+  "probabilities_released": false,
+  "independent_code_review": "Child-file symlink preflight gap found and fixed; no remaining actionable issue in reviewed UI changes. Non-atomic filesystem and reverse-proxy limitations documented.",
+  "local_log_sha256": {
+    "research_crypto.log": "f92f531217af8abce463465b8e2536144d619535906e2404ba872c0e5065fb80",
+    "research_fx.log": "7cbc16f2b7a8d4a42cb05fd29957b2f0dc7c0f9144ba23c0437a2dd89a6d7bac",
+    "research_macro.log": "b946f4d7aae852a0a15a4c3058406f91d4debd6ea7c474cfdfe720cb73789c1d",
+    "research_workspace.log": "ee7607d3ee319a1594af814ee8fa8f826d1991eae9cb77b2e49539320f53c50e"
+  }
+}
