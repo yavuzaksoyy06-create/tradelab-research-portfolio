@@ -23,6 +23,7 @@ def review_snapshot(directory):
         "Unsupported source manifest": "UNSUPPORTED_MANIFEST",
         "Snapshot fingerprint mismatch": "HASH_MISMATCH",
         "Manifest coverage mismatch": "COVERAGE_MISMATCH",
+        "Manifest byte count mismatch": "MANIFEST_MISMATCH",
         "Registered snapshot partition mismatch": "PARTITION_MISMATCH",
         "Registered snapshot changed; research partition cannot move": "PARTITION_MISMATCH",
         "Sealed period is not eligible": "SEALED_PERIOD",
@@ -31,7 +32,7 @@ def review_snapshot(directory):
         folder = Path(directory)
         # Pin both metadata and prices; reject changes during the review.
         before = _digests(folder)
-        frame, meta = load_private(folder)
+        frame, meta = load_private(folder, expected_digests=before)
         after = _digests(folder)
         if before != after:
             raise ValueError("Snapshot changed during review")

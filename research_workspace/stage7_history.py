@@ -102,25 +102,38 @@ def save_private(frame, metadata, directory):
     return manifest
 
 
-def load_private(directory):
+def load_private(directory, *, expected_digests=None):
     """Hash-checked local snapshot; reject sealed timestamps before reading numeric columns."""
     folder = Path(directory)
-    if (folder / "manifest.json").stat().st_size > 100_000 or (folder / "bars.csv").stat().st_size > MAX_BYTES:
-        raise ValueError("Snapshot exceeds bounded input size")
-    meta = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+    # Enforce bounds on the bytes actually consumed, not a racy earlier stat.
+    content = {}
+    for name, limit in (("manifest.json", 100_000), ("bars.csv", MAX_BYTES)):
+        with (folder / name).open("rb") as stream:
+            content[name] = stream.read(limit + 1)
+        if len(content[name]) > limit:
+            raise ValueError("Snapshot exceeds bounded input size")
+    digests = {name: hashlib.sha256(payload).hexdigest() for name, payload in content.items()}
+    if expected_digests is not None and digests != expected_digests:
+        raise ValueError("Snapshot changed during review")
+    meta = json.loads(content["manifest.json"].decode("utf-8"))
     if (meta.get("schema") != VERSION or meta.get("feed") not in ("iex", "sip") or
             meta.get("adjustment") != "split" or meta.get("synthetic") is not False or
             meta.get("orders_enabled") is not False):
         raise ValueError("Unsupported source manifest")
-    payload = (folder / "bars.csv").read_bytes()
+    payload = content["bars.csv"]
     if hashlib.sha256(payload).hexdigest() != meta.get("csv_sha256"):
         raise ValueError("Snapshot fingerprint mismatch")
+    if type(meta.get("bytes")) is not int or meta["bytes"] != len(payload):
+        raise ValueError("Manifest byte count mismatch")
     stamps = pd.read_csv(BytesIO(payload), usecols=["timestamp"])
     dates = pd.to_datetime(stamps.timestamp, utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
     if (dates >= SEALED_START).any():
         raise ValueError("Sealed period is not eligible")
     frame = validated_history(pd.read_csv(BytesIO(payload), float_precision="round_trip"), meta)
-    if len(frame) != meta.get("received_bars") or len(frame) != meta.get("expected_bars"):
+    counts = {"received_bars": len(frame), "expected_bars": len(frame)}
+    counts.update({k: v for k, v in (("sessions", int(frame.session.nunique())), ("missing_bars", 0))
+                   if k in meta})
+    if any(type(meta.get(key)) is not int or meta[key] != count for key, count in counts.items()):
         raise ValueError("Manifest coverage mismatch")
     if meta.get("research_partition") is not None and meta["research_partition"] != research_partition(frame):
         raise ValueError("Registered snapshot partition mismatch")
