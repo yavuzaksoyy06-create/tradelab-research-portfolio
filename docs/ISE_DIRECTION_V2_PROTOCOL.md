@@ -22,6 +22,8 @@ Alpha candidates are exactly 1, 10 and 100. Minimize pooled inner Brier score; t
 
 The direction rule is strictly `score > threshold`; equality is nonpositive. Numerical scores and log-loss inputs are clipped to [1e-12, 1-1e-12]. Armijo uses coefficient 1e-4. These are numerical/decision conventions, not extra tuned candidates.
 
+A simulated full-fold test exposed floating-point stagnation near an optimum: objective changes were smaller than rounding precision while the gradient remained just above tolerance. Before any real v2 run, the solver was clarified to accept a near-equal objective endpoint only when its gradient actually meets the same 1e-8 tolerance and its objective is within eight float64 epsilon units scaled by the current objective. The tolerance and iteration limit were not relaxed.
+
 ## References, evidence and outcome interpretation
 
 References: smoothed training positive frequency, hard training majority, hard lag-two direction and the unchanged v1 Ridge sign. v1 gets direction metrics only; its regression output is not a probability. Hard-reference log loss is clipped at epsilon 1e-12 and explicitly labeled. No reference is selected after inspecting results.
