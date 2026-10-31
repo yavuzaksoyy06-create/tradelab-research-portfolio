@@ -1,6 +1,6 @@
 # Registered exploratory direction experiment v2
 
-Registered before any v2 model execution. Baseline `055e436`; the v1 result has already been inspected. This experiment does not modify v1, the reserved 108 observations, frozen V4/V4.1, the BIST-stock 2025 holdout or the 2027-01-21 21:15 UTC gate. The [machine-readable specification](../research_workspace/ise_direction_v2_spec.json) is committed with this document.
+Registered before any v2 evaluation on real observations; simulated software tests are separate. Baseline `055e436`; the v1 result has already been inspected. This experiment does not modify v1, the reserved 108 observations, frozen V4/V4.1, the BIST-stock 2025 holdout or the 2027-01-21 21:15 UTC gate. The [machine-readable specification](../research_workspace/ise_direction_v2_spec.json) is committed with this document. Numeric clipping, Armijo coefficient and exact threshold equality behavior were clarified during implementation, before the first real v2 evaluation.
 
 ## Question and limits
 
@@ -19,6 +19,8 @@ For outer start s, let E=s-2 be the exclusive eligible training end. Final outer
 Use unweighted L2 logistic regression with objective: sum of binary negative log likelihood plus alpha/2 times squared standardized coefficient norm. The intercept is unpenalized. Use training-only population standard deviation, mapping a near-zero scale to one. Solver is deterministic Newton/Armijo, maximum 100 iterations, gradient infinity tolerance 1e-8 and at most 32 step halvings; unfinished or nonfinite fits fail closed. Single-class training uses the declared Laplace-frequency fallback and reports it.
 
 Alpha candidates are exactly 1, 10 and 100. Minimize pooled inner Brier score; ties within 1e-12 prefer the larger alpha. For the selected alpha only, choose decision threshold from 0.4, 0.5 and 0.6 by pooled inner balanced accuracy; ties within 1e-12 prefer closest to 0.5, then larger threshold. A one-class inner pool uses threshold 0.5. Log every candidate score, exact boundary, selected setting and convergence status. No search beyond this registered family/grid or post-result threshold/model edits.
+
+The direction rule is strictly `score > threshold`; equality is nonpositive. Numerical scores and log-loss inputs are clipped to [1e-12, 1-1e-12]. Armijo uses coefficient 1e-4. These are numerical/decision conventions, not extra tuned candidates.
 
 ## References, evidence and outcome interpretation
 
