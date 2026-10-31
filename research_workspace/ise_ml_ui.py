@@ -61,8 +61,25 @@ def render():
     if curve.empty:
         st.info("Henüz görünür doğrulama gözlemi yok.")
         return
+    model = summary["metrics"]["ridge"]
+    reference = summary["metrics"]["train_mean"]
+    st.subheader("Sonuçların otomatik yorumu")
+    st.write(f"Modelin yön doğruluğu %{100 * model['directional_accuracy']:.1f}; "
+             f"eğitim ortalaması referansı %{100 * reference['directional_accuracy']:.1f}. "
+             f"Model RMSE: {model['rmse']:.6f}; referans RMSE: {reference['rmse']:.6f}. "
+             "Hata ölçülerinde düşük değer daha iyidir; yön doğruluğu tek başına kazanç ölçmez.")
+    interval = summary["mse_improvement_95_block_interval"]
+    if interval is None:
+        st.warning("Belirsizlik aralığı için en az 20 görünür doğrulama gözlemi gerekli.")
+    elif interval[0] <= 0:
+        st.warning("Referansa karşı güvenilir hata üstünlüğü gösterilmedi: iyileşme aralığının alt sınırı pozitif değil. "
+                   "Araştırma etiketleri doğrulanmış işlem sinyali olarak kullanılmamalı.")
+    else:
+        st.info("Bu görünür örneklemde hata iyileşmesi aralığı pozitif. Bu sonuç bağımsız piyasa verisi, "
+                "ekonomik işlem maliyeti veya gelecekte kârlılık doğrulaması değildir.")
     fig = go.Figure()
-    for column, label in (("actual_return", "Gerçekleşen endeks getirisi"), ("prediction", "Önceden üretilen tahmin")):
+    for column, label in (("actual_return", "Gerçekleşen endeks getirisi"),
+                          ("prediction", "Geçmiş girdilerle yeniden hesaplanan tahmin")):
         fig.add_trace(go.Scatter(x=curve.date, y=curve[column], name=label, mode="lines"))
     for name, color, shape in (("LONG", "#38bd91", "triangle-up"), ("WATCH", "#e2ac48", "circle"),
                                ("CASH", "#7b9fc9", "square")):
