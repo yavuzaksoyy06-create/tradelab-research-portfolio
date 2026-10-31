@@ -197,6 +197,8 @@ I used AI-assisted tooling during portions of implementation and review. I remai
 
 ### Reference index
 
+**Separate direction experiment v2:** I registered a compact logistic classifier with training-only nested selection and compared it with all fixed references. Balanced accuracy rose to 52.3%, but Brier error was slightly worse than training frequency and the improvement interval included zero. I kept that result, preserved v1 and excluded the reserved period. [Specification, actual comparison and tests](docs/ISE_DIRECTION_V2_RESULTS.md)
+
 **Real-data machine learning:** I ran a fixed chronological Ridge model on the openly licensed UCI Istanbul index-return dataset and added replay charts, historical LONG/WATCH/CASH labels and partial feature explanations. Across 107 validation observations, directional accuracy was 56.1% versus 57.9% for the training-mean baseline; the error-improvement interval includes zero. I retained that negative finding and kept the final 108 observations excluded. [Reproducible ML lab and actual results](docs/ISTANBUL_ML_LAB.md)
 
 I then audited parameter drift, source metadata and mutable report caches, added adversarial regression tests and measured the training/validation fit gap without retuning the model. The audit preserves original predictions and distinguishes weak generalization evidence from a proved overfitting diagnosis. [Audit findings and measured fit gaps](docs/ISE_OVERFIT_AUDIT.md)
