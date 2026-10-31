@@ -186,6 +186,12 @@ def read_snapshot(directory):
     for field in ("protocol", "canonical_sha256", "registration_sha256", "rows", "validation_start", "holdout_start", "bytes"):
         if type(stored.get(field)) is not type(meta[field]) or stored[field] != meta[field]:
             raise ValueError("ISE_REGISTERED_INPUT_CHANGED")
+    # Older immutable manifests predate the derived memory-validation binding.
+    # Recompute it without rewriting them, but never ignore a present conflict.
+    if "validation_binding_sha256" in stored and (
+            type(stored["validation_binding_sha256"]) is not str or
+            stored["validation_binding_sha256"] != meta["validation_binding_sha256"]):
+        raise ValueError("ISE_REGISTERED_INPUT_CHANGED")
     return frame, meta
 
 

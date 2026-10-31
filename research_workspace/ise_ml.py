@@ -17,6 +17,35 @@ FEATURE_NAMES = tuple(f"{col}_lag{lag}" for lag in (2, 3) for col in COLUMNS[1:]
     "ise_try_prior5_mean", "ise_try_prior5_std", "ise_try_prior20_mean", "ise_try_prior20_std")
 
 
+def model_specification():
+    """Reject parameter drift under the fixed v1 name; this is not an authenticity signature."""
+    columns = "date ise_try ise_usd sp dax ftse nikkei bovespa eu em".split()
+    names = [f"{name}_lag{lag}" for lag in (2, 3) for name in columns[1:]] + [
+        "ise_try_prior5_mean", "ise_try_prior5_std", "ise_try_prior20_mean", "ise_try_prior20_std"]
+    expected = {"protocol": "tradelab.ise-ml.v1", "columns": columns, "rows": 536,
+                "validation_start": 321, "holdout_start": 428, "feature_names": names,
+                "ridge_lambda": 10.0, "signal_threshold_source_units": 0.005,
+                "fold_rows": 20, "training_purge_rows": 2, "minimum_feature_lag_rows": 2,
+                "bootstrap_block_rows": 20, "bootstrap_replications": 500, "bootstrap_seed": 7}
+    current = {**expected, "protocol": PROTOCOL, "columns": list(COLUMNS), "rows": ROWS,
+               "validation_start": VALIDATION_START, "holdout_start": HOLDOUT_START,
+               "feature_names": list(FEATURE_NAMES), "ridge_lambda": RIDGE_LAMBDA,
+               "signal_threshold_source_units": SIGNAL_THRESHOLD}
+    try:
+        actual = json.dumps(current, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        pinned = json.dumps(expected, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError):
+        raise ValueError("ISE_REGISTERED_MODEL_SPEC_CHANGED") from None
+    if actual != pinned:
+        raise ValueError("ISE_REGISTERED_MODEL_SPEC_CHANGED")
+    return expected
+
+
+def model_spec_sha256():
+    return hashlib.sha256(json.dumps(model_specification(), sort_keys=True,
+                                     separators=(",", ":")).encode()).hexdigest()
+
+
 def _manifest(meta):
     if (not isinstance(meta, dict) or meta.get("source_id") != "uci247" or
             meta.get("license") != "CC-BY-4.0"):
@@ -67,6 +96,20 @@ def _registration(meta):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def _validation_binding(meta):
+    value = {key: meta.get(key) for key in ("registration_sha256", "rows", "bytes", "orders_enabled",
+                                           "validation_start", "holdout_start")}
+    value["model_spec_sha256"] = model_spec_sha256()
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+
+
+def experiment_sha256(metadata):
+    value = {"registration_sha256": metadata.get("registration_sha256"),
+             "validation_binding_sha256": metadata.get("validation_binding_sha256"),
+             "model_spec_sha256": model_spec_sha256()}
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 def load_csv(payload, manifest):
     """Validate source bytes and bind the full fixed partition; no outcomes computed."""
     meta = _manifest(manifest)
@@ -79,7 +122,27 @@ def load_csv(payload, manifest):
                 validation_start=VALIDATION_START, holdout_start=HOLDOUT_START,
                 bytes=len(payload), orders_enabled=False)
     meta["registration_sha256"] = _registration(meta)
+    # Derived from the exact bytes just consumed. It need not rewrite an older
+    # immutable on-disk manifest: read_snapshot rebuilds it from pinned bytes.
+    meta["validation_binding_sha256"] = _validation_binding(meta)
     return frame, meta
+
+
+def validate_registration(frame, metadata):
+    """Validate a memory snapshot and fixed specification without fitting a model."""
+    model_specification()
+    clean = _validated(frame)
+    _manifest(metadata)
+    fixed = {"rows": ROWS, "validation_start": VALIDATION_START, "holdout_start": HOLDOUT_START}
+    if (any(type(metadata.get(key)) is not int or metadata[key] != value for key, value in fixed.items()) or
+            type(metadata.get("bytes")) is not int or not 0 < metadata["bytes"] <= MAX_BYTES or
+            metadata.get("orders_enabled") is not False):
+        raise ValueError("ISE_REGISTERED_INPUT_CHANGED")
+    if (metadata.get("protocol") != PROTOCOL or metadata.get("canonical_sha256") != _fingerprint(clean) or
+            metadata.get("registration_sha256") != _registration(metadata) or
+            metadata.get("validation_binding_sha256") != _validation_binding(metadata)):
+        raise ValueError("ISE_REGISTERED_INPUT_CHANGED")
+    return clean
 
 
 def features(frame, indices):
@@ -135,18 +198,14 @@ def _interval(values):
 
 def evaluate(frame, metadata, *, visible_count=None):
     """Expanding fixed folds; only visible validation labels, never the 108-row holdout."""
-    clean = _validated(frame)
-    _manifest(metadata)
-    if (metadata.get("protocol") != PROTOCOL or metadata.get("canonical_sha256") != _fingerprint(clean) or
-            metadata.get("registration_sha256") != _registration(metadata) or
-            metadata.get("validation_start") != VALIDATION_START or metadata.get("holdout_start") != HOLDOUT_START):
-        raise ValueError("ISE_REGISTERED_INPUT_CHANGED")
+    clean = validate_registration(frame, metadata)
     if visible_count is None:
         visible_count = HOLDOUT_START
     if type(visible_count) is not int or not 0 <= visible_count <= ROWS:
         raise ValueError("ISE_INVALID_VISIBLE_COUNT")
     end = min(visible_count, HOLDOUT_START)
     summary = {"protocol": PROTOCOL, "source_id": "uci247", "registration_sha256": metadata["registration_sha256"],
+               "model_spec_sha256": model_spec_sha256(), "experiment_sha256": experiment_sha256(metadata),
                "input_rows": ROWS, "validation_start": VALIDATION_START, "holdout_start": HOLDOUT_START,
                "reserved_rows": ROWS - HOLDOUT_START, "evaluated_rows": max(0, end - VALIDATION_START),
                "model": "standardized ridge regression", "ridge_lambda": RIDGE_LAMBDA,
@@ -159,6 +218,7 @@ def evaluate(frame, metadata, *, visible_count=None):
     if end <= VALIDATION_START:
         return summary, pd.DataFrame()
     rows = []
+    fold_diagnostics = []
     for fold_start in range(VALIDATION_START, end, 20):
         train = list(range(22, fold_start - 2))
         x = features(clean, train)
@@ -167,6 +227,28 @@ def evaluate(frame, metadata, *, visible_count=None):
         targets = list(range(fold_start, min(fold_start + 20, end)))
         standardized = (features(clean, targets) - mean) / scale
         predictions = standardized @ weights + intercept
+        fitted = ((x - mean) / scale) @ weights + intercept
+        target_values = clean.ise_try.iloc[targets].to_numpy()
+        train_rmse = float(np.sqrt(np.mean((y - fitted) ** 2)))
+        validation_rmse = float(np.sqrt(np.mean((target_values - predictions) ** 2)))
+        z = (x - mean) / scale
+        singular = np.linalg.svd(z, compute_uv=False)
+        effective_dof = 1.0 + float(np.sum(singular ** 2 / (singular ** 2 + RIDGE_LAMBDA)))
+        fold_diagnostics.append({"fold": (fold_start - VALIDATION_START) // 20,
+                                 "training_rows": len(train), "feature_count": len(FEATURE_NAMES),
+                                 "validation_rows": len(targets),
+                                 "training_first_index": train[0], "training_end_index": train[-1],
+                                 "training_first_date": clean.date.iloc[train[0]].date().isoformat(),
+                                 "training_end_date": clean.date.iloc[train[-1]].date().isoformat(),
+                                 "validation_first_index": targets[0], "validation_last_index": targets[-1],
+                                 "train_rmse": train_rmse, "validation_rmse": validation_rmse,
+                                 "train_mean_rmse": float(np.sqrt(np.mean((y - intercept) ** 2))),
+                                 "validation_train_mean_rmse": float(np.sqrt(np.mean((target_values - intercept) ** 2))),
+                                 "validation_minus_train_rmse": validation_rmse - train_rmse,
+                                 "validation_train_rmse_ratio": validation_rmse / train_rmse if train_rmse > 0 else None,
+                                 "effective_degrees_of_freedom": effective_dof,
+                                 "coefficient_l2_norm": float(np.linalg.norm(weights)),
+                                 "interpretation": "Descriptive fit-gap audit; not proof or absence of overfitting"})
         for j, t in enumerate(targets):
             contributions = standardized[j] * weights
             top = np.argsort(-np.abs(contributions), kind="stable")[:3]
@@ -193,6 +275,7 @@ def evaluate(frame, metadata, *, visible_count=None):
                    **{name: _metrics(actual, curve[col].to_numpy()) for name, col in (
                        ("train_mean", "baseline_mean"), ("zero", "baseline_zero"), ("persistence", "baseline_persistence"))}},
                    signal_counts={name: int((curve.signal == name).sum()) for name in ("LONG", "WATCH", "CASH")},
+                   fold_fit_diagnostics=fold_diagnostics,
                    signal_threshold_source_units=SIGNAL_THRESHOLD,
                    mean_squared_error_improvement_vs_train_mean=float(improvement.mean()),
                    mse_improvement_95_block_interval=_interval(improvement),

@@ -1,16 +1,43 @@
 """Historical Istanbul index-return predictions and research signals, no orders."""
 import os
+import hashlib
+import json
+import hmac
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from research_workspace.ise_ml import evaluate, VALIDATION_START, HOLDOUT_START
+from research_workspace.ise_ml import evaluate, validate_registration, VALIDATION_START, HOLDOUT_START
 from research_workspace.ise_source import read_snapshot
 from research_workspace.ise_diagnostics import diagnostics
 from research_workspace.stage7_preparation_ui import _local_directory
 
 SNAPSHOT_KEY = "ise_loaded_snapshot"
 REPORT_KEY = "ise_cached_report"
+
+
+def _report_digest(identity, summary, curve):
+    """Detect accidental changes to a cached report, not owner-authenticate it."""
+    if not isinstance(curve, pd.DataFrame):
+        raise ValueError("ISE_CACHE_REPORT_TYPE")
+    def timestamp(value):
+        if isinstance(value, pd.Timestamp):
+            return value.isoformat()
+        raise TypeError("Unsupported cached report value")
+
+    payload = {"identity": identity, "summary": summary,
+              "columns": list(curve.columns), "dtypes": [str(dtype) for dtype in curve.dtypes],
+              "index_dtype": str(curve.index.dtype), "index_name": curve.index.name,
+              "curve": curve.to_dict(orient="split")}
+    encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, allow_nan=False,
+                         separators=(",", ":"), default=timestamp).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _reject_cached_state():
+    st.session_state.pop(REPORT_KEY, None)
+    st.session_state.pop(SNAPSHOT_KEY, None)
+    st.error("ISE_CACHE_REJECTED · Bellekteki veri veya rapor değişti; kaydı yeniden doğrulayıp yükleyin.")
 
 
 def render():
@@ -49,29 +76,46 @@ def render():
         st.info("Doğrulanmış veri yüklenmedi. Grafik veya sonuç uydurulmaz; otomatik indirme yapılmaz.")
         return
     _, frame, meta = snapshot
+    try:
+        # A display-only rerun must not bypass the same source checks as a fit.
+        validate_registration(frame, meta)
+    except Exception:
+        _reject_cached_state()
+        return
     st.caption("Yüklenen kayıt: " + meta["registration_sha256"] +
                " · Bellekteki doğrulanmış kopya kullanılır; dosyayı yeniden incelemek için tekrar yükleyin.")
     visible_count = st.slider("Tarihsel replay · görünür gözlem", min_value=VALIDATION_START,
                               max_value=HOLDOUT_START, value=HOLDOUT_START, step=1, key="ise_cursor")
-    identity = (meta["registration_sha256"], visible_count)
+    identity = (meta["registration_sha256"], meta["validation_binding_sha256"], visible_count)
     cached = st.session_state.get(REPORT_KEY)
+    if cached is not None and (not isinstance(cached, tuple) or len(cached) != 4):
+        _reject_cached_state()
+        return
     if cached is not None and cached[0] != identity:
         st.session_state.pop(REPORT_KEY, None)
         cached = None
+    if cached is not None:
+        try:
+            if (not isinstance(cached[3], str) or
+                    not hmac.compare_digest(cached[3], _report_digest(identity, cached[1], cached[2]))):
+                raise ValueError("ISE_CACHE_REPORT_CHANGED")
+        except Exception:
+            _reject_cached_state()
+            return
     st.caption("Sonuçlar yalnızca aşağıdaki düğmeyle hesaplanır. Replay veya veri kaydı değişince temizlenir. "
                "Grafikte gösterilen hedef tarihinin özellikleri en az iki gözlem öncesinde biter.")
     if st.button("Görünür dönem için modeli ve sinyalleri değerlendir", key="ise_evaluate"):
         st.session_state.pop(REPORT_KEY, None)
         try:
             summary, curve = evaluate(frame, meta, visible_count=visible_count)
-            cached = (identity, summary, curve)
+            cached = (identity, summary, curve, _report_digest(identity, summary, curve))
             st.session_state[REPORT_KEY] = cached
         except Exception:
             st.error("ISE_EVALUATION_REJECTED · Kayıt bütünlüğü veya hesaplama doğrulanamadı.")
             return
     if cached is None:
         return
-    _, summary, curve = cached
+    _, summary, curve, _ = cached
     st.json(summary)
     if curve.empty:
         st.info("Henüz görünür doğrulama gözlemi yok.")
@@ -138,3 +182,8 @@ def render():
     st.dataframe(pd.DataFrame(detail["signals"]), hide_index=True, width="stretch")
     st.write({"Yukarı doğru": detail["confusion"]["tp"], "Yanlış yukarı": detail["confusion"]["fp"],
               "Kaçırılan yukarı": detail["confusion"]["fn"], "Aşağı/sıfır doğru": detail["confusion"]["tn"]})
+    st.subheader("Eğitim ve doğrulama farkı")
+    st.caption("Aynı sabit modelin aynı eğitiminden hesaplanır; ek model araması yapılmaz. "
+               "Eğitim/doğrulama farkı, dönem dağılımı ve örneklem büyüklüğüyle birlikte yorumlanmalıdır; "
+               "tek başına aşırı uyumun kanıtı veya yokluğu değildir.")
+    st.dataframe(pd.DataFrame(summary["fold_fit_diagnostics"]), hide_index=True, width="stretch")
