@@ -21,7 +21,7 @@ $env:TRADELAB_ISE_SNAPSHOT='C:\PrivateTradeLabData\uci247_v001'
 python -B -m streamlit run research_workspace/app.py --server.address 127.0.0.1 --server.port 8504 --browser.gatherUsageStats false
 ```
 
-Select **Istanbul ML**, load the registered folder explicitly, then select **Görünür dönem için modeli ve sinyalleri değerlendir**. Loading alone never fits a model. The replay cursor is capped at 428 observations. Results clear on another rerun, failed reload removes the prior snapshot, and local filesystem access requires an explicit loopback bind. The immutable in-memory snapshot is identified by registration hash; reload explicitly to inspect files again.
+Select **Istanbul ML**, load the registered folder explicitly, then select **Görünür dönem için modeli ve sinyalleri değerlendir**. Loading alone never fits a model. The replay cursor is capped at 428 observations. Changing replay/source or explicitly reloading invalidates the report; display-only inspector interaction reuses the same evaluated report without another fit. Failed reload removes the prior snapshot, and local filesystem access requires an explicit loopback bind. The immutable in-memory snapshot is identified by registration hash; reload explicitly to inspect files again.
 
 ## Fixed model, actual evidence
 
@@ -41,6 +41,8 @@ Historical labels: **19 LONG, 72 WATCH, 16 CASH**. LONG means prediction >0.005 
 ![Real validation returns, retrospective predictions and baseline comparison](images/ise_ml/ise-ml-validation.png)
 
 [Exact actual results](images/ise_ml/ise-ml-validation.json) · [Software/source evidence](../evidence/ise_ml_checks.json)
+
+The [post-hoc stability and signal audit](ISE_ML_DIAGNOSTIC_AUDIT.md) adds a per-observation inspector, six-window performance table, confusion counts and descriptive signal-group outcomes. It is explicitly exploratory and leaves the original model and results unchanged.
 
 ## What is and is not tested
 

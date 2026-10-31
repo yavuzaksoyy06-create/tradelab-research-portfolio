@@ -136,3 +136,52 @@ class ISEMLUITests(unittest.TestCase):
             self.assertTrue(text)
             self.assertNotIn("SECRET_SOURCE_BODY", text)
             self.assertNotIn("private-provider-path", text)
+
+    def test_signal_inspection_reuses_matching_report_without_refitting(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch("research_workspace.ise_ml_ui.read_snapshot", return_value=(self.frame, self.meta)), \
+             patch("research_workspace.ise_ml_ui.evaluate", wraps=evaluate) as model:
+            at = self.app()
+            self.load(at, tmp)
+            at.slider(key="ise_cursor").set_value(350).run()
+            at.button(key="ise_evaluate").click().run()
+            self.assertFalse(at.exception)
+            self.assertEqual(model.call_count, 1)
+            self.assertGreater(len(at.get("plotly_chart")), 0)
+            inspector = at.selectbox(key="ise_inspect_origin")
+            self.assertEqual(inspector.value, 349)
+            inspector.set_value(321).run()
+            self.assertFalse(at.exception)
+            self.assertEqual(model.call_count, 1)
+            self.assertEqual(at.selectbox(key="ise_inspect_origin").value, 321)
+            self.assertGreater(len(at.get("plotly_chart")), 0)
+            target_date = self.frame.date.iloc[321].date().isoformat()
+            self.assertTrue(any(target_date in element.value for element in at.markdown))
+            report = next(json.loads(e.value) for e in at.json if "evaluated_rows" in json.loads(e.value))
+            self.assertEqual(report["evaluated_rows"], 29)
+            at.run()
+            self.assertFalse(at.exception)
+            self.assertEqual(model.call_count, 1)
+            self.assertGreater(len(at.get("plotly_chart")), 0)
+
+    def test_explicit_reload_invalidates_report_even_when_registration_is_unchanged(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch("research_workspace.ise_ml_ui.read_snapshot", return_value=(self.frame, self.meta)) as read, \
+             patch("research_workspace.ise_ml_ui.evaluate", wraps=evaluate) as model:
+            at = self.app()
+            self.load(at, tmp)
+            at.slider(key="ise_cursor").set_value(350).run()
+            at.button(key="ise_evaluate").click().run()
+            self.assertFalse(at.exception)
+            self.assertEqual(model.call_count, 1)
+            self.assertGreater(len(at.get("plotly_chart")), 0)
+            self.load(at, tmp)
+            self.assertEqual(read.call_count, 2)
+            self.assertEqual(model.call_count, 1)
+            self.assertEqual(len(at.get("plotly_chart")), 0)
+            self.assertFalse(any(e.key == "ise_inspect_origin" for e in at.selectbox))
+            self.assertFalse(any("evaluated_rows" in json.loads(e.value) for e in at.json))
+            at.button(key="ise_evaluate").click().run()
+            self.assertFalse(at.exception)
+            self.assertEqual(model.call_count, 2)
+            self.assertGreater(len(at.get("plotly_chart")), 0)

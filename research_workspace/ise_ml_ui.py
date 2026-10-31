@@ -6,9 +6,11 @@ import streamlit as st
 
 from research_workspace.ise_ml import evaluate, VALIDATION_START, HOLDOUT_START
 from research_workspace.ise_source import read_snapshot
+from research_workspace.ise_diagnostics import diagnostics
 from research_workspace.stage7_preparation_ui import _local_directory
 
 SNAPSHOT_KEY = "ise_loaded_snapshot"
+REPORT_KEY = "ise_cached_report"
 
 
 def render():
@@ -23,6 +25,7 @@ def render():
                "Kaynak yabancı endekslerde önceki değerle doldurma uygulamıştır; yayın zamanı bağımsız doğrulanmamıştır.")
     if st.get_option("server.address") not in ("127.0.0.1", "::1"):
         st.session_state.pop(SNAPSHOT_KEY, None)
+        st.session_state.pop(REPORT_KEY, None)
         st.info("Yerel kayıt yükleme kapalı. Uygulamayı --server.address 127.0.0.1 ile başlatın.")
         return
     with st.form("ise_load_form"):
@@ -31,6 +34,7 @@ def render():
         submitted = st.form_submit_button("Kaydı doğrula ve yükle", key="ise_load")
     if submitted:
         st.session_state.pop(SNAPSHOT_KEY, None)
+        st.session_state.pop(REPORT_KEY, None)
         try:
             if not _local_directory(path):
                 raise ValueError("Local path required")
@@ -41,6 +45,7 @@ def render():
             return
     snapshot = st.session_state.get(SNAPSHOT_KEY)
     if snapshot is None or snapshot[0] != path:
+        st.session_state.pop(REPORT_KEY, None)
         st.info("Doğrulanmış veri yüklenmedi. Grafik veya sonuç uydurulmaz; otomatik indirme yapılmaz.")
         return
     _, frame, meta = snapshot
@@ -48,18 +53,34 @@ def render():
                " · Bellekteki doğrulanmış kopya kullanılır; dosyayı yeniden incelemek için tekrar yükleyin.")
     visible_count = st.slider("Tarihsel replay · görünür gözlem", min_value=VALIDATION_START,
                               max_value=HOLDOUT_START, value=HOLDOUT_START, step=1, key="ise_cursor")
-    st.caption("Sonuçlar yalnızca aşağıdaki düğmeyle hesaplanır ve başka bir ekran çalıştırmasında temizlenir. "
+    identity = (meta["registration_sha256"], visible_count)
+    cached = st.session_state.get(REPORT_KEY)
+    if cached is not None and cached[0] != identity:
+        st.session_state.pop(REPORT_KEY, None)
+        cached = None
+    st.caption("Sonuçlar yalnızca aşağıdaki düğmeyle hesaplanır. Replay veya veri kaydı değişince temizlenir. "
                "Grafikte gösterilen hedef tarihinin özellikleri en az iki gözlem öncesinde biter.")
-    if not st.button("Görünür dönem için modeli ve sinyalleri değerlendir", key="ise_evaluate"):
+    if st.button("Görünür dönem için modeli ve sinyalleri değerlendir", key="ise_evaluate"):
+        st.session_state.pop(REPORT_KEY, None)
+        try:
+            summary, curve = evaluate(frame, meta, visible_count=visible_count)
+            cached = (identity, summary, curve)
+            st.session_state[REPORT_KEY] = cached
+        except Exception:
+            st.error("ISE_EVALUATION_REJECTED · Kayıt bütünlüğü veya hesaplama doğrulanamadı.")
+            return
+    if cached is None:
         return
-    try:
-        summary, curve = evaluate(frame, meta, visible_count=visible_count)
-    except Exception:
-        st.error("ISE_EVALUATION_REJECTED · Kayıt bütünlüğü veya hesaplama doğrulanamadı.")
-        return
+    _, summary, curve = cached
     st.json(summary)
     if curve.empty:
         st.info("Henüz görünür doğrulama gözlemi yok.")
+        return
+    try:
+        detail = diagnostics(curve)
+    except Exception:
+        st.session_state.pop(REPORT_KEY, None)
+        st.error("ISE_DIAGNOSTIC_REJECTED · Görünür sonuçların sınırları veya sayısal yapısı doğrulanamadı.")
         return
     model = summary["metrics"]["ridge"]
     reference = summary["metrics"]["train_mean"]
@@ -92,8 +113,12 @@ def render():
     fig = go.Figure(go.Bar(x=curve.date, y=errors, name="Gerçekleşen − tahmin"))
     fig.update_layout(yaxis_title="Tahmin hatası · kaynak birimi")
     st.plotly_chart(fig, key="ise_errors", width="stretch")
-    latest = curve.iloc[-1]
-    st.subheader("Son görünür tarihsel sinyalin açıklaması")
+    st.subheader("Tarihsel sinyal inceleyicisi")
+    choices = curve.origin_index.tolist()
+    selected = st.selectbox("İncelenecek tarihsel hedef günü", choices, index=len(choices)-1,
+                            format_func=lambda i: curve.loc[curve.origin_index == i, "date"].iloc[0].date().isoformat(),
+                            key="ise_inspect_origin")
+    latest = curve.loc[curve.origin_index == selected].iloc[0]
     st.write(f"{latest.date.date().isoformat()}: {latest.signal}. Tahmin {latest.prediction:.6f} kaynak birimi. "
              f"Özellik sınırı {latest.feature_cutoff}; eğitim sınırı {latest.training_end}.")
     top = latest.top_contributions
@@ -104,3 +129,12 @@ def render():
                "Model doğruluğu ve referans modellere üstünlük ayrı ölçülür; zayıf sonuçlar gizlenmez.")
     st.dataframe(curve[["date", "signal", "prediction", "actual_return", "training_end", "feature_cutoff"]],
                  hide_index=True, width="stretch")
+    st.subheader("Dönem ve sinyal denetimi")
+    st.caption("Sonuçlar görüldükten sonra eklenen betimsel denetimdir; model veya eşik değiştirilmez. "
+               "Sinyal gruplarındaki oranlar geleceğe ait kalibre olasılık değildir.")
+    for text in detail["commentary"]:
+        st.write(text)
+    st.dataframe(pd.DataFrame(detail["folds"]), hide_index=True, width="stretch")
+    st.dataframe(pd.DataFrame(detail["signals"]), hide_index=True, width="stretch")
+    st.write({"Yukarı doğru": detail["confusion"]["tp"], "Yanlış yukarı": detail["confusion"]["fp"],
+              "Kaçırılan yukarı": detail["confusion"]["fn"], "Aşağı/sıfır doğru": detail["confusion"]["tn"]})
