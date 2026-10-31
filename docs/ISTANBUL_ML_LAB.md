@@ -44,6 +44,8 @@ Historical labels: **19 LONG, 72 WATCH, 16 CASH**. LONG means prediction >0.005 
 
 The [post-hoc stability and signal audit](ISE_ML_DIAGNOSTIC_AUDIT.md) adds a per-observation inspector, six-window performance table, confusion counts and descriptive signal-group outcomes. It is explicitly exploratory and leaves the original model and results unchanged.
 
+The subsequent [leakage and overfitting audit](ISE_OVERFIT_AUDIT.md) enforces fixed model settings, exact metadata binding and lossless cache integrity on every display. It adds training/validation error gaps and effective model degrees of freedom from the same fits. Original source files and validation predictions remain unchanged. Older open sessions need an explicit reload to obtain the new in-memory validation binding; their disk manifests are preserved.
+
 ## What is and is not tested
 
 The public tests include independently calculated Ridge predictions, train-only scaling, changed-target and future-suffix invariance, holdout exclusion, metadata changes, malformed archives, source substitution, deterministic resampling and explicit UI/replay behavior. A separate smoke check ran the actual registered data through the full application: three charts, 107 scored rows, cursor maximum 428 and no reserved-period output.
