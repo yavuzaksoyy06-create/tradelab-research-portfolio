@@ -197,6 +197,12 @@ I used AI-assisted tooling during portions of implementation and review. I remai
 
 ### Reference index
 
+**Real-data machine learning:** I ran a fixed chronological Ridge model on the openly licensed UCI Istanbul index-return dataset and added replay charts, historical LONG/WATCH/CASH labels and partial feature explanations. Across 107 validation observations, directional accuracy was 56.1% versus 57.9% for the training-mean baseline; the error-improvement interval includes zero. I retained that negative finding and kept the final 108 observations excluded. [Reproducible ML lab and actual results](docs/ISTANBUL_ML_LAB.md)
+
+I then audited parameter drift, source metadata and mutable report caches, added adversarial regression tests and measured the training/validation fit gap without retuning the model. The audit preserves original predictions and distinguishes weak generalization evidence from a proved overfitting diagnosis. [Audit findings and measured fit gaps](docs/ISE_OVERFIT_AUDIT.md)
+
+![Real index-return ML validation with explicit baseline comparison](docs/images/ise_ml/ise-ml-validation.png)
+
 **BIST daily research:** I added an entitled-CSV workflow for THYAO, GARAN and ASELS, with XIST coverage checks, source-bound hashes, real-data chart rendering and a fixed delayed EMA20/60 backtest with cost sensitivity and block-bootstrap diagnostics. The 2025 holdout stays excluded. No licensed BIST dataset was available during implementation, so no real BIST performance is claimed. [Lab and reproducibility](docs/BIST_RESEARCH_LAB.md) · [Registered protocol](docs/BIST_RESEARCH_PROTOCOL.md)
 
 **Stage 7 preparation:** I added an offline collection planner and read-only snapshot reviewer to check expected coverage, SHA-256 integrity and registered holdout boundaries before evaluation. Both are available as explicit forms in the local Equity Research workspace; private folder review requires a loopback bind. [Workflow and limitations](docs/STAGE7_DATA_REVIEW.md) · [CLI evidence](evidence/stage7_review_checks.json) · [UI evidence](evidence/stage7_preparation_ui_checks.json)

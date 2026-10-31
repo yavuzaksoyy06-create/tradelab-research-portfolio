@@ -1,0 +1,105 @@
+{
+  "audit_date": "2026-10-31",
+  "base_commit": "0677c854330329ab6ec3b79a20149d584df10dea",
+  "implementation_commit": "7cbc1fd910e368c0d2d3247907a350758edf8131",
+  "report_commit": "b86feb034646b84668087a9feeff116ce58a8bf1",
+  "baseline_reproductions": {
+    "engine_assertion_failures": 9,
+    "cache_test_failures": 4
+  },
+  "new_tests": {
+    "engine_leakage_audit": 9,
+    "ui_cache_audit": 5
+  },
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:18.126115+00:00",
+        "finished_at": "2026-10-31T12:19:18.472158+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:18.472158+00:00",
+        "finished_at": "2026-10-31T12:19:18.788390+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:18.788390+00:00",
+        "finished_at": "2026-10-31T12:19:19.063064+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 322,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:19.063064+00:00",
+        "finished_at": "2026-10-31T12:20:42.896586+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 568,
+    "skipped": 1
+  },
+  "source_inventory_files": 142,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "frozen_comparison": "Exact bytes against 4d6f0c1",
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_cutoff": "2026-10-26",
+  "ise_holdout_rows": 108,
+  "holdout_scored": false,
+  "orders_sent": false,
+  "probabilities_released": false,
+  "model_spec_sha256": "05bfa089fa2e3441401ce407f6774919062a2d874b4f3aaed3e60a9deb64ee40",
+  "experiment_sha256": "4931179e6b026c86b4ffebb114f9fc814c45709a0e5e7188f1eee5f56c03a00d",
+  "integrity_fixes": [
+    "fixed-v1 parameter drift rejection",
+    "strict metadata types/counts and derived byte/model binding",
+    "source validation before cached display",
+    "lossless summary/curve/nested-contribution digest",
+    "present stored derived binding checked; absent legacy field reconstructed read-only"
+  ],
+  "actual_validation": {
+    "all_107_predictions_and_labels_unchanged": true,
+    "metrics_unchanged": true,
+    "source_files_unchanged": true,
+    "source_registration_preserved": true,
+    "actual_ui_smoke": "passed",
+    "tampered_report_rejected_before_display": true,
+    "inspector_refit": false
+  },
+  "overfit_assessment": {
+    "status": "NOT_ESTABLISHED",
+    "predictive_advantage": "NOT_ESTABLISHED",
+    "first_training_rows": 297,
+    "last_training_rows": 397,
+    "feature_count": 22,
+    "training_validation_gap_mixed": true,
+    "effective_dof_min": 19.244880907674574,
+    "effective_dof_max": 19.904142328178306,
+    "post_hoc_descriptive": true,
+    "model_tuned": false
+  },
+  "artifact_sha256": {
+    "ise-ml-fit-audit.json": "64895876a4a875421803206830faac19725d32298726ed5c5f07abee01e7e0ce",
+    "ise-ml-fit-audit.png": "d8b6815ea7bb284ae02e0b39eff079d3a920b3cfdba41e00fd3d7a04458409e6",
+    "ise-ml-validation.json": "f44f8ad27b0a1976554762610968dbc006a4aa216b6ab479dd751c01edc4c198"
+  },
+  "local_log_sha256": {
+    "research_crypto.log": "4350b9c9b27aad42ac5c1eb6225d1c957da493052b695032b9eefd29896b78df",
+    "research_fx.log": "a15b4955ff74fdebad52dd7594e4e5acf75900ceb373b78b9473192d41c244c6",
+    "research_macro.log": "65d65f3484be62c498bea02610bfc3c1cf1266ab4543776040519228ef507ad8",
+    "research_workspace.log": "fda1d53270f4848fcb0b351765c7e6eb81cbf45185d7c1115242c6eab949e0e8"
+  }
+}

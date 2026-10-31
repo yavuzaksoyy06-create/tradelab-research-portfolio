@@ -1,0 +1,78 @@
+{
+  "protocol": "tradelab.ise-ml.v1",
+  "source_id": "uci247",
+  "registration_sha256": "b7ebab507eb2f8647197e3e5dac5795fb3044c8d67659fd0b5cb375ba82219e9",
+  "input_rows": 536,
+  "validation_start": 321,
+  "holdout_start": 428,
+  "reserved_rows": 108,
+  "evaluated_rows": 107,
+  "model": "standardized ridge regression",
+  "ridge_lambda": 10.0,
+  "feature_count": 22,
+  "minimum_feature_lag_rows": 2,
+  "fold_rows": 20,
+  "training_purge_rows": 2,
+  "parameter_search_performed": false,
+  "holdout_scored": false,
+  "orders_enabled": false,
+  "probabilities_publishable": false,
+  "source_return_definition": "unverified",
+  "economic_backtest_available": false,
+  "prediction_units": "source return units; not independently verified percentages",
+  "status": "RETROSPECTIVE_VALIDATION_ONLY",
+  "metrics": {
+    "ridge": {
+      "mae": 0.011040554855433404,
+      "rmse": 0.015558673519457432,
+      "directional_accuracy": 0.5607476635514018,
+      "balanced_accuracy": 0.5051971326164875
+    },
+    "train_mean": {
+      "mae": 0.010572784330571502,
+      "rmse": 0.015599382217906136,
+      "directional_accuracy": 0.5794392523364486,
+      "balanced_accuracy": 0.5
+    },
+    "zero": {
+      "mae": 0.010632613747663552,
+      "rmse": 0.01550577643161028,
+      "directional_accuracy": 0.4205607476635514,
+      "balanced_accuracy": 0.5
+    },
+    "persistence": {
+      "mae": 0.016100913485981305,
+      "rmse": 0.0220856068413245,
+      "directional_accuracy": 0.4485981308411215,
+      "balanced_accuracy": 0.43584229390681006
+    }
+  },
+  "signal_counts": {
+    "LONG": 19,
+    "WATCH": 72,
+    "CASH": 16
+  },
+  "signal_threshold_source_units": 0.005,
+  "mean_squared_error_improvement_vs_train_mean": 1.2684038952602444e-06,
+  "mse_improvement_95_block_interval": [
+    -1.1602532191986762e-05,
+    1.6079056650150733e-05
+  ],
+  "bootstrap": {
+    "method": "moving_block",
+    "block_rows": 20,
+    "replications": 500,
+    "seed": 7
+  },
+  "evaluation_first_date": "2010-04-13",
+  "evaluation_last_date": "2010-09-15",
+  "pnl_computed": false,
+  "limitations": [
+    "Index returns, not individual-stock OHLCV or executable prices",
+    "Source units and vintage require independent interpretation; no PIT proof",
+    "Two-observation lag limits international close-timing leakage; publication times unverified",
+    "Signals are uncalibrated research classifications, not executable orders",
+    "Small retrospective sample; validation is not a fresh prospective test",
+    "No parameter search, holdout release or frozen V4.1 modification"
+  ]
+}

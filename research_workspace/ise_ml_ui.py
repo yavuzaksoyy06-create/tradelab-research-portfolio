@@ -1,0 +1,189 @@
+"""Historical Istanbul index-return predictions and research signals, no orders."""
+import os
+import hashlib
+import json
+import hmac
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+from research_workspace.ise_ml import evaluate, validate_registration, VALIDATION_START, HOLDOUT_START
+from research_workspace.ise_source import read_snapshot
+from research_workspace.ise_diagnostics import diagnostics
+from research_workspace.stage7_preparation_ui import _local_directory
+
+SNAPSHOT_KEY = "ise_loaded_snapshot"
+REPORT_KEY = "ise_cached_report"
+
+
+def _report_digest(identity, summary, curve):
+    """Detect accidental changes to a cached report, not owner-authenticate it."""
+    if not isinstance(curve, pd.DataFrame):
+        raise ValueError("ISE_CACHE_REPORT_TYPE")
+    def timestamp(value):
+        if isinstance(value, pd.Timestamp):
+            return value.isoformat()
+        raise TypeError("Unsupported cached report value")
+
+    payload = {"identity": identity, "summary": summary,
+              "columns": list(curve.columns), "dtypes": [str(dtype) for dtype in curve.dtypes],
+              "index_dtype": str(curve.index.dtype), "index_name": curve.index.name,
+              "curve": curve.to_dict(orient="split")}
+    encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, allow_nan=False,
+                         separators=(",", ":"), default=timestamp).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _reject_cached_state():
+    st.session_state.pop(REPORT_KEY, None)
+    st.session_state.pop(SNAPSHOT_KEY, None)
+    st.error("ISE_CACHE_REJECTED · Bellekteki veri veya rapor değişti; kaydı yeniden doğrulayıp yükleyin.")
+
+
+def render():
+    st.subheader("İstanbul Endeksi · Makine Öğrenmesi")
+    st.info("Gerçek tarihsel endeks getirileri · UCI 247 · Akbilgic (2013) · CC BY 4.0. "
+            "Bu kaynak THYAO/GARAN/ASELS fiyatları, OHLC mumları veya güncel piyasa verisi değildir.")
+    st.caption("Sabit Ridge modeli: 22 gecikmeli özellik, yalnızca eğitimden standardizasyon, "
+               "20 gözlemde bir genişleyen eğitim. 321 geliştirme / 107 doğrulama / 108 ayrılmış gözlem. "
+               "Son 108 gözlem grafik, model ve skorlara alınmaz.")
+    st.warning("LONG / WATCH / CASH tarihsel araştırma etiketleridir; emir veya kalibre olasılık değildir. "
+               "0.005 eşiği kaynak biriminde sabittir. Getirinin basit/log tanımı doğrulanmadığı için P&L hesaplanmaz. "
+               "Kaynak yabancı endekslerde önceki değerle doldurma uygulamıştır; yayın zamanı bağımsız doğrulanmamıştır.")
+    if st.get_option("server.address") not in ("127.0.0.1", "::1"):
+        st.session_state.pop(SNAPSHOT_KEY, None)
+        st.session_state.pop(REPORT_KEY, None)
+        st.info("Yerel kayıt yükleme kapalı. Uygulamayı --server.address 127.0.0.1 ile başlatın.")
+        return
+    with st.form("ise_load_form"):
+        path = st.text_input("Hash doğrulamalı UCI kayıt klasörü · mutlak yerel yol",
+                             value=os.environ.get("TRADELAB_ISE_SNAPSHOT", ""), key="ise_snapshot_path")
+        submitted = st.form_submit_button("Kaydı doğrula ve yükle", key="ise_load")
+    if submitted:
+        st.session_state.pop(SNAPSHOT_KEY, None)
+        st.session_state.pop(REPORT_KEY, None)
+        try:
+            if not _local_directory(path):
+                raise ValueError("Local path required")
+            frame, meta = read_snapshot(path)
+            st.session_state[SNAPSHOT_KEY] = (path, frame, meta)
+        except Exception:
+            st.error("ISE_LOAD_REJECTED · Yerel yol, kaynak hash'i ve veri kaydını kontrol edin.")
+            return
+    snapshot = st.session_state.get(SNAPSHOT_KEY)
+    if snapshot is None or snapshot[0] != path:
+        st.session_state.pop(REPORT_KEY, None)
+        st.info("Doğrulanmış veri yüklenmedi. Grafik veya sonuç uydurulmaz; otomatik indirme yapılmaz.")
+        return
+    _, frame, meta = snapshot
+    try:
+        # A display-only rerun must not bypass the same source checks as a fit.
+        validate_registration(frame, meta)
+    except Exception:
+        _reject_cached_state()
+        return
+    st.caption("Yüklenen kayıt: " + meta["registration_sha256"] +
+               " · Bellekteki doğrulanmış kopya kullanılır; dosyayı yeniden incelemek için tekrar yükleyin.")
+    visible_count = st.slider("Tarihsel replay · görünür gözlem", min_value=VALIDATION_START,
+                              max_value=HOLDOUT_START, value=HOLDOUT_START, step=1, key="ise_cursor")
+    identity = (meta["registration_sha256"], meta["validation_binding_sha256"], visible_count)
+    cached = st.session_state.get(REPORT_KEY)
+    if cached is not None and (not isinstance(cached, tuple) or len(cached) != 4):
+        _reject_cached_state()
+        return
+    if cached is not None and cached[0] != identity:
+        st.session_state.pop(REPORT_KEY, None)
+        cached = None
+    if cached is not None:
+        try:
+            if (not isinstance(cached[3], str) or
+                    not hmac.compare_digest(cached[3], _report_digest(identity, cached[1], cached[2]))):
+                raise ValueError("ISE_CACHE_REPORT_CHANGED")
+        except Exception:
+            _reject_cached_state()
+            return
+    st.caption("Sonuçlar yalnızca aşağıdaki düğmeyle hesaplanır. Replay veya veri kaydı değişince temizlenir. "
+               "Grafikte gösterilen hedef tarihinin özellikleri en az iki gözlem öncesinde biter.")
+    if st.button("Görünür dönem için modeli ve sinyalleri değerlendir", key="ise_evaluate"):
+        st.session_state.pop(REPORT_KEY, None)
+        try:
+            summary, curve = evaluate(frame, meta, visible_count=visible_count)
+            cached = (identity, summary, curve, _report_digest(identity, summary, curve))
+            st.session_state[REPORT_KEY] = cached
+        except Exception:
+            st.error("ISE_EVALUATION_REJECTED · Kayıt bütünlüğü veya hesaplama doğrulanamadı.")
+            return
+    if cached is None:
+        return
+    _, summary, curve, _ = cached
+    st.json(summary)
+    if curve.empty:
+        st.info("Henüz görünür doğrulama gözlemi yok.")
+        return
+    try:
+        detail = diagnostics(curve)
+    except Exception:
+        st.session_state.pop(REPORT_KEY, None)
+        st.error("ISE_DIAGNOSTIC_REJECTED · Görünür sonuçların sınırları veya sayısal yapısı doğrulanamadı.")
+        return
+    model = summary["metrics"]["ridge"]
+    reference = summary["metrics"]["train_mean"]
+    st.subheader("Sonuçların otomatik yorumu")
+    st.write(f"Modelin yön doğruluğu %{100 * model['directional_accuracy']:.1f}; "
+             f"eğitim ortalaması referansı %{100 * reference['directional_accuracy']:.1f}. "
+             f"Model RMSE: {model['rmse']:.6f}; referans RMSE: {reference['rmse']:.6f}. "
+             "Hata ölçülerinde düşük değer daha iyidir; yön doğruluğu tek başına kazanç ölçmez.")
+    interval = summary["mse_improvement_95_block_interval"]
+    if interval is None:
+        st.warning("Belirsizlik aralığı için en az 20 görünür doğrulama gözlemi gerekli.")
+    elif interval[0] <= 0:
+        st.warning("Referansa karşı güvenilir hata üstünlüğü gösterilmedi: iyileşme aralığının alt sınırı pozitif değil. "
+                   "Araştırma etiketleri doğrulanmış işlem sinyali olarak kullanılmamalı.")
+    else:
+        st.info("Bu görünür örneklemde hata iyileşmesi aralığı pozitif. Bu sonuç bağımsız piyasa verisi, "
+                "ekonomik işlem maliyeti veya gelecekte kârlılık doğrulaması değildir.")
+    fig = go.Figure()
+    for column, label in (("actual_return", "Gerçekleşen endeks getirisi"),
+                          ("prediction", "Geçmiş girdilerle yeniden hesaplanan tahmin")):
+        fig.add_trace(go.Scatter(x=curve.date, y=curve[column], name=label, mode="lines"))
+    for name, color, shape in (("LONG", "#38bd91", "triangle-up"), ("WATCH", "#e2ac48", "circle"),
+                               ("CASH", "#7b9fc9", "square")):
+        rows = curve.loc[curve.signal == name]
+        fig.add_trace(go.Scatter(x=rows.date, y=rows.prediction, name=name, mode="markers",
+                                 marker=dict(color=color, symbol=shape, size=7)))
+    fig.update_layout(yaxis_title="Kaynağın getiri birimi", xaxis_title="Tarihsel hedef günü")
+    st.plotly_chart(fig, key="ise_predictions", width="stretch")
+    errors = curve.actual_return - curve.prediction
+    fig = go.Figure(go.Bar(x=curve.date, y=errors, name="Gerçekleşen − tahmin"))
+    fig.update_layout(yaxis_title="Tahmin hatası · kaynak birimi")
+    st.plotly_chart(fig, key="ise_errors", width="stretch")
+    st.subheader("Tarihsel sinyal inceleyicisi")
+    choices = curve.origin_index.tolist()
+    selected = st.selectbox("İncelenecek tarihsel hedef günü", choices, index=len(choices)-1,
+                            format_func=lambda i: curve.loc[curve.origin_index == i, "date"].iloc[0].date().isoformat(),
+                            key="ise_inspect_origin")
+    latest = curve.loc[curve.origin_index == selected].iloc[0]
+    st.write(f"{latest.date.date().isoformat()}: {latest.signal}. Tahmin {latest.prediction:.6f} kaynak birimi. "
+             f"Özellik sınırı {latest.feature_cutoff}; eğitim sınırı {latest.training_end}.")
+    top = latest.top_contributions
+    fig = go.Figure(go.Bar(x=[v["contribution"] for v in top], y=[v["feature"] for v in top], orientation="h"))
+    fig.update_layout(xaxis_title="İmzalı tahmin katkısı · kaynak birimi")
+    st.plotly_chart(fig, key="ise_contributions", width="stretch")
+    st.caption("Yalnızca en büyük üç doğrusal katkı gösterilir; bunlar toplam açıklama veya ekonomik nedensellik değildir. "
+               "Model doğruluğu ve referans modellere üstünlük ayrı ölçülür; zayıf sonuçlar gizlenmez.")
+    st.dataframe(curve[["date", "signal", "prediction", "actual_return", "training_end", "feature_cutoff"]],
+                 hide_index=True, width="stretch")
+    st.subheader("Dönem ve sinyal denetimi")
+    st.caption("Sonuçlar görüldükten sonra eklenen betimsel denetimdir; model veya eşik değiştirilmez. "
+               "Sinyal gruplarındaki oranlar geleceğe ait kalibre olasılık değildir.")
+    for text in detail["commentary"]:
+        st.write(text)
+    st.dataframe(pd.DataFrame(detail["folds"]), hide_index=True, width="stretch")
+    st.dataframe(pd.DataFrame(detail["signals"]), hide_index=True, width="stretch")
+    st.write({"Yukarı doğru": detail["confusion"]["tp"], "Yanlış yukarı": detail["confusion"]["fp"],
+              "Kaçırılan yukarı": detail["confusion"]["fn"], "Aşağı/sıfır doğru": detail["confusion"]["tn"]})
+    st.subheader("Eğitim ve doğrulama farkı")
+    st.caption("Aynı sabit modelin aynı eğitiminden hesaplanır; ek model araması yapılmaz. "
+               "Eğitim/doğrulama farkı, dönem dağılımı ve örneklem büyüklüğüyle birlikte yorumlanmalıdır; "
+               "tek başına aşırı uyumun kanıtı veya yokluğu değildir.")
+    st.dataframe(pd.DataFrame(summary["fold_fit_diagnostics"]), hide_index=True, width="stretch")

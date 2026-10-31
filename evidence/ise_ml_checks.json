@@ -1,0 +1,111 @@
+{
+  "base_commit": "0899e497aa9e3f4a383a44b7abbb7032a17fc9a7",
+  "registered_protocol_commit": "4c666242b7d8cf231798822ec3e86c57c294b748",
+  "implementation_commit": "d9ba5cd35924033231098f00676864c87a96d056",
+  "actual_results_commit": "f74910b4615795842f56ce532fea62c58ac77691",
+  "review_date": "2026-10-31",
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:18.126115+00:00",
+        "finished_at": "2026-10-31T12:19:18.472158+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:18.472158+00:00",
+        "finished_at": "2026-10-31T12:19:18.788390+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:18.788390+00:00",
+        "finished_at": "2026-10-31T12:19:19.063064+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 322,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T12:19:19.063064+00:00",
+        "finished_at": "2026-10-31T12:20:42.896586+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 568,
+    "skipped": 1
+  },
+  "new_tests": {
+    "ml_engine": 9,
+    "source_integrity": 6,
+    "ui": 8,
+    "post_hoc_diagnostics": 7
+  },
+  "source_inventory_files": 142,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_excludes_dates_on_or_after": "2026-10-26",
+  "source": {
+    "source_id": "uci247",
+    "license": "CC-BY-4.0",
+    "attribution": "Akbilgic, O. (2013). DOI 10.24432/C54P4J",
+    "raw_sha256": "a30838316290a83a98a52a46c30174e0204c963c0877627954ebc74111668922",
+    "normalized_sha256": "5c0b89dd85cc6a9af4c9e53b1cdf14ca00e961de40e50aaa968a1262e7b1dcb6",
+    "independent_reader_normalization_equal": true,
+    "first_date_from_file": "2009-01-05",
+    "last_date_from_file": "2011-02-22",
+    "landing_page_start_date_discrepancy_disclosed": true,
+    "return_semantics_verified": false,
+    "source_preprocessing": "Author paper reports previous-value filling of foreign indices"
+  },
+  "actual_evaluation": {
+    "rows": 107,
+    "period": "2010-04-13 through 2010-09-15",
+    "reserved_rows": 108,
+    "holdout_scored": false,
+    "parameter_search": false,
+    "economic_pnl_computed": false,
+    "individual_bist_stock_backtest_run": false,
+    "results_sha256": "f44f8ad27b0a1976554762610968dbc006a4aa216b6ab479dd751c01edc4c198",
+    "figure_sha256": "a4ae75c8ca7f4e891d05561daafe73f61763724336b5c3154928b06e7d886c6b",
+    "conclusion": "No reliable predictive advantage established; interval includes zero",
+    "unchanged_after_diagnostic_extension": true,
+    "diagnostics_sha256": "7c599814b133a58a12228a09a917998ac060f3e420908d6fe66a81bbd46576e6",
+    "diagnostic_scope": "Post-hoc descriptive, no refit or threshold/model changes",
+    "unchanged_after_integrity_audit": true,
+    "fit_audit_sha256": "64895876a4a875421803206830faac19725d32298726ed5c5f07abee01e7e0ce"
+  },
+  "actual_ui_smoke": {
+    "status": "passed",
+    "charts": 3,
+    "evaluated_rows": 107,
+    "replay_max": 428,
+    "holdout_scored": false,
+    "inspector_did_not_refit": true,
+    "cursor_change_invalidated_report": true,
+    "localhost_health_http": 200
+  },
+  "orders_sent": false,
+  "probabilities_released": false,
+  "local_log_sha256": {
+    "research_crypto.log": "4350b9c9b27aad42ac5c1eb6225d1c957da493052b695032b9eefd29896b78df",
+    "research_fx.log": "a15b4955ff74fdebad52dd7594e4e5acf75900ceb373b78b9473192d41c244c6",
+    "research_macro.log": "65d65f3484be62c498bea02610bfc3c1cf1266ab4543776040519228ef507ad8",
+    "research_workspace.log": "fda1d53270f4848fcb0b351765c7e6eb81cbf45185d7c1115242c6eab949e0e8"
+  },
+  "diagnostic_implementation_commit": "67254f09b7f8460ec8ab57fc9a2208b84dc92a15",
+  "integrity_audit_commit": "7cbc1fd910e368c0d2d3247907a350758edf8131",
+  "integrity_audit_evidence": "evidence/ise_ml_audit_checks.json",
+  "model_spec_sha256": "05bfa089fa2e3441401ce407f6774919062a2d874b4f3aaed3e60a9deb64ee40",
+  "experiment_sha256": "4931179e6b026c86b4ffebb114f9fc814c45709a0e5e7188f1eee5f56c03a00d"
+}
