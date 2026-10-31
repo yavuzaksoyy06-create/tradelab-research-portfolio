@@ -12,36 +12,36 @@
         "tests": 115,
         "skipped": 0,
         "exit_code": 0,
-        "started_at": "2026-10-31T11:53:51.702983+00:00",
-        "finished_at": "2026-10-31T11:53:52.213375+00:00"
+        "started_at": "2026-10-31T12:19:18.126115+00:00",
+        "finished_at": "2026-10-31T12:19:18.472158+00:00"
       },
       {
         "suite": "research_crypto",
         "tests": 100,
         "skipped": 1,
         "exit_code": 0,
-        "started_at": "2026-10-31T11:53:52.213375+00:00",
-        "finished_at": "2026-10-31T11:53:52.514965+00:00"
+        "started_at": "2026-10-31T12:19:18.472158+00:00",
+        "finished_at": "2026-10-31T12:19:18.788390+00:00"
       },
       {
         "suite": "research_fx",
         "tests": 31,
         "skipped": 0,
         "exit_code": 0,
-        "started_at": "2026-10-31T11:53:52.514965+00:00",
-        "finished_at": "2026-10-31T11:53:52.768228+00:00"
+        "started_at": "2026-10-31T12:19:18.788390+00:00",
+        "finished_at": "2026-10-31T12:19:19.063064+00:00"
       },
       {
         "suite": "research_workspace",
-        "tests": 308,
+        "tests": 322,
         "skipped": 0,
         "exit_code": 0,
-        "started_at": "2026-10-31T11:53:52.768228+00:00",
-        "finished_at": "2026-10-31T11:54:45.666308+00:00"
+        "started_at": "2026-10-31T12:19:19.063064+00:00",
+        "finished_at": "2026-10-31T12:20:42.896586+00:00"
       }
     ],
     "passed": true,
-    "tests": 554,
+    "tests": 568,
     "skipped": 1
   },
   "new_tests": {
@@ -50,7 +50,7 @@
     "ui": 8,
     "post_hoc_diagnostics": 7
   },
-  "source_inventory_files": 139,
+  "source_inventory_files": 142,
   "frozen_files_checked": 23,
   "frozen_changed": [],
   "prospective_gate": "2027-01-21 21:15:00+00:00",
@@ -81,7 +81,9 @@
     "conclusion": "No reliable predictive advantage established; interval includes zero",
     "unchanged_after_diagnostic_extension": true,
     "diagnostics_sha256": "7c599814b133a58a12228a09a917998ac060f3e420908d6fe66a81bbd46576e6",
-    "diagnostic_scope": "Post-hoc descriptive, no refit or threshold/model changes"
+    "diagnostic_scope": "Post-hoc descriptive, no refit or threshold/model changes",
+    "unchanged_after_integrity_audit": true,
+    "fit_audit_sha256": "64895876a4a875421803206830faac19725d32298726ed5c5f07abee01e7e0ce"
   },
   "actual_ui_smoke": {
     "status": "passed",
@@ -96,10 +98,14 @@
   "orders_sent": false,
   "probabilities_released": false,
   "local_log_sha256": {
-    "research_crypto.log": "3ea3f2d1c91a1c92740b7078b4362ce3989b0ad70e22e20f6c83e410f4a4f648",
-    "research_fx.log": "7cbc16f2b7a8d4a42cb05fd29957b2f0dc7c0f9144ba23c0437a2dd89a6d7bac",
-    "research_macro.log": "b946f4d7aae852a0a15a4c3058406f91d4debd6ea7c474cfdfe720cb73789c1d",
-    "research_workspace.log": "1f0e7faab0c91802fcc3cc53a0003f2ceefaf925c4aafdee348b76b2d7a42184"
+    "research_crypto.log": "4350b9c9b27aad42ac5c1eb6225d1c957da493052b695032b9eefd29896b78df",
+    "research_fx.log": "a15b4955ff74fdebad52dd7594e4e5acf75900ceb373b78b9473192d41c244c6",
+    "research_macro.log": "65d65f3484be62c498bea02610bfc3c1cf1266ab4543776040519228ef507ad8",
+    "research_workspace.log": "fda1d53270f4848fcb0b351765c7e6eb81cbf45185d7c1115242c6eab949e0e8"
   },
-  "diagnostic_implementation_commit": "67254f09b7f8460ec8ab57fc9a2208b84dc92a15"
+  "diagnostic_implementation_commit": "67254f09b7f8460ec8ab57fc9a2208b84dc92a15",
+  "integrity_audit_commit": "7cbc1fd910e368c0d2d3247907a350758edf8131",
+  "integrity_audit_evidence": "evidence/ise_ml_audit_checks.json",
+  "model_spec_sha256": "05bfa089fa2e3441401ce407f6774919062a2d874b4f3aaed3e60a9deb64ee40",
+  "experiment_sha256": "4931179e6b026c86b4ffebb114f9fc814c45709a0e5e7188f1eee5f56c03a00d"
 }

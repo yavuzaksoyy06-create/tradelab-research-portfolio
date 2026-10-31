@@ -1,0 +1,105 @@
+{
+  "base_commit": "0899e497aa9e3f4a383a44b7abbb7032a17fc9a7",
+  "registered_protocol_commit": "4c666242b7d8cf231798822ec3e86c57c294b748",
+  "implementation_commit": "d9ba5cd35924033231098f00676864c87a96d056",
+  "actual_results_commit": "f74910b4615795842f56ce532fea62c58ac77691",
+  "review_date": "2026-10-31",
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T11:53:51.702983+00:00",
+        "finished_at": "2026-10-31T11:53:52.213375+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-10-31T11:53:52.213375+00:00",
+        "finished_at": "2026-10-31T11:53:52.514965+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T11:53:52.514965+00:00",
+        "finished_at": "2026-10-31T11:53:52.768228+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 308,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-10-31T11:53:52.768228+00:00",
+        "finished_at": "2026-10-31T11:54:45.666308+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 554,
+    "skipped": 1
+  },
+  "new_tests": {
+    "ml_engine": 9,
+    "source_integrity": 6,
+    "ui": 8,
+    "post_hoc_diagnostics": 7
+  },
+  "source_inventory_files": 139,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_excludes_dates_on_or_after": "2026-10-26",
+  "source": {
+    "source_id": "uci247",
+    "license": "CC-BY-4.0",
+    "attribution": "Akbilgic, O. (2013). DOI 10.24432/C54P4J",
+    "raw_sha256": "a30838316290a83a98a52a46c30174e0204c963c0877627954ebc74111668922",
+    "normalized_sha256": "5c0b89dd85cc6a9af4c9e53b1cdf14ca00e961de40e50aaa968a1262e7b1dcb6",
+    "independent_reader_normalization_equal": true,
+    "first_date_from_file": "2009-01-05",
+    "last_date_from_file": "2011-02-22",
+    "landing_page_start_date_discrepancy_disclosed": true,
+    "return_semantics_verified": false,
+    "source_preprocessing": "Author paper reports previous-value filling of foreign indices"
+  },
+  "actual_evaluation": {
+    "rows": 107,
+    "period": "2010-04-13 through 2010-09-15",
+    "reserved_rows": 108,
+    "holdout_scored": false,
+    "parameter_search": false,
+    "economic_pnl_computed": false,
+    "individual_bist_stock_backtest_run": false,
+    "results_sha256": "f44f8ad27b0a1976554762610968dbc006a4aa216b6ab479dd751c01edc4c198",
+    "figure_sha256": "a4ae75c8ca7f4e891d05561daafe73f61763724336b5c3154928b06e7d886c6b",
+    "conclusion": "No reliable predictive advantage established; interval includes zero",
+    "unchanged_after_diagnostic_extension": true,
+    "diagnostics_sha256": "7c599814b133a58a12228a09a917998ac060f3e420908d6fe66a81bbd46576e6",
+    "diagnostic_scope": "Post-hoc descriptive, no refit or threshold/model changes"
+  },
+  "actual_ui_smoke": {
+    "status": "passed",
+    "charts": 3,
+    "evaluated_rows": 107,
+    "replay_max": 428,
+    "holdout_scored": false,
+    "inspector_did_not_refit": true,
+    "cursor_change_invalidated_report": true,
+    "localhost_health_http": 200
+  },
+  "orders_sent": false,
+  "probabilities_released": false,
+  "local_log_sha256": {
+    "research_crypto.log": "3ea3f2d1c91a1c92740b7078b4362ce3989b0ad70e22e20f6c83e410f4a4f648",
+    "research_fx.log": "7cbc16f2b7a8d4a42cb05fd29957b2f0dc7c0f9144ba23c0437a2dd89a6d7bac",
+    "research_macro.log": "b946f4d7aae852a0a15a4c3058406f91d4debd6ea7c474cfdfe720cb73789c1d",
+    "research_workspace.log": "1f0e7faab0c91802fcc3cc53a0003f2ceefaf925c4aafdee348b76b2d7a42184"
+  },
+  "diagnostic_implementation_commit": "67254f09b7f8460ec8ab57fc9a2208b84dc92a15"
+}
