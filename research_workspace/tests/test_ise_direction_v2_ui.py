@@ -89,6 +89,25 @@ class DirectionV2UITests(unittest.TestCase):
             self.assertEqual(len(at.json), 0)
             self.assertTrue(any("V2_CACHE_REJECTED" in x.value for x in at.error))
 
+    def test_malformed_loaded_snapshot_fails_closed_without_fit_or_display(self):
+        with patch("research_workspace.ise_direction_v2_ui.read_snapshot") as read, \
+             patch("research_workspace.ise_direction_v2_ui.evaluate_v2") as model:
+            for value in ((), ("",), ("", None, None, "extra"), ["", None, None], {"private": "SECRET"}):
+                with self.subTest(snapshot_type=type(value).__name__, size=len(value)):
+                    at = self.app()
+                    at.session_state["ise_v2_loaded_snapshot"] = value
+                    at.session_state["ise_v2_cached_report"] = ("stale",)
+                    at.run()
+                    self.assertFalse(at.exception)
+                    self.assertEqual(len(at.get("plotly_chart")), 0)
+                    self.assertEqual(len(at.json), 0)
+                    self.assertTrue(any("V2_CACHE_REJECTED" in x.value for x in at.error))
+                    self.assertNotIn("ise_v2_loaded_snapshot", at.session_state)
+                    self.assertNotIn("ise_v2_cached_report", at.session_state)
+                    self.assertNotIn("SECRET", " ".join(x.value for x in at.error))
+            read.assert_not_called()
+            model.assert_not_called()
+
     def test_rejected_path_and_provider_error_never_echo_private_content(self):
         with patch("research_workspace.ise_direction_v2_ui.read_snapshot") as read:
             at = self.load(r"\\server\share\SECRET")

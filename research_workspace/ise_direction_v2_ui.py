@@ -50,12 +50,18 @@ def render():
             st.error("V2_LOAD_REJECTED · Yerel yol, kaynak ve kayıt hash'lerini kontrol edin.")
             return
     snapshot = st.session_state.get(SNAPSHOT_KEY)
-    if snapshot is None or snapshot[0] != path:
+    if snapshot is None:
         st.session_state.pop(REPORT_KEY, None)
         st.info("Veri yüklenmedi; model veya sonuç üretilmedi. Otomatik indirme yapılmaz.")
         return
-    _, frame, meta = snapshot
     try:
+        if not isinstance(snapshot, tuple) or len(snapshot) != 3 or not isinstance(snapshot[0], str):
+            raise ValueError("Invalid snapshot")
+        if snapshot[0] != path:
+            st.session_state.pop(REPORT_KEY, None)
+            st.info("Veri yüklenmedi; model veya sonuç üretilmedi. Otomatik indirme yapılmaz.")
+            return
+        _, frame, meta = snapshot
         validate_registration(frame, meta)
         experiment = experiment_sha256(meta)
     except Exception:
