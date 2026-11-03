@@ -1,5 +1,17 @@
 # Validation evidence
 
+## Execution robustness checkpoint — 3 November 2026
+
+The current local public-source regression executed **643 tests: 642 passed, one existing Windows symlink-privilege skip, zero failures**. Macro/crypto/FX/workspace suite counts are 115/100/31/397. This replaces no historical evidence: the preceding `7e0fbd8` test results and 151-file source inventory are preserved in `evidence/archive/`.
+
+GitHub's independent Windows job for implementation `9b05d1c` passed **all 643 tests with zero skips/failures**: [Actions #70](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/41662381516). Direct job logs confirm all four suite counts; documentation and figure-label updates do not change the tested engine.
+
+The checkpoint adds 52 execution-engineering tests (15 rehearsal, 11 independent ledger recovery, 10 stress diagnostics, 12 UI, four CLI) and one v2 malformed-cache regression. Four malformed-cache cases failed before the correction; the final-close intent regression also failed before its correction. Tests independently check accounting, semantic forgeries with recomputed hashes, truncation, causal intent timing, delayed-session cancellation, halt behavior, future-dependent curves and omitted events. Actual app-menu smoke checks produced two rehearsal charts and one stress-comparison chart without errors.
+
+The synthetic 260-bar execution evidence passes all exercised diagnostics. It is not real-market validation. All 23 tracked frozen V4/V4.1 files and five protected v1 files remain byte-identical to their reference commits. V2 model/evaluation code, pinned specification and original result artifacts are unchanged. The source inventory now covers 162 source/test/config files.
+
+[Current machine-readable audit](../evidence/execution_robustness_checks.json) · [Current test results](../evidence/public_test_results.json) · [Execution methodology](EXECUTION_ROBUSTNESS_LAB.md)
+
 ## Public package verification — 28 October 2026 (Europe/Istanbul)
 
 The curated source copy was tested separately from the original checkout:

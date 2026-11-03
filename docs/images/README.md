@@ -10,3 +10,7 @@ Updated 29 October 2026. These are reproducible analytical figures, not generate
 Run `python -B tools/build_readme_figures.py` from the repository root in the configured Python 3.12 environment. The script needs the existing plotting and research dependencies, performs no downloads, reads no private caches and never invokes a trading or frozen evaluation runner. `readme-figure-sources.json` records source values and SHA-256 hashes for the generated files.
 
 Older UI captures remain preserved in this directory. They are not represented as screenshots of the current Stage 7 interface. The README now prioritizes quantified findings and an explicitly synthetic view of the current causal code.
+
+## Execution-system figure — 3 November 2026
+
+`bot_rehearsal/execution_robustness.png` comes from `tools/build_bot_rehearsal_report.py` and the deterministic `equity_data.synthetic_fixture`. Its 260 bars are synthetic prices on historical calendar timestamps. It compares four fixed execution assumptions, not optimized strategies or real-market performance. Exact stress, rehearsal-journal and recovered-account JSON files are retained alongside it. No private data, reserved observations or broker connections are used. Generate into a new directory with `python -B tools/build_bot_rehearsal_report.py --output C:\PrivateTradeLabData\new-synthetic-execution-report`.

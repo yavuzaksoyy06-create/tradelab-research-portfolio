@@ -54,8 +54,8 @@ def build(output):
     ax.set_xlabel("Hypothetical net account change ($)")
     ax.set_title("All registered cases retained; no winner selected", loc="left", fontsize=10)
     for i, row in enumerate(rows):
-        ax.text(row["net_pnl"] + 22, i, f"fees ${row['total_fees']:.2f} · {row['fill_count']} fills",
-                va="center", fontsize=8, color="white", weight="bold")
+        ax.text(row["net_pnl"] / 2, i, f"${row['total_fees']:.0f} fees / {row['fill_count']} fills",
+                va="center", ha="center", fontsize=8, color="white", weight="bold")
     ax.axvline(0, color="#677384", linewidth=.7)
     ax.grid(axis="x", alpha=.18)
     ax = fig.add_subplot(grid[1, 1])
