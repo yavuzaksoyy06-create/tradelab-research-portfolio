@@ -1,0 +1,134 @@
+{
+  "schema": "tradelab.strategy-planner-checkpoint.v1",
+  "previous_checkpoint": "a4e3ef439fbf349cc88d01be465fa3c2edc6af74",
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-09T12:52:41.801873+00:00",
+        "finished_at": "2026-11-09T12:52:42.291524+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-11-09T12:52:42.291524+00:00",
+        "finished_at": "2026-11-09T12:52:42.574345+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-09T12:52:42.574345+00:00",
+        "finished_at": "2026-11-09T12:52:42.811658+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 439,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-09T12:52:42.811658+00:00",
+        "finished_at": "2026-11-09T12:54:08.080742+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 685,
+    "skipped": 1
+  },
+  "source_inventory_files": 170,
+  "frozen_files_checked": 23,
+  "protected_v1_files": 5,
+  "unchanged_v2_files": 5,
+  "unchanged_legacy_execution_artifacts": {
+    "docs/images/bot_rehearsal/synthetic_rehearsal.json": "91ba03030428994f36db825ef736aabc8ab93ef018ae2f2a1bbbca095424b537",
+    "docs/images/bot_rehearsal/synthetic_stress.json": "d37be5924bdcb4128ac81cde0656086e7ec802c669cedfb6ba1f67b75aedf6f7",
+    "docs/images/bot_rehearsal/synthetic_recovered_account.json": "7f57395e715087517bd25bb199d2961723d19c41cdebd53c3bc96973654f1042",
+    "docs/images/bot_rehearsal/execution_robustness.png": "e5fcf9ba42a73731e0d7f7e8b14da51a7202f2b255f106c6737d48b44e10c043"
+  },
+  "new_tests": {
+    "strategy_schema": 10,
+    "draft_integration": 9,
+    "durable_outbox": 14,
+    "strategy_ui": 6,
+    "frozen_plan_stress": 2,
+    "cli_end_to_end": 1
+  },
+  "synthetic_demo": {
+    "plan": {
+      "content": {
+        "schema": "tradelab.strategy-plan.v1",
+        "mode": "OFFLINE_RESEARCH_ONLY",
+        "status": "UNVALIDATED",
+        "orders_enabled": false,
+        "name": "Channel rehearsal",
+        "symbol": "QQQ",
+        "rule": "channel_breakout",
+        "fast": 9,
+        "slow": 21,
+        "max_position_bps": 1000,
+        "planned_risk_bps": 50,
+        "stop_bps": 200,
+        "target_bps": 400,
+        "session_loss_bps": 200,
+        "max_holding_bars": 4
+      },
+      "sha256": "542721ad078966784620e1b6a973003fbf4eb355eb667e754208c76f0752e30c"
+    },
+    "drafts": 14,
+    "replay_rows": 260,
+    "source_sha256": "013ec06db66a0b211556114fb045f115aabccf46e461703eba5367bc4f4928f6",
+    "report_sha256": "3171aaa3970d61f369c66074810821d7552112beb77c0eaabe6c25161dcb0a7d",
+    "policy_sha256": "43600bb0ae44ecc3265ec866fa075dca135a5f02002add7de4c0a90e2610e7be",
+    "stress_sha256": "ed6f767b1fe72083b6e33604d6003ad457cfb3bfedca48949c0b29b7361d644b",
+    "stress_status": "PASSED_DIAGNOSTICS",
+    "scenarios": [
+      "baseline",
+      "high_cost",
+      "delay_1_bar",
+      "high_cost_delay_1_bar"
+    ],
+    "staged": {
+      "inserted": 14,
+      "duplicates": 0
+    },
+    "retried": {
+      "inserted": 0,
+      "duplicates": 14
+    },
+    "halted": {
+      "cancelled": 14,
+      "halted": true
+    },
+    "recovered_head": "b8e52ebd5e2516fba98ec5514d1eb197b12227e5f063482b33166005466e883e",
+    "recovered_events": 15,
+    "synthetic": true,
+    "dispatch_allowed": false,
+    "orders_sent": 0
+  },
+  "verified_behaviors": {
+    "crash_after_dirty_sqlite_pages_rolled_back": true,
+    "concurrent_expected_head_only_one_writer": true,
+    "restored_old_head_cannot_mutate": true,
+    "legacy_rehearsal_and_stress_reproduced_byte_for_byte": true,
+    "planner_app_route_downloads": 3,
+    "localhost_http": 200
+  },
+  "protections": {
+    "v4_v41_byte_identical": true,
+    "prospective_gate_utc": "2027-01-21T21:15:00Z",
+    "stage7_sealed_start": "2026-10-26",
+    "reserved_ise_rows": 108,
+    "reserved_bist_year": 2025,
+    "real_orders_sent": 0,
+    "paper_orders_sent": 0,
+    "replay_orders_sent": 0,
+    "live_broker_adapter": false,
+    "ml_model_promoted": false
+  }
+}

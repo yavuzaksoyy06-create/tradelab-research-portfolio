@@ -11,7 +11,9 @@ import math
 
 import pandas as pd
 
-from research_workspace.stage7_events import validated_history, replay_limit, fingerprint
+from research_workspace.equity_data import MAX_BARS
+from research_workspace.stage7_events import SEALED_START, validated_history, replay_limit, fingerprint
+from research_workspace.bot_strategy import _unique_object, validate_strategy_plan, strategy_signals
 
 
 @dataclass(frozen=True)
@@ -45,13 +47,28 @@ def _sha(value):
     return hashlib.sha256(_canonical(value)).hexdigest()
 
 
-def _scenario_policy(scenario):
+def _scenario_policy(scenario, plan_content=None):
     if type(scenario) is not str or scenario not in SCENARIOS:
         raise ValueError("BOT_SCENARIO_UNREGISTERED")
     high_cost = scenario in ("high_cost", "high_cost_delay_1_bar")
     delay = 1 if scenario in ("delay_1_bar", "high_cost_delay_1_bar") else 0
     policy = replace(_POLICY, fee_bps=10., slippage_bps=15.) if high_cost else _POLICY
-    return policy, delay, {**asdict(policy), "additional_delay_bars": delay}
+    if plan_content is not None:
+        policy = replace(
+            policy,
+            maximum_position_fraction=plan_content["max_position_bps"] / 10_000,
+            planned_risk_fraction=plan_content["planned_risk_bps"] / 10_000,
+            stop_fraction=plan_content["stop_bps"] / 10_000,
+            target_fraction=plan_content["target_bps"] / 10_000,
+            session_loss_fraction=plan_content["session_loss_bps"] / 10_000,
+            maximum_holding_bars=plan_content["max_holding_bars"],
+        )
+    descriptor = {**asdict(policy), "additional_delay_bars": delay}
+    if plan_content is not None:
+        del descriptor["fast_ema"], descriptor["slow_ema"]
+        descriptor.update(strategy_plan_sha256=_sha(plan_content),
+                          rule=plan_content["rule"], fast=plan_content["fast"], slow=plan_content["slow"])
+    return policy, delay, descriptor
 
 
 def readiness_report():
@@ -68,13 +85,16 @@ def readiness_report():
                          "NO_BROKER_ADAPTER_OR_ORDER_PERMISSION"]}
 
 
-def run_rehearsal(frame, metadata, *, visible_count=None, halt_at=None, scenario="baseline"):
-    """Replay fixed long/flat EMA plumbing with next-bar fills and one position.
+def run_rehearsal(frame, metadata, *, visible_count=None, halt_at=None, scenario="baseline", plan=None):
+    """Replay a frozen plan or the default EMA fixture with one long position.
 
     Full-snapshot validation and holdout allocation precede prefix slicing.
     No model fitting, downloads, persistence or external orders occur here.
     """
-    p, delay, policy = _scenario_policy(scenario)
+    plan_content = validate_strategy_plan(plan) if plan is not None else None
+    if plan_content is not None and plan_content["symbol"] != metadata.get("symbol"):
+        raise ValueError("BOT_STRATEGY_SYMBOL_MISMATCH")
+    p, delay, policy = _scenario_policy(scenario, plan_content)
     clean = validated_history(frame, metadata)
     boundary = replay_limit(clean)
     if visible_count is None:
@@ -86,8 +106,12 @@ def run_rehearsal(frame, metadata, *, visible_count=None, halt_at=None, scenario
     bars = clean.iloc[:visible_count].copy()
     policy_hash = _sha(policy)
     fee, slip = p.fee_bps / 10_000, p.slippage_bps / 10_000
-    fast = bars.close.ewm(span=p.fast_ema, adjust=False, min_periods=p.fast_ema).mean()
-    slow = bars.close.ewm(span=p.slow_ema, adjust=False, min_periods=p.slow_ema).mean()
+    if plan_content is None:
+        fast = bars.close.ewm(span=p.fast_ema, adjust=False, min_periods=p.fast_ema).mean()
+        slow = bars.close.ewm(span=p.slow_ema, adjust=False, min_periods=p.slow_ema).mean()
+        enter, exit_signal = (fast > slow).to_numpy(), (fast <= slow).to_numpy()
+    else:
+        enter, exit_signal = strategy_signals(bars.close, plan_content)
     cash, quantity, entry_cost, stop, target, held = p.starting_cash, 0, 0., 0., 0., 0
     pending, halted, session, day_equity = None, False, None, p.starting_cash
     journal, curve, used_ids = [], [], set()
@@ -160,7 +184,8 @@ def run_rehearsal(frame, metadata, *, visible_count=None, halt_at=None, scenario
                     total_fees += commission
                     stop, target, held = price * (1 - p.stop_fraction), price * (1 + p.target_fraction), 0
                     event("FILL", i, row.timestamp, side="BUY", quantity=quantity, price=price,
-                          fee=commission, reason="EMA_PLUMBING_ONLY", intent_id=intent["id"],
+                          fee=commission, reason="STRATEGY_ENTRY" if plan_content is not None else "EMA_PLUMBING_ONLY",
+                          intent_id=intent["id"],
                           cash_after=cash, position_after=quantity, stop=stop, target=target,
                           planned_risk=quantity * unit_loss, equity_before=equity)
                 else:
@@ -195,9 +220,9 @@ def run_rehearsal(frame, metadata, *, visible_count=None, halt_at=None, scenario
         # Signals see only the completed close. No entry on the last session bar,
         # and no replacement entry on an exit bar. The final visible close may
         # create an unfilled intent; it never requires or reads a future bar.
-        if not pending and not final_session_bar and not halted and not exited and pd.notna(slow.iloc[i]):
-            side = "BUY" if fast.iloc[i] > slow.iloc[i] and quantity == 0 else (
-                "SELL" if fast.iloc[i] <= slow.iloc[i] and quantity > 0 else None)
+        if not pending and not final_session_bar and not halted and not exited:
+            side = "BUY" if enter[i] and quantity == 0 else (
+                "SELL" if exit_signal[i] and quantity > 0 else None)
             if side:
                 intent = {"side": side, "signal_index": i, "execute_index": i + 1 + delay}
                 intent["id"] = _sha({"symbol": metadata["symbol"], "observed_at": row.bar_end.isoformat(),
@@ -225,6 +250,9 @@ def run_rehearsal(frame, metadata, *, visible_count=None, halt_at=None, scenario
                                "Gap losses can exceed planned risk; halts cannot guarantee a maximum loss",
                                "Open replay-end positions are marked, not fabricated as completed exits",
                                "No external orders, connection, credentials or durable live recovery"]}
+    if plan_content is not None:
+        summary["strategy_plan"] = {"content": plan_content, "sha256": policy["strategy_plan_sha256"]}
+        summary["limitations"][0] = "The frozen plan is an unvalidated hypothesis for offline rehearsal"
     if abs(summary["ending_equity"] - p.starting_cash - realized - summary["unrealized_pnl"]) > 1e-7:
         raise ValueError("BOT_PNL_RECONCILIATION")
     return summary, curve, journal
@@ -246,7 +274,7 @@ def verify_report(payload):
     if not isinstance(payload, bytes) or not 0 < len(payload) <= MAX_REPORT_BYTES:
         raise ValueError("BOT_REPORT_SIZE")
     try:
-        report = json.loads(payload.decode("utf-8"))
+        report = json.loads(payload.decode("utf-8"), object_pairs_hook=_unique_object)
         if set(report) != {"content", "sha256"} or not hmac.compare_digest(report["sha256"], _sha(report["content"])):
             raise ValueError("Digest")
         content, previous = report["content"], _ZERO
@@ -264,12 +292,17 @@ def verify_report(payload):
                 summary["visible_bars"] != len(content["curve"]) or
                 summary["mode"] != "OFFLINE_REHEARSAL_ONLY" or
                 any(type(summary[k]) is not int or summary[k] != 0 for k in ("real_orders_sent", "paper_orders_sent", "model_fits")) or
-                summary["holdout_scored"] is not False or summary["strategy_validated"] is not False):
+                summary["holdout_scored"] is not False or summary["strategy_validated"] is not False or
+                summary["economic_performance_claim"] is not False or
+                type(summary["ise_reserved_rows"]) is not int or summary["ise_reserved_rows"] != 108):
             raise ValueError("Bounds")
         from research_workspace.bot_ledger import recover_ledger
         recovered = recover_ledger(content["journal"], expected_head=previous)
-        expected_policy, delay, policy = _scenario_policy(summary["scenario"])
-        if (summary["policy"] != policy or summary["policy_sha256"] != _sha(policy) or
+        plan_content = validate_strategy_plan(summary["strategy_plan"]) if "strategy_plan" in summary else None
+        if plan_content is not None and plan_content["symbol"] != summary["symbol"]:
+            raise ValueError("Plan symbol")
+        expected_policy, delay, policy = _scenario_policy(summary["scenario"], plan_content)
+        if (_canonical(summary["policy"]) != _canonical(policy) or summary["policy_sha256"] != _sha(policy) or
                 recovered["policy_sha256"] != summary["policy_sha256"] or
                 recovered["symbol"] != summary["symbol"] or
                 type(summary["synthetic"]) is not bool or recovered["synthetic"] != summary["synthetic"] or
@@ -299,13 +332,18 @@ def verify_report(payload):
             if type(summary[key]) not in (float, int) or abs(summary[key] - recovered[key]) > 1e-7:
                 raise ValueError("Recovered balances")
         cash, qty, halted, event_index, prior_stamp = recovered["starting_cash"], 0, False, 0, None
-        if type(summary["visible_bars"]) is not int or not 0 < summary["visible_bars"] <= summary["replay_limit"]:
+        count_fields = ("visible_bars", "replay_limit", "snapshot_bars", "reserved_snapshot_bars")
+        if (any(type(summary[k]) is not int for k in count_fields) or
+                not 0 < summary["visible_bars"] <= summary["replay_limit"] <= summary["snapshot_bars"] <= MAX_BARS or
+                summary["reserved_snapshot_bars"] != summary["snapshot_bars"] - summary["replay_limit"]):
             raise ValueError("Replay bound")
         for i, row in enumerate(content["curve"]):
             if set(row) != {"timestamp", "close", "cash", "position", "equity", "halted"}:
                 raise ValueError("Curve schema")
             stamp = pd.Timestamp(row["timestamp"])
-            if pd.isna(stamp) or stamp.tzinfo is None or prior_stamp is not None and stamp <= prior_stamp:
+            if (pd.isna(stamp) or stamp.tzinfo is None or
+                    stamp.tz_convert("America/New_York").date().isoformat() >= SEALED_START or
+                    prior_stamp is not None and stamp <= prior_stamp):
                 raise ValueError("Curve time")
             prior_stamp = stamp
             while event_index < len(content["journal"]) and content["journal"][event_index]["bar_index"] <= i:
@@ -327,5 +365,5 @@ def verify_report(payload):
                 abs(summary["unrealized_pnl"] - qty * last["close"] + recovered["entry_cost"]) > 1e-7):
             raise ValueError("Curve end balance")
         return content
-    except (ValueError, TypeError, KeyError, UnicodeError, AttributeError, OverflowError):
+    except (ValueError, TypeError, KeyError, UnicodeError, AttributeError, OverflowError, RecursionError):
         raise ValueError("BOT_REPORT_REJECTED") from None

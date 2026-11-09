@@ -11,11 +11,11 @@ import math
 import numpy as np
 import pandas as pd
 
-from research_workspace.bot_rehearsal import run_rehearsal
+from research_workspace.bot_rehearsal import SCENARIOS, _scenario_policy, run_rehearsal
 from research_workspace.bot_ledger import recover_ledger
+from research_workspace.bot_strategy import validate_strategy_plan
 from research_workspace.stage7_events import validated_history, replay_limit
 
-SCENARIOS = ("baseline", "high_cost", "delay_1_bar", "high_cost_delay_1_bar")
 MAX_REPORT_BYTES = 8_000_000
 
 
@@ -61,12 +61,12 @@ def _same_curve(first, second):
     return True
 
 
-def _prefix_audit(frame, metadata, summary, curve, journal):
+def _prefix_audit(frame, replay, summary, curve, journal):
     n = summary["visible_bars"]
     counts = sorted({count for count in (21, n // 2, n - 1) if 1 <= count < n})
     checks = []
     for count in counts:
-        prefix_summary, prefix_curve, prefix_events = run_rehearsal(frame, metadata, visible_count=count)
+        prefix_summary, prefix_curve, prefix_events = replay(frame, visible_count=count)
         curve_equal = _same_curve(prefix_curve, curve.iloc[:count])
         expected_events = [event for event in journal if event["bar_index"] < count]
         journal_equal = prefix_events == expected_events
@@ -79,7 +79,7 @@ def _prefix_audit(frame, metadata, summary, curve, journal):
                       "INSUFFICIENT_PREFIXES" if not checks else "FAILED"}
 
 
-def _future_suffix_audit(frame, metadata, summary, baseline_curve):
+def _future_suffix_audit(frame, metadata, replay, summary, baseline_curve):
     count = summary["visible_bars"] // 2
     if count < 1 or count >= summary["visible_bars"]:
         return {"status": "INSUFFICIENT_PREFIXES", "checked_prefixes": 0}
@@ -89,7 +89,7 @@ def _future_suffix_audit(frame, metadata, summary, baseline_curve):
     columns = ["open", "high", "low", "close"]
     altered.loc[altered.index[count:summary["visible_bars"]], columns] *= 1.25
     try:
-        _, changed_curve, _ = run_rehearsal(altered, metadata, visible_count=count)
+        _, changed_curve, _ = replay(altered, visible_count=count)
     except ValueError as exc:
         # A source-bound immutable snapshot is expected to reject any byte/value
         # change. Keep its registration intact rather than forging a new one.
@@ -121,13 +121,13 @@ def _source_guards(frame, metadata):
     return checks
 
 
-def _halt_audit(frame, metadata, summary, journal):
+def _halt_audit(frame, replay, summary, journal):
     buys = [event for event in journal if event["kind"] == "FILL" and event["side"] == "BUY"]
     available = [event for event in buys if event["bar_index"] + 1 < summary["visible_bars"]]
     if not available:
         return {"status": "NOT_EXERCISED_NO_ELIGIBLE_ENTRY", "orders_sent": 0}
     halt_at = available[0]["bar_index"] + 1
-    stopped, _, events = run_rehearsal(frame, metadata, visible_count=summary["visible_bars"], halt_at=halt_at)
+    stopped, _, events = replay(frame, visible_count=summary["visible_bars"], halt_at=halt_at)
     halts = [event for event in events if event["kind"] == "HALT"]
     halted_sequence = halts[0]["sequence"] if halts else -1
     late_entries = [event for event in events if event["kind"] == "FILL" and
@@ -166,29 +166,44 @@ def _ledger_audit(outputs):
             "scope": "Offline account reconstruction, not durable broker restart or exchange reconciliation"}
 
 
-def run_stress_suite(frame, metadata, *, visible_count=None):
+def run_stress_suite(frame, metadata, *, visible_count=None, plan=None):
     """Run a fixed sensitivity grid and integrity probes; never pick a winner.
 
-    Returns JSON-ready, hash-bound evidence. It is not independent validation,
-    live recovery, strategy optimization or authorization for external orders.
+    Returns JSON-ready, hash-bound evidence. All cases and probes use the same
+    validated plan snapshot when supplied.
     """
+    frozen_plan = None
+    if plan is not None:
+        plan_content = validate_strategy_plan(plan)
+        if plan_content["symbol"] != metadata.get("symbol"):
+            raise ValueError("BOT_STRESS_STRATEGY_SYMBOL_MISMATCH")
+        frozen_plan = {"content": plan_content, "sha256": _sha(plan_content)}
+
+    def replay(bars, **settings):
+        if frozen_plan is not None:
+            settings["plan"] = frozen_plan
+        summary, curve, journal = run_rehearsal(bars, metadata, **settings)
+        if summary.get("strategy_plan") != frozen_plan:
+            raise ValueError("BOT_STRESS_STRATEGY_PLAN_MISMATCH")
+        return summary, curve, journal
+
     clean = validated_history(frame, metadata)
     maximum = replay_limit(clean)
     if visible_count is None:
         visible_count = maximum
     if type(visible_count) is not int or not 1 <= visible_count <= maximum:
         raise ValueError("BOT_STRESS_VISIBLE_PREFIX_RESERVED_OR_INVALID")
-    outputs = {scenario: run_rehearsal(clean, metadata, visible_count=visible_count, scenario=scenario)
+    outputs = {scenario: replay(clean, visible_count=visible_count, scenario=scenario)
                for scenario in SCENARIOS}
     baseline, baseline_curve, baseline_journal = outputs["baseline"]
     comparison = [_statistics(*outputs[scenario]) for scenario in SCENARIOS]
     equity_curves = {scenario: [{"timestamp": row.timestamp.isoformat(), "equity": float(row.equity)}
                                 for row in curve.itertuples(index=False)]
                      for scenario, (_, curve, _) in outputs.items()}
-    diagnostics = {"prefix_replay": _prefix_audit(clean, metadata, baseline, baseline_curve, baseline_journal),
-                   "future_suffix": _future_suffix_audit(clean, metadata, baseline, baseline_curve),
+    diagnostics = {"prefix_replay": _prefix_audit(clean, replay, baseline, baseline_curve, baseline_journal),
+                   "future_suffix": _future_suffix_audit(clean, metadata, replay, baseline, baseline_curve),
                    "source_guards": _source_guards(clean, metadata),
-                   "manual_halt": _halt_audit(clean, metadata, baseline, baseline_journal),
+                   "manual_halt": _halt_audit(clean, replay, baseline, baseline_journal),
                    "journal_recovery": _ledger_audit(outputs)}
     statuses = [diagnostics["prefix_replay"]["status"], diagnostics["future_suffix"]["status"],
                 diagnostics["manual_halt"]["status"], diagnostics["journal_recovery"]["status"]]
@@ -212,6 +227,8 @@ def run_stress_suite(frame, metadata, *, visible_count=None):
                                "Costs, latency and OHLC fills are assumptions; liquidity and order queues are not reconstructed",
                                "Passing code diagnostics does not establish a profitable or deployable strategy",
                                "Hashes detect accidental changes, not an owner who can rewrite code and recompute hashes"]}
+    if frozen_plan is not None:
+        content["strategy_plan"] = frozen_plan
     report = {"content": content, "sha256": _sha(content)}
     verify_stress_report(report)
     return report
@@ -240,6 +257,17 @@ def verify_stress_report(report):
                 set(content["equity_curves"]) != set(SCENARIOS) or
                 any(len(curve) != content["visible_bars"] for curve in content["equity_curves"].values())):
             raise ValueError("Bounds")
+        plan_content = (validate_strategy_plan(content["strategy_plan"])
+                        if "strategy_plan" in content else None)
+        if plan_content is not None and plan_content["symbol"] != content["symbol"]:
+            raise ValueError("Strategy symbol")
+        for row in content["comparison"]:
+            policy, delay, descriptor = _scenario_policy(row["scenario"], plan_content)
+            if (row["policy_sha256"] != _sha(descriptor)
+                    or type(row["fee_bps"]) not in (int, float) or row["fee_bps"] != policy.fee_bps
+                    or type(row["slippage_bps"]) not in (int, float) or row["slippage_bps"] != policy.slippage_bps
+                    or type(row["additional_delay_bars"]) is not int or row["additional_delay_bars"] != delay):
+                raise ValueError("Scenario policy")
         return content
-    except (ValueError, TypeError, KeyError, UnicodeError, AttributeError, OverflowError):
+    except (ValueError, TypeError, KeyError, UnicodeError, AttributeError, OverflowError, RecursionError):
         raise ValueError("BOT_STRESS_REPORT_REJECTED") from None

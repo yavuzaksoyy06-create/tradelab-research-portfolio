@@ -13,7 +13,13 @@ Instead of building a system that just draws buy/sell arrows, I built a research
 
 > **Research status:** No profitable trading edge has been established. Stage 7's probabilistic research pipeline has **not** been validated on real market outcomes, so its scenario probabilities remain disabled. This repository contains **no broker-order execution**, real or paper.
 
-## Latest engineering milestone: execution robustness
+## Strategy planning and durable intent handling
+
+I added a strategy planner for EMA trend and prior-channel breakouts. Each plan freezes the rule, symbol and risk limits in a versioned hash-bound record. The same plan drives the existing causal rehearsal and all four execution stress cases. Verified simulated signal fills yield broker-neutral drafts with a reproducible identity and source, policy and report provenance.
+
+The local SQLite outbox stages those drafts atomically, deduplicates exact retries and restores state from its event journal. A durable halt cancels staged drafts and blocks new ones. The expected journal head can guard writes against a stale or restored database. The **Strateji Planlayıcı** page exports the plan, rehearsal and drafts. Dispatch remains disabled. [Architecture and local reproduction](docs/STRATEGY_PLANNER_AND_OUTBOX.md)
+
+## Execution robustness
 
 I built an event-sourced offline execution system that turns completed-bar signals into risk-checked hypothetical fills, then independently reconstructs the account from its journal. The audit checks exact replay-prefix equivalence, future-suffix invariance, intent deduplication, gap and ambiguous-candle handling, loss halts, and four fixed cost/latency scenarios. Even a fully rehashed journal is rejected when its accounting is inconsistent.
 

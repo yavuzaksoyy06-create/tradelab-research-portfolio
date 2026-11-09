@@ -8,6 +8,7 @@ import pandas as pd
 
 from research_workspace import bot_stress as stress
 from research_workspace.bot_rehearsal import run_rehearsal
+from research_workspace.bot_strategy import make_strategy_plan
 from research_workspace.equity_data import synthetic_fixture
 from research_workspace.stage7_events import research_partition
 
@@ -20,6 +21,7 @@ class BotStressTests(unittest.TestCase):
 
     def test_registered_cases_do_not_select_winner_or_promote_model(self):
         report = self.report["content"]
+        self.assertNotIn("strategy_plan", report)
         self.assertEqual(report["status"], "PASSED_DIAGNOSTICS")
         self.assertEqual(report["scenarios"], list(stress.SCENARIOS))
         expected = ((3., 5., 0), (10., 15., 0), (3., 5., 1), (10., 15., 1))
@@ -158,3 +160,47 @@ class BotStressTests(unittest.TestCase):
                 with self.subTest(count=count), self.assertRaises(ValueError):
                     stress.run_stress_suite(self.frame, self.meta, visible_count=count)
             engine.assert_not_called()
+
+    def test_stress_freezes_one_plan_across_cases_and_causal_probes(self):
+        plan = make_strategy_plan("QQQ channel", "QQQ", rule="channel_breakout",
+                                  fast=2, slow=6, max_position_bps=700, planned_risk_bps=20)
+        frame, metadata = synthetic_fixture("QQQ")
+        with patch.object(stress, "run_rehearsal", wraps=run_rehearsal) as replay:
+            report = stress.run_stress_suite(frame, metadata, visible_count=130, plan=plan)
+        content = stress.verify_stress_report(report)
+        self.assertEqual(content["strategy_plan"], plan)
+        self.assertEqual(content["status"], "PASSED_DIAGNOSTICS")
+        self.assertEqual(content["diagnostics"]["prefix_replay"]["status"], "PASSED")
+        self.assertEqual(content["diagnostics"]["future_suffix"]["status"], "PASSED")
+        self.assertEqual(content["diagnostics"]["manual_halt"]["status"], "PASSED")
+        self.assertGreater(replay.call_count, len(stress.SCENARIOS))
+        for call in replay.call_args_list:
+            self.assertEqual(call.kwargs["plan"], plan)
+            self.assertIsNot(call.kwargs["plan"], plan)
+        for row in content["comparison"]:
+            expected, _, _ = run_rehearsal(frame, metadata, visible_count=130,
+                                            plan=plan, scenario=row["scenario"])
+            self.assertEqual(row["policy_sha256"], expected["policy_sha256"])
+            self.assertEqual(row["ending_equity"], expected["ending_equity"])
+
+        for replacement in (None, make_strategy_plan("Renamed", "QQQ", rule="channel_breakout",
+                                                      fast=2, slow=6, max_position_bps=700,
+                                                      planned_risk_bps=20)):
+            with self.subTest(replacement=replacement):
+                broken = copy.deepcopy(report)
+                del broken["content"]["strategy_plan"]
+                if replacement is not None:
+                    broken["content"]["strategy_plan"] = replacement
+                broken["sha256"] = stress._sha(broken["content"])
+                with self.assertRaisesRegex(ValueError, "BOT_STRESS_REPORT_REJECTED"):
+                    stress.verify_stress_report(broken)
+
+    def test_wrong_symbol_and_invalid_plan_never_reach_rehearsal(self):
+        plan = make_strategy_plan("Wrong symbol", "MSFT")
+        invalid = dict(plan, sha256="0" * 64)
+        with patch.object(stress, "run_rehearsal") as replay:
+            with self.assertRaisesRegex(ValueError, "BOT_STRESS_STRATEGY_SYMBOL_MISMATCH"):
+                stress.run_stress_suite(self.frame, self.meta, plan=plan)
+            with self.assertRaisesRegex(ValueError, "BOT_STRATEGY_PLAN_DIGEST"):
+                stress.run_stress_suite(self.frame, self.meta, plan=invalid)
+            replay.assert_not_called()

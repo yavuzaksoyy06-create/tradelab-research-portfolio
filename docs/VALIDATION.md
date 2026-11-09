@@ -1,5 +1,11 @@
 # Validation evidence
 
+## Strategy planner and durable intent checkpoint · 9 November 2026
+
+The local public-source regression executed **685 tests, with 684 passes, one existing Windows symlink-privilege skip and zero failures**. The previous checkpoint's test and source inventories remain available in `evidence/archive/`.
+
+The 42 new tests cover frozen plan schemas and causal signal rules, report-to-draft provenance, planned stress verification, the local interface and command path, and concurrent or interrupted SQLite writes. The app-menu smoke test produced the three plan, report and draft exports. The published baseline rehearsal and stress payloads reproduced byte-for-byte. The 170-file source inventory and the 23 frozen V4/V4.1 files were verified. [Current checkpoint evidence](../evidence/strategy_planner_checks.json)
+
 ## Execution robustness checkpoint — 3 November 2026
 
 The current local public-source regression executed **643 tests: 642 passed, one existing Windows symlink-privilege skip, zero failures**. Macro/crypto/FX/workspace suite counts are 115/100/31/397. This replaces no historical evidence: the preceding `7e0fbd8` test results and 151-file source inventory are preserved in `evidence/archive/`.

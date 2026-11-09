@@ -1,12 +1,14 @@
 """Exclusive local evidence publication and sanitized offline command errors."""
 from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
+import json
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from tools.bot_rehearsal import main
+from research_workspace.bot_strategy import encode_strategy_plan, make_strategy_plan
 
 
 class BotCommandTests(unittest.TestCase):
@@ -38,3 +40,30 @@ class BotCommandTests(unittest.TestCase):
             target = Path(tmp) / "stress.json"
             self.assertEqual(main(["stress", "--output", str(target), "--visible-count", "50"]), 0)
             self.assertEqual(main(["verify", "--report", str(target)]), 0)
+
+    def test_frozen_plan_cli_stages_once_and_halt_survives_reopen(self):
+        def invoke(args, *, code=0):
+            with redirect_stdout(StringIO()) as output, redirect_stderr(StringIO()):
+                self.assertEqual(main(args), code)
+            return json.loads(output.getvalue()) if code == 0 else None
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plan, report, database = (str(root / name) for name in ("plan.json", "rehearsal.json", "intent.sqlite3"))
+            Path(plan).write_bytes(encode_strategy_plan(make_strategy_plan("CLI channel", "QQQ", rule="channel_breakout")))
+            run = ["rehearsal", "--plan", plan, "--output", report]
+            self.assertTrue(invoke(run)["synthetic"])
+            initial = invoke(["outbox", "init", "--db", database])["result"]["head_sha256"]
+            stage = ["outbox", "stage", "--db", database, "--plan", plan, "--report", report]
+            staged = invoke(stage + ["--expected-head", initial])["result"]
+            self.assertGreater(staged["inserted"], 0)
+            invoke(stage + ["--expected-head", initial], code=1)
+            self.assertEqual(invoke(stage)["result"], {"inserted": 0, "duplicates": staged["inserted"]})
+            inspected = invoke(["outbox", "inspect", "--db", database])["result"]
+            self.assertEqual(inspected["drafts"][0]["draft"]["content"]["symbol"], "QQQ")
+            halted = invoke(["outbox", "halt", "--db", database, "--expected-head", inspected["head_sha256"]])
+            self.assertEqual(halted["result"]["cancelled"], staged["inserted"])
+            recovered = invoke(["outbox", "recover", "--db", database])["result"]
+            self.assertTrue(recovered["halted"])
+            self.assertTrue(all(row["status"] == "CANCELLED" for row in recovered["drafts"]))
+            invoke(stage, code=1)
