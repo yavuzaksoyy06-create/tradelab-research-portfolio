@@ -1,17 +1,35 @@
 # TradeLab
 ### Quantitative Trading Research · Financial Data Engineering · Statistical Validation
 
-[![Public research tests](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml/badge.svg?branch=feature%2Fequity-lab-stage6-slice1)](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml)
+[![Public research tests](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml/badge.svg?branch=feature%2Fistanbul-direction-v2)](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/workflows/public-tests.yml)
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB)
 ![Research only](https://img.shields.io/badge/status-research%20only-64748b)
 
 **Python · pandas · NumPy · SQLite/SQL · Streamlit · Plotly · Statistical inference · Market-data validation**
+
+The local workspace now uses a Turkish market-terminal layout with separate chart, analysis and evidence views. Alpaca is the terminal's default source, and a successfully loaded snapshot can also drive the strategy planner and execution rehearsal. [Interface and data workflow](docs/EQUITY_RESEARCH_LAB.md#terminal-layout-and-shared-alpaca-snapshots)
 
 I started TradeLab with a question that sounded simple: **when a support or resistance level looks convincing on a chart, does it still work after I define the rule, respect what was knowable at the time, simulate an actual portfolio, and pay trading costs?**
 
 Instead of building a system that just draws buy/sell arrows, I built a research workflow: historical market-data validation, causal technical features, a shared-capital portfolio simulator, statistical comparisons, a replay terminal and a financial-data quality lab. The most valuable outcome has been learning **when the evidence does *not* support a trading claim**.
 
 > **Research status:** No profitable trading edge has been established. Stage 7's probabilistic research pipeline has **not** been validated on real market outcomes, so its scenario probabilities remain disabled. This repository contains **no broker-order execution**, real or paper.
+
+## Strategy planning and durable intent handling
+
+I added a strategy planner for EMA trend and prior-channel breakouts. Each plan freezes the rule, symbol and risk limits in a versioned hash-bound record. The same plan drives the existing causal rehearsal and all four execution stress cases. Verified simulated signal fills yield broker-neutral drafts with a reproducible identity and source, policy and report provenance.
+
+The local SQLite outbox stages those drafts atomically, deduplicates exact retries and restores state from its event journal. A durable halt cancels staged drafts and blocks new ones. The expected journal head can guard writes against a stale or restored database. The **Strateji Planlayıcı** page exports the plan, rehearsal and drafts. Dispatch remains disabled. [Architecture and local reproduction](docs/STRATEGY_PLANNER_AND_OUTBOX.md)
+
+## Execution robustness
+
+I built an event-sourced offline execution system that turns completed-bar signals into risk-checked hypothetical fills, then independently reconstructs the account from its journal. The audit checks exact replay-prefix equivalence, future-suffix invariance, intent deduplication, gap and ambiguous-candle handling, loss halts, and four fixed cost/latency scenarios. Even a fully rehashed journal is rejected when its accounting is inconsistent.
+
+This adds a tested bridge from research decisions to execution engineering while keeping the unvalidated v2 model disconnected from orders. The local **Bot Provası** page exposes explicit rehearsal/stress actions, account charts and verifiable evidence downloads. **Published charts below use synthetic prices; they are software diagnostics, not real-market trading results.**
+
+![Synthetic execution robustness, fixed sensitivities and independent ledger recovery](docs/images/bot_rehearsal/execution_robustness.png)
+
+[Architecture, exact assumptions and reproduction](docs/EXECUTION_ROBUSTNESS_LAB.md) · [Machine-readable synthetic stress evidence](docs/images/bot_rehearsal/synthetic_stress.json)
 
 ## Results worth seeing first
 
@@ -21,7 +39,7 @@ Instead of building a system that just draws buy/sell arrows, I built a research
 | **36 diagnostic configurations; no statistical edge declared** | 3 entry rules × 3 zone widths × 4 cost settings; paired bootstrap interval for the principal comparison **crossed zero** | A backtest can overstate certainty after repeated trials |
 | **218 valid Treasury observations recovered** | Missing `BC_1_5MONTH` tenor; a separate version grew from **3,237 → 3,455** rows | A matching file hash does not prove a complete financial dataset |
 | **A future-data leak was discovered and corrected** | Stage 7 replay/holdout audit; **9 adversarial regression tests** added | A green test suite is not enough without checking information timing |
-| **477 Windows CI tests passed** | [Actions #47](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/40858054701), 0 failed, 0 skipped | Public software contracts are tested; **not** a proof of trading profitability |
+| **643 Windows CI tests passed** | [Actions #70](https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/41662381516), 0 failed, 0 skipped | Causal replay, independent ledger recovery, research and data contracts; **not** a proof of trading profitability |
 
 **Where to start:** **2 minutes** — read the findings above and the figures below; **5 minutes** — open the [Treasury remediation](docs/TREASURY_REMEDIATION.md) and [look-ahead audit](docs/STAGE7_AUDIT.md); **15 minutes** — inspect the [S/R evidence](docs/SR_RESEARCH_EVIDENCE.md), [Stage 7 protocol](docs/STAGE7_RESEARCH_PROTOCOL.md), and run the offline test suite.
 
@@ -196,6 +214,8 @@ Open **http://127.0.0.1:8502/** and choose **Equity Research** for the synthetic
 I used AI-assisted tooling during portions of implementation and review. I remain responsible for understanding the financial assumptions, inspecting the code's behavior, evaluating tests, documenting limitations and presenting only evidence that the repository can support. **Passing software tests is not proof of a tradable edge.**
 
 ### Reference index
+
+**Separate direction experiment v2:** I registered a compact logistic classifier with training-only nested selection and compared it with all fixed references. Balanced accuracy rose to 52.3%, but Brier error was slightly worse than training frequency and the improvement interval included zero. I kept that result, preserved v1 and excluded the reserved period. [Specification, actual comparison and tests](docs/ISE_DIRECTION_V2_RESULTS.md)
 
 **Real-data machine learning:** I ran a fixed chronological Ridge model on the openly licensed UCI Istanbul index-return dataset and added replay charts, historical LONG/WATCH/CASH labels and partial feature explanations. Across 107 validation observations, directional accuracy was 56.1% versus 57.9% for the training-mean baseline; the error-improvement interval includes zero. I retained that negative finding and kept the final 108 observations excluded. [Reproducible ML lab and actual results](docs/ISTANBUL_ML_LAB.md)
 

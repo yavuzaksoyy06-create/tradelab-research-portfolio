@@ -1,0 +1,1278 @@
+{
+  "experiment_id": "tradelab.ise-direction.v2",
+  "spec_sha256": "4114e3b38427d750345a6e19d128b834b93ba9c78acfbfd649d8f2a9f37eee06",
+  "experiment_sha256": "729f625c5a9ec2251d39dda159e97d9120055e541e828030aa1402dff0ee6c8a",
+  "source_registration_sha256": "b7ebab507eb2f8647197e3e5dac5795fb3044c8d67659fd0b5cb375ba82219e9",
+  "input_rows": 536,
+  "validation_start": 321,
+  "holdout_start": 428,
+  "reserved_rows": 108,
+  "evaluated_rows": 107,
+  "feature_count": 5,
+  "outer_validation_previously_inspected": true,
+  "fresh_independent_test": false,
+  "holdout_scored": false,
+  "probabilities_publishable": false,
+  "economic_pnl_computed": false,
+  "orders_enabled": false,
+  "status": "EXPLORATORY_REUSED_VALIDATION",
+  "metrics": {
+    "logistic": {
+      "directional_accuracy": 0.45794392523364486,
+      "balanced_accuracy": 0.5231182795698924,
+      "positive_prediction_share": 0.09345794392523364,
+      "brier": 0.24497652428655703,
+      "logloss": 0.6830595426290238,
+      "ece_5bins": 0.010473357162631407,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 97,
+          "mean_score": 0.5693907013290511,
+          "empirical_positive_share": 0.5670103092783505
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 10,
+          "mean_score": 0.6110248812516399,
+          "empirical_positive_share": 0.7
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        }
+      ],
+      "score_kind": "uncalibrated_logistic_score",
+      "calibrated_probability": false
+    },
+    "train_prior": {
+      "directional_accuracy": 0.5794392523364486,
+      "balanced_accuracy": 0.5,
+      "positive_prediction_share": 1.0,
+      "brier": 0.24474057634488444,
+      "logloss": 0.682615470336046,
+      "ece_5bins": 0.012787191248844088,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 107,
+          "mean_score": 0.5666520610876045,
+          "empirical_positive_share": 0.5794392523364486
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        }
+      ],
+      "score_kind": "smoothed_training_frequency",
+      "calibrated_probability": false
+    },
+    "majority": {
+      "directional_accuracy": 0.5794392523364486,
+      "balanced_accuracy": 0.5,
+      "positive_prediction_share": 1.0,
+      "brier": 0.4205607476635514,
+      "logloss": 11.620532202852921,
+      "ece_5bins": 0.42056074766355145,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 107,
+          "mean_score": 1.0,
+          "empirical_positive_share": 0.5794392523364486
+        }
+      ],
+      "score_kind": "hard_reference_score",
+      "calibrated_probability": false
+    },
+    "persistence": {
+      "directional_accuracy": 0.4485981308411215,
+      "balanced_accuracy": 0.43584229390681006,
+      "positive_prediction_share": 0.5700934579439252,
+      "brier": 0.5514018691588785,
+      "logloss": 15.23580268576459,
+      "ece_5bins": 0.5514018691588785,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 46,
+          "mean_score": 0.0,
+          "empirical_positive_share": 0.6521739130434783
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "mean_score": null,
+          "empirical_positive_share": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 61,
+          "mean_score": 1.0,
+          "empirical_positive_share": 0.5245901639344263
+        }
+      ],
+      "score_kind": "hard_reference_score",
+      "calibrated_probability": false
+    },
+    "v1_ridge_sign": {
+      "directional_accuracy": 0.5607476635514018,
+      "balanced_accuracy": 0.5051971326164875,
+      "positive_prediction_share": 0.8504672897196262,
+      "score_kind": "direction_only_not_a_probability",
+      "brier": null,
+      "logloss": null,
+      "calibrated_probability": false
+    }
+  },
+  "selection_trace": [
+    {
+      "outer_start_index": 321,
+      "eligible_training_end_exclusive": 319,
+      "alpha_candidates": [
+        {
+          "alpha": 1.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.255632091302327,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 166,
+              "training_rows": 145,
+              "validation_first_index": 169,
+              "validation_end_index": 218,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 216,
+              "training_rows": 195,
+              "validation_first_index": 219,
+              "validation_end_index": 268,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 266,
+              "training_rows": 245,
+              "validation_first_index": 269,
+              "validation_end_index": 318,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 10.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25417545568906047,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 166,
+              "training_rows": 145,
+              "validation_first_index": 169,
+              "validation_end_index": 218,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 216,
+              "training_rows": 195,
+              "validation_first_index": 219,
+              "validation_end_index": 268,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 266,
+              "training_rows": 245,
+              "validation_first_index": 269,
+              "validation_end_index": 318,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 100.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25123429879753567,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 166,
+              "training_rows": 145,
+              "validation_first_index": 169,
+              "validation_end_index": 218,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 216,
+              "training_rows": 195,
+              "validation_first_index": 219,
+              "validation_end_index": 268,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 266,
+              "training_rows": 245,
+              "validation_first_index": 269,
+              "validation_end_index": 318,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        }
+      ],
+      "threshold_candidates": [
+        {
+          "threshold": 0.4,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.6,
+          "balanced_accuracy": 0.5423242467718795
+        }
+      ],
+      "selected_alpha": 100.0,
+      "selected_threshold": 0.6,
+      "selected_inner_brier": 0.25123429879753567,
+      "inner_label_classes": 2
+    },
+    {
+      "outer_start_index": 341,
+      "eligible_training_end_exclusive": 339,
+      "alpha_candidates": [
+        {
+          "alpha": 1.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.2612711953243762,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 186,
+              "training_rows": 165,
+              "validation_first_index": 189,
+              "validation_end_index": 238,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 236,
+              "training_rows": 215,
+              "validation_first_index": 239,
+              "validation_end_index": 288,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 286,
+              "training_rows": 265,
+              "validation_first_index": 289,
+              "validation_end_index": 338,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 10.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.2593016747416768,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 186,
+              "training_rows": 165,
+              "validation_first_index": 189,
+              "validation_end_index": 238,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 236,
+              "training_rows": 215,
+              "validation_first_index": 239,
+              "validation_end_index": 288,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 286,
+              "training_rows": 265,
+              "validation_first_index": 289,
+              "validation_end_index": 338,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 100.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.2560231344409039,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 186,
+              "training_rows": 165,
+              "validation_first_index": 189,
+              "validation_end_index": 238,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 236,
+              "training_rows": 215,
+              "validation_first_index": 239,
+              "validation_end_index": 288,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 286,
+              "training_rows": 265,
+              "validation_first_index": 289,
+              "validation_end_index": 338,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        }
+      ],
+      "threshold_candidates": [
+        {
+          "threshold": 0.4,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.6,
+          "balanced_accuracy": 0.5549724248354385
+        }
+      ],
+      "selected_alpha": 100.0,
+      "selected_threshold": 0.6,
+      "selected_inner_brier": 0.2560231344409039,
+      "inner_label_classes": 2
+    },
+    {
+      "outer_start_index": 361,
+      "eligible_training_end_exclusive": 359,
+      "alpha_candidates": [
+        {
+          "alpha": 1.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25466837268288456,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 206,
+              "training_rows": 185,
+              "validation_first_index": 209,
+              "validation_end_index": 258,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 256,
+              "training_rows": 235,
+              "validation_first_index": 259,
+              "validation_end_index": 308,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 306,
+              "training_rows": 285,
+              "validation_first_index": 309,
+              "validation_end_index": 358,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 10.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.2535048476507835,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 206,
+              "training_rows": 185,
+              "validation_first_index": 209,
+              "validation_end_index": 258,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 256,
+              "training_rows": 235,
+              "validation_first_index": 259,
+              "validation_end_index": 308,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 306,
+              "training_rows": 285,
+              "validation_first_index": 309,
+              "validation_end_index": 358,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 100.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25168380709480576,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 206,
+              "training_rows": 185,
+              "validation_first_index": 209,
+              "validation_end_index": 258,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 256,
+              "training_rows": 235,
+              "validation_first_index": 259,
+              "validation_end_index": 308,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 306,
+              "training_rows": 285,
+              "validation_first_index": 309,
+              "validation_end_index": 358,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        }
+      ],
+      "threshold_candidates": [
+        {
+          "threshold": 0.4,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.6,
+          "balanced_accuracy": 0.5968087003030843
+        }
+      ],
+      "selected_alpha": 100.0,
+      "selected_threshold": 0.6,
+      "selected_inner_brier": 0.25168380709480576,
+      "inner_label_classes": 2
+    },
+    {
+      "outer_start_index": 381,
+      "eligible_training_end_exclusive": 379,
+      "alpha_candidates": [
+        {
+          "alpha": 1.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25074822973276506,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 226,
+              "training_rows": 205,
+              "validation_first_index": 229,
+              "validation_end_index": 278,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 276,
+              "training_rows": 255,
+              "validation_first_index": 279,
+              "validation_end_index": 328,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 326,
+              "training_rows": 305,
+              "validation_first_index": 329,
+              "validation_end_index": 378,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 10.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.2503067709361002,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 226,
+              "training_rows": 205,
+              "validation_first_index": 229,
+              "validation_end_index": 278,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 276,
+              "training_rows": 255,
+              "validation_first_index": 279,
+              "validation_end_index": 328,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 326,
+              "training_rows": 305,
+              "validation_first_index": 329,
+              "validation_end_index": 378,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 100.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.24984713165086372,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 226,
+              "training_rows": 205,
+              "validation_first_index": 229,
+              "validation_end_index": 278,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 276,
+              "training_rows": 255,
+              "validation_first_index": 279,
+              "validation_end_index": 328,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 326,
+              "training_rows": 305,
+              "validation_first_index": 329,
+              "validation_end_index": 378,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        }
+      ],
+      "threshold_candidates": [
+        {
+          "threshold": 0.4,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.6,
+          "balanced_accuracy": 0.5214285714285715
+        }
+      ],
+      "selected_alpha": 100.0,
+      "selected_threshold": 0.6,
+      "selected_inner_brier": 0.24984713165086372,
+      "inner_label_classes": 2
+    },
+    {
+      "outer_start_index": 401,
+      "eligible_training_end_exclusive": 399,
+      "alpha_candidates": [
+        {
+          "alpha": 1.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.251846515774177,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 246,
+              "training_rows": 225,
+              "validation_first_index": 249,
+              "validation_end_index": 298,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 296,
+              "training_rows": 275,
+              "validation_first_index": 299,
+              "validation_end_index": 348,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 346,
+              "training_rows": 325,
+              "validation_first_index": 349,
+              "validation_end_index": 398,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 10.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25083257483665444,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 246,
+              "training_rows": 225,
+              "validation_first_index": 249,
+              "validation_end_index": 298,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 296,
+              "training_rows": 275,
+              "validation_first_index": 299,
+              "validation_end_index": 348,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 346,
+              "training_rows": 325,
+              "validation_first_index": 349,
+              "validation_end_index": 398,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 100.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.24860097407661083,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 246,
+              "training_rows": 225,
+              "validation_first_index": 249,
+              "validation_end_index": 298,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 296,
+              "training_rows": 275,
+              "validation_first_index": 299,
+              "validation_end_index": 348,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 346,
+              "training_rows": 325,
+              "validation_first_index": 349,
+              "validation_end_index": 398,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        }
+      ],
+      "threshold_candidates": [
+        {
+          "threshold": 0.4,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.6,
+          "balanced_accuracy": 0.5248917748917749
+        }
+      ],
+      "selected_alpha": 100.0,
+      "selected_threshold": 0.6,
+      "selected_inner_brier": 0.24860097407661083,
+      "inner_label_classes": 2
+    },
+    {
+      "outer_start_index": 421,
+      "eligible_training_end_exclusive": 419,
+      "alpha_candidates": [
+        {
+          "alpha": 1.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25415760418614874,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 266,
+              "training_rows": 245,
+              "validation_first_index": 269,
+              "validation_end_index": 318,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 316,
+              "training_rows": 295,
+              "validation_first_index": 319,
+              "validation_end_index": 368,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 366,
+              "training_rows": 345,
+              "validation_first_index": 369,
+              "validation_end_index": 418,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 10.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.2531392254361353,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 266,
+              "training_rows": 245,
+              "validation_first_index": 269,
+              "validation_end_index": 318,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 316,
+              "training_rows": 295,
+              "validation_first_index": 319,
+              "validation_end_index": 368,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 366,
+              "training_rows": 345,
+              "validation_first_index": 369,
+              "validation_end_index": 418,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        },
+        {
+          "alpha": 100.0,
+          "pooled_inner_rows": 150,
+          "pooled_inner_brier": 0.25091170581668143,
+          "fits": [
+            {
+              "training_first_index": 22,
+              "training_end_index": 266,
+              "training_rows": 245,
+              "validation_first_index": 269,
+              "validation_end_index": 318,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 316,
+              "training_rows": 295,
+              "validation_first_index": 319,
+              "validation_end_index": 368,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            },
+            {
+              "training_first_index": 22,
+              "training_end_index": 366,
+              "training_rows": 345,
+              "validation_first_index": 369,
+              "validation_end_index": 418,
+              "validation_rows": 50,
+              "iterations": 3,
+              "converged": true,
+              "constant_class": false,
+              "fit_status": "newton_converged"
+            }
+          ]
+        }
+      ],
+      "threshold_candidates": [
+        {
+          "threshold": 0.4,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        {
+          "threshold": 0.6,
+          "balanced_accuracy": 0.511808910359635
+        }
+      ],
+      "selected_alpha": 100.0,
+      "selected_threshold": 0.6,
+      "selected_inner_brier": 0.25091170581668143,
+      "inner_label_classes": 2
+    }
+  ],
+  "fold_fit_diagnostics": [
+    {
+      "fold": 0,
+      "training_rows": 297,
+      "validation_rows": 20,
+      "training_end_index": 318,
+      "alpha": 100.0,
+      "threshold": 0.6,
+      "train_brier": 0.24302938527361218,
+      "outer_brier": 0.28232715631940425,
+      "outer_minus_train_brier": 0.039297771045792074,
+      "train_logloss": 0.679121769231186,
+      "selected_inner_brier": 0.25123429879753567,
+      "outer_minus_selected_inner_brier": 0.031092857521868578,
+      "coefficient_l2_norm": 0.07087908869228507,
+      "iterations": 3,
+      "converged": true,
+      "constant_class": false,
+      "interpretation": "Descriptive gap, not proof or absence of overfitting"
+    },
+    {
+      "fold": 1,
+      "training_rows": 317,
+      "validation_rows": 20,
+      "training_end_index": 338,
+      "alpha": 100.0,
+      "threshold": 0.6,
+      "train_brier": 0.2456211021909083,
+      "outer_brier": 0.246550433939982,
+      "outer_minus_train_brier": 0.0009293317490736974,
+      "train_logloss": 0.6843458896511798,
+      "selected_inner_brier": 0.2560231344409039,
+      "outer_minus_selected_inner_brier": -0.009472700500921916,
+      "coefficient_l2_norm": 0.06425665661583337,
+      "iterations": 3,
+      "converged": true,
+      "constant_class": false,
+      "interpretation": "Descriptive gap, not proof or absence of overfitting"
+    },
+    {
+      "fold": 2,
+      "training_rows": 337,
+      "validation_rows": 20,
+      "training_end_index": 358,
+      "alpha": 100.0,
+      "threshold": 0.6,
+      "train_brier": 0.24498170481442208,
+      "outer_brier": 0.2330602398425469,
+      "outer_minus_train_brier": -0.011921464971875184,
+      "train_logloss": 0.6830521892492574,
+      "selected_inner_brier": 0.25168380709480576,
+      "outer_minus_selected_inner_brier": -0.01862356725225886,
+      "coefficient_l2_norm": 0.07232534026215516,
+      "iterations": 3,
+      "converged": true,
+      "constant_class": false,
+      "interpretation": "Descriptive gap, not proof or absence of overfitting"
+    },
+    {
+      "fold": 3,
+      "training_rows": 357,
+      "validation_rows": 20,
+      "training_end_index": 378,
+      "alpha": 100.0,
+      "threshold": 0.6,
+      "train_brier": 0.24452594120271537,
+      "outer_brier": 0.2324218519120346,
+      "outer_minus_train_brier": -0.01210408929068077,
+      "train_logloss": 0.6821264768397814,
+      "selected_inner_brier": 0.24984713165086372,
+      "outer_minus_selected_inner_brier": -0.017425279738829125,
+      "coefficient_l2_norm": 0.07866998029959155,
+      "iterations": 3,
+      "converged": true,
+      "constant_class": false,
+      "interpretation": "Descriptive gap, not proof or absence of overfitting"
+    },
+    {
+      "fold": 4,
+      "training_rows": 377,
+      "validation_rows": 20,
+      "training_end_index": 398,
+      "alpha": 100.0,
+      "threshold": 0.6,
+      "train_brier": 0.2430655394858743,
+      "outer_brier": 0.23674462448772443,
+      "outer_minus_train_brier": -0.006320914998149879,
+      "train_logloss": 0.6791895051885032,
+      "selected_inner_brier": 0.24860097407661083,
+      "outer_minus_selected_inner_brier": -0.0118563495888864,
+      "coefficient_l2_norm": 0.07148759577282064,
+      "iterations": 3,
+      "converged": true,
+      "constant_class": false,
+      "interpretation": "Descriptive gap, not proof or absence of overfitting"
+    },
+    {
+      "fold": 5,
+      "training_rows": 397,
+      "validation_rows": 7,
+      "training_end_index": 418,
+      "alpha": 100.0,
+      "threshold": 0.6,
+      "train_brier": 0.243360815951569,
+      "outer_brier": 0.22720028123253685,
+      "outer_minus_train_brier": -0.016160534719032144,
+      "train_logloss": 0.679777747223004,
+      "selected_inner_brier": 0.25091170581668143,
+      "outer_minus_selected_inner_brier": -0.023711424584144575,
+      "coefficient_l2_norm": 0.07964118973465395,
+      "iterations": 3,
+      "converged": true,
+      "constant_class": false,
+      "interpretation": "Descriptive gap, not proof or absence of overfitting"
+    }
+  ],
+  "mean_brier_improvement_vs_train_prior": -0.0002359479416725687,
+  "brier_improvement_95_block_interval": [
+    -0.0019303761414376124,
+    0.0030124741460984448
+  ],
+  "bootstrap": {
+    "method": "paired moving block",
+    "block_rows": 20,
+    "replications": 500,
+    "seed": 7
+  },
+  "evaluation_first_date": "2010-04-13",
+  "evaluation_last_date": "2010-09-15",
+  "label_counts": {
+    "UP_RESEARCH": 10,
+    "NONPOSITIVE_RESEARCH": 97
+  },
+  "limitations": [
+    "Reused inspected validation; not a fresh independent test",
+    "Nested selection excludes current/future outer labels; past completed labels may be reused",
+    "Raw scores are uncalibrated; empirical ECE is not probability publication approval",
+    "Index directions, not individual-stock quotes, P&L or executable orders",
+    "No final holdout release, frozen v1 modification or V4.1 gate change"
+  ]
+}

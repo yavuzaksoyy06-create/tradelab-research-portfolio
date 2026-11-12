@@ -7,7 +7,9 @@ a transport and never contact the provider.
 from __future__ import annotations
 
 from datetime import date, datetime, timezone
+from http.client import HTTPException
 import json
+import os
 import ssl
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -19,15 +21,77 @@ from research_sr_v4.data import expected_grid
 from research_workspace.equity_data import (
     MAX_BARS, SYMBOLS, _validate_and_label,
 )
+from research_workspace.stage7_events import SEALED_START
 
 API_ENDPOINT = "https://data.alpaca.markets/v2/stocks/bars"
 FEEDS = ("iex", "sip")
 MAX_PAGES = 8
 MAX_PAGE_BYTES = 2_000_000
+_CREDENTIAL_PAIRS = (
+    ("ALPACA_API_KEY", "ALPACA_SECRET_KEY"),
+    ("APCA_API_KEY_ID", "APCA_API_SECRET_KEY"),
+)
+_HTTP_FAILURES = {
+    401: ("authentication", "check the local market-data credentials"),
+    403: ("entitlement", "check access to the selected feed"),
+    429: ("rate_limit", "request limit reached; try again later"),
+}
 
 
 class EquityProviderError(ValueError):
     """Sanitized user-facing provider or dataset failure."""
+
+    def __init__(self, message: str, *, code: str = "invalid_data"):
+        super().__init__(message)
+        self.code = code
+
+
+def _safe_credential(value):
+    return isinstance(value, str) and 0 < len(value) <= 512 and all(
+        33 <= ord(character) <= 126 for character in value
+    )
+
+
+def _configured_credentials():
+    """Resolve a complete pair only; aliases from different pairs never mix."""
+    any_configured = False
+    for key_name, secret_name in _CREDENTIAL_PAIRS:
+        key = os.environ.get(key_name)
+        secret = os.environ.get(secret_name)
+        if _safe_credential(key) and _safe_credential(secret):
+            return "configured", (key, secret)
+        any_configured |= bool(key or secret)
+    return ("incomplete" if any_configured else "missing"), None
+
+
+def alpaca_credentials_status() -> str:
+    """Return configured, incomplete or missing without exposing a credential."""
+    return _configured_credentials()[0]
+
+
+def _parse_session_date(value) -> date:
+    try:
+        text = str(value)
+        parsed = date.fromisoformat(text)
+        if parsed.isoformat() == text:
+            return parsed
+    except (ValueError, TypeError):
+        pass
+    raise EquityProviderError("Use valid YYYY-MM-DD dates")
+
+
+def read_configured_alpaca_history(symbol: str, start: str, end: str, *, feed: str, now=None):
+    """Explicit request from the terminal using its server-process configuration."""
+    first, last = _parse_session_date(start), _parse_session_date(end)
+    if last >= date.fromisoformat(SEALED_START):
+        raise EquityProviderError("The requested dates reach the sealed research period", code="sealed_range")
+    status, credentials = _configured_credentials()
+    if credentials is None:
+        raise EquityProviderError("A complete local Alpaca Market Data credential pair is required",
+                                  code=f"credentials_{status}")
+    key, secret = credentials
+    return read_alpaca_history(symbol, first.isoformat(), last.isoformat(),
+                               feed=feed, api_key=key, api_secret=secret, now=now)
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -56,9 +120,13 @@ def _api_get(params: dict, key: str, secret: str) -> dict:
                 raise EquityProviderError("Provider page exceeded size limit")
     except HTTPError as exc:
         # Never display request URL, headers, bodies, keys, or secrets.
-        raise EquityProviderError(f"Provider returned HTTP {exc.code}; check data entitlement and credentials") from None
-    except URLError:
-        raise EquityProviderError("Market data service unavailable (network or TLS)") from None
+        if 500 <= exc.code <= 599:
+            code, detail = "unavailable", "market data service unavailable"
+        else:
+            code, detail = _HTTP_FAILURES.get(exc.code, ("http_error", "request rejected"))
+        raise EquityProviderError(f"Provider returned HTTP {exc.code}; {detail}", code=code) from None
+    except (URLError, OSError, HTTPException):
+        raise EquityProviderError("Market data service unavailable (network or TLS)", code="unavailable") from None
     try:
         parsed = json.loads(payload)
     except (UnicodeDecodeError, ValueError):
@@ -79,12 +147,10 @@ def read_alpaca_history(
     """
     if symbol not in SYMBOLS or feed not in FEEDS:
         raise EquityProviderError("Only SPY/MSFT/QQQ and explicit iex/sip feeds are supported")
-    if not api_key or not api_secret:
-        raise EquityProviderError("Local Alpaca Market Data credentials are required")
-    try:
-        first, last = date.fromisoformat(str(start)), date.fromisoformat(str(end))
-    except (ValueError, TypeError):
-        raise EquityProviderError("Use valid YYYY-MM-DD dates") from None
+    if not _safe_credential(api_key) or not _safe_credential(api_secret):
+        code = "credentials_incomplete" if api_key or api_secret else "credentials_missing"
+        raise EquityProviderError("Local Alpaca Market Data credentials are required", code=code)
+    first, last = _parse_session_date(start), _parse_session_date(end)
     if first > last or (last - first).days > 20:
         raise EquityProviderError("Select no more than 21 calendar days in chronological order")
     if first < date(2000, 1, 1) or last > date(2035, 12, 31):
@@ -130,28 +196,38 @@ def read_alpaca_history(
         params["page_token"] = token
     else:
         raise EquityProviderError("Provider pagination exceeds safety limit")
-    if not items:
-        raise EquityProviderError("No historical bars returned; feed and entitlement may differ")
-
     rows = []
     for item in items:
         if not isinstance(item, dict) or any(k not in item for k in ("t", "o", "h", "l", "c", "v")):
             raise EquityProviderError("Incomplete provider OHLCV bar")
+        try:
+            if not isinstance(item["t"], str):
+                raise ValueError
+            timestamp = pd.Timestamp(item["t"])
+            if pd.isna(timestamp) or timestamp.tzinfo is None:
+                raise ValueError
+            timestamp = timestamp.tz_convert("UTC")
+        except (ValueError, TypeError, OverflowError):
+            raise EquityProviderError("Invalid provider timestamps") from None
         rows.append({
-            "timestamp": item["t"], "open": item["o"], "high": item["h"],
+            "timestamp": timestamp, "open": item["o"], "high": item["h"],
             "low": item["l"], "close": item["c"], "volume": item["v"],
         })
-    raw = pd.DataFrame(rows)
-    try:
-        timestamps = pd.to_datetime(raw.timestamp, utc=True, errors="raise")
-    except (ValueError, TypeError, OverflowError):
-        raise EquityProviderError("Invalid provider timestamps") from None
+    raw = pd.DataFrame(rows, columns=["timestamp", "open", "high", "low", "close", "volume"])
     # Keep original order. Duplicate and out-of-order RTH timestamps fail closed.
-    eligible = raw.loc[timestamps.isin(grid.timestamp)].reset_index(drop=True)
+    eligible = raw.loc[raw.timestamp.isin(grid.timestamp)].reset_index(drop=True)
     outside_count = len(raw) - len(eligible)
-    clean = _validate_and_label(eligible, symbol, now=clock)
+    missing_count = int((~grid.timestamp.isin(eligible.timestamp)).sum())
+    if missing_count:
+        detail = " IEX covers one exchange; select SIP explicitly if available." if feed == "iex" else ""
+        raise EquityProviderError(f"Missing {missing_count} expected regular-session bars.{detail}", code="coverage")
+    try:
+        clean = _validate_and_label(eligible, symbol, now=clock)
+    except (ValueError, TypeError, OverflowError):
+        # Pandas errors can contain raw provider fields; the UI gets only a safe code/message.
+        raise EquityProviderError("Provider bars failed timestamp or OHLCV validation") from None
     if list(clean.timestamp) != list(grid.timestamp):
-        raise EquityProviderError("Incomplete requested session coverage; missing edge sessions")
+        raise EquityProviderError("Incomplete requested session coverage", code="coverage")
     return clean, {
         "symbol": symbol,
         "origin": f"ALPACA HISTORICAL {feed.upper()} API RESPONSE — NOT INDEPENDENTLY VERIFIED",
@@ -164,6 +240,8 @@ def read_alpaca_history(
         "market": "XNYS / US equities",
         "bar_interval": "15m",
         "bars": len(clean),
+        "expected_bars": len(grid),
+        "missing_bars": 0,
         "session_count": session_count,
         "outside_regular_session_bars_excluded": outside_count,
         "retrieved_at_utc": clock.tz_convert("UTC").isoformat(),

@@ -9,13 +9,14 @@ class Stage7UITests(unittest.TestCase):
         app = Path(__file__).resolve().parents[1] / "app.py"
         at = AppTest.from_file(str(app), default_timeout=60).run()
         at.radio(key="page").set_value("Equity Research").run()
+        at.radio(key="equity_mode").set_value("Synthetic teaching example").run()
         self.assertFalse(at.exception)
         headings = [e.value for e in at.subheader]
         for title in ("Piyasa Durumu", "Olası Senaryolar", "Tarihsel Kanıt",
                       "Tahmin ve Gerçekleşen Sonuç", "Model Güvenilirliği", "Araştırma Kaydı"):
             self.assertIn(title, headings)
         self.assertEqual(len(at.get("plotly_chart")), 1)
-        replay = next(s for s in at.slider if "As-of replay" in s.label)
+        replay = at.slider(key="equity_cursor")
         replay.set_value(30).run()
         self.assertFalse(at.exception)
         result_tables = [d.value for d in at.dataframe if "Sonuç zamanı" in d.value.columns]

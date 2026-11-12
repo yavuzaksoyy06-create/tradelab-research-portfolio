@@ -11,8 +11,18 @@ class WorkspaceUITests(unittest.TestCase):
         if page!='Genel Bakış':at.radio(key='page').set_value(page).run()
         self.assertFalse(at.exception,[x.message for x in at.exception]);return at
     def test_overview_separates_history_and_demo(self):
-        at=self.app();self.assertTrue(any('donmuş' in x.value.lower() for x in at.subheader))
-        self.assertTrue(any('Planlanan' in x.value for x in at.caption))
+        at = self.app()
+        self.assertTrue(any('donmuş' in x.value.lower() for x in at.subheader))
+        self.assertTrue(any('Alpaca üzerinden' in x.value for x in at.caption))
+        self.assertTrue(any(x.label == 'Araştırma arşivi ve test kanıtları' for x in at.expander))
+    def test_overview_market_action_routes_without_automatically_fetching(self):
+        with patch('research_workspace.equity_ui.read_configured_alpaca_history') as fetch:
+            at = self.app()
+            at.button(key='tl_home_primary_Equity Research').click().run()
+            self.assertFalse(at.exception)
+            self.assertEqual(at.radio(key='page').value, 'Equity Research')
+            self.assertTrue(any(title.value == 'Piyasa Terminali' for title in at.title))
+            fetch.assert_not_called()
     def test_forex_has_demo_label_and_backend_count(self):
         at=self.app('Forex Takvimi');self.assertTrue(any(DEMO in x.value for x in at.warning))
         self.assertEqual(at.metric[0].value,'95')
@@ -46,5 +56,5 @@ class WorkspaceUITests(unittest.TestCase):
         at.selectbox(key='learning_topic').set_value('Beklenen değer').run();self.assertFalse(at.exception)
     def test_no_real_dataset_dependency(self):
         with patch('research_workspace.evidence.historical_status',return_value={'status':'unavailable','missing':['not-present']}):
-            at=self.app();self.assertTrue(any('Tarihsel kayıt bulunamıyor' in x.value for x in at.warning))
+            at=self.app();self.assertTrue(any('Tarihsel kayıt bulunamıyor' in x.value for x in at.info))
             at.radio(key='page').set_value('Makro Laboratuvarı').run();self.assertFalse(at.exception)

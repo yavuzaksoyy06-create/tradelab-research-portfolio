@@ -1,4 +1,4 @@
-"""TradeLab Research Workspace 0.3.0 Preview — local, read-only UI."""
+"""TradeLab's local market data and research workspace."""
 from pathlib import Path
 import sys
 if str(Path(__file__).resolve().parents[1]) not in sys.path:
@@ -7,9 +7,8 @@ from dataclasses import asdict,replace
 from datetime import date,datetime,timedelta,timezone
 import pandas as pd
 import streamlit as st
-from research_workspace import __version__
 from research_workspace.adapters import (DEMO,PROFILE,CASES,ZONES,SYMBOLS,FX_SCENARIOS,MACRO_SCENARIOS,
-    forex_view,macro_case,macro_view,time_labels,utc,SCHEMA_VERSION)
+    forex_view,macro_case,macro_view,time_labels,utc)
 from research_workspace.charts import forex_chart,event_chart
 from research_workspace.evidence import stored_tests,protected_artifacts,prospective_restrictions,historical_status
 from research_workspace.learning import TOPICS
@@ -18,24 +17,14 @@ from research_workspace.financial_ui import render as render_financial
 from research_workspace.equity_ui import render as render_equity
 from research_workspace.bist_ui import render as render_bist
 from research_workspace.ise_ml_ui import render as render_ise_ml
+from research_workspace.ise_direction_v2_ui import render as render_ise_v2
+from research_workspace.bot_rehearsal_ui import render as render_bot_rehearsal
+from research_workspace.bot_strategy_ui import render as render_bot_strategy
+from research_workspace.equity_provider import alpaca_credentials_status
+from research_workspace.workspace_ui import render_home, render_shell
 
-st.set_page_config(page_title='TradeLab · Research Workspace',page_icon='◈',layout='wide',initial_sidebar_state='expanded')
-st.markdown('''<style>
-.stApp {background:#080f1b;color:#dce5f3;} [data-testid="stSidebar"]{background:#0e1829;border-right:1px solid #26334a;}
-.block-container{padding-top:2rem;max-width:1500px;} h1{font-size:2.2rem!important;letter-spacing:-.03em;}
-[data-testid="stMetric"]{background:#101c2e;border:1px solid #24344c;border-radius:10px;padding:15px;}
-[data-testid="stMetricValue"]{font-size:1.8rem;} .eyebrow{color:#80a5c9;letter-spacing:.15em;font-size:12px;}
-.hero{border-bottom:1px solid #25324a;padding-bottom:14px;margin-bottom:24px;}
-</style>''',unsafe_allow_html=True)
-st.sidebar.markdown('## ◈ TRADELAB')
-st.sidebar.caption('RESEARCH WORKSPACE\n\n0.3.0 Preview · localhost')
-page=st.sidebar.radio('Çalışma alanı',['Genel Bakış','Equity Research','BIST Research','Istanbul ML','Gerçek Veri','Financial Analytics','Forex Takvimi','Makro Laboratuvarı','Araştırma Denetimi'],key='page')
-learning=st.sidebar.toggle('Öğrenme modu',value=False,key='learning')
-st.sidebar.divider()
-st.sidebar.info('Salt okunur araştırma\n\nCanlı veri bağlantısı ve emir işlevi yok.')
-st.sidebar.caption('Terminal 0.2.0 ayrı uygulamadır. Bu önizleme mevcut deneyleri değiştirmez.')
-st.markdown('<div class="hero"><div class="eyebrow">MULTI-MARKET RESEARCH · 0.3.0 PREVIEW</div></div>',unsafe_allow_html=True)
-st.title(page)
+st.set_page_config(page_title='TradeLab · Araştırma Terminali',page_icon='◈',layout='wide',initial_sidebar_state='auto')
+page, learning = render_shell()
 
 @st.cache_data(ttl=60,show_spinner=False)
 def cached_integrity():return protected_artifacts()
@@ -58,25 +47,15 @@ def show_tests(evidence):
         if record['changed_sources']:st.error('Kanıtla eşleşmeyen kaynaklar: '+', '.join(record['changed_sources']))
 
 if page=='Genel Bakış':
-    st.caption('Doğrulanmış yazılım yetenekleri, sentetik öğretici deneyler ve donmuş araştırma kayıtları ayrı gösterilir.')
-    a,b,c=st.columns(3)
-    a.metric('Makro kayıt şeması',str(SCHEMA_VERSION));b.metric('Forex öğretici parite','3');c.metric('Emir / canlı veri','Kapalı')
-    st.subheader('Araştırma motorları')
-    st.dataframe(pd.DataFrame([
-        ['V4 / V4.1','Donmuş tarihsel hisse araştırması','Ayrı Terminal 0.2.0; burada yalnızca durum'],
-        ['Crypto','24/7 takvim + manifest','Gerçek veri adaptörü bu arayüzde yok'],
-        ['Macro Schema 3','Belge baytları, kaynak uyumu, zaman kontrolleri','Sentetik öğretici belgeler'],
-        ['Forex','NY DST, seans, rollover ve mum doğrulama','Varsayımsal sağlayıcı profili'],
-        ['Event Study','Tam pencere ve ham betimsel getiri','Sentetik; alpha veya nedensellik sonucu değil']
-    ],columns=['Motor','Uygulanan kapsam','Veri / sınır']),hide_index=True,width='stretch')
-    historical=historical_status()
-    st.subheader('Donmuş tarihsel araştırma · ayrı kanıt alanı')
-    if historical['status']=='unavailable':st.warning('Tarihsel kayıt bulunamıyor. Sentetik ekranlar kullanılabilir.')
-    else:st.info(historical['message']+' Bu ekranda performans yeniden hesaplanmaz.')
-    st.subheader('Saklanmış test kanıtı')
-    show_tests(stored_tests())
-    st.info('Gerçek Veri: ECB günlük referans kurları ve ABD Hazinesi 2025 faiz serileri; yerel hash doğrulamalı sürümler.')
-    st.caption('Planlanan: gerçek 15 dakikalık OHLCV ve geçmiş yayın sürümleri. Henüz uygulanmadı.')
+    render_home(alpaca_credentials_status())
+    with st.expander('Araştırma arşivi ve test kanıtları'):
+        historical = historical_status()
+        st.subheader('Donmuş tarihsel araştırma')
+        if historical['status']=='unavailable':
+            st.info('Tarihsel kayıt bulunamıyor. Diğer çalışma alanlarını kullanabilirsin.')
+        else:
+            st.caption(historical['message'])
+        show_tests(stored_tests())
 
 elif page=='Equity Research':
     render_equity()
@@ -86,6 +65,15 @@ elif page=='BIST Research':
 
 elif page=='Istanbul ML':
     render_ise_ml()
+
+elif page=='Istanbul ML v2':
+    render_ise_v2()
+
+elif page=='Bot Provası':
+    render_bot_rehearsal()
+
+elif page=='Strateji Planlayıcı':
+    render_bot_strategy()
 
 elif page=='Financial Analytics':
     render_financial()

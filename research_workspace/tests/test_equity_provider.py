@@ -1,9 +1,66 @@
 """Offline historical-provider contract tests: no network and no execution."""
 from datetime import datetime, timezone
+import os
 import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
 
+from research_workspace import equity_provider
 from research_workspace.equity_data import synthetic_fixture
 from research_workspace.equity_provider import EquityProviderError, read_alpaca_history
+
+
+class ConfiguredAlpacaTests(unittest.TestCase):
+    @patch.dict(os.environ, {}, clear=True)
+    def test_status_and_missing_pairs_do_not_fetch(self):
+        with patch.object(equity_provider, "read_alpaca_history") as read:
+            for env, status in (
+                ({}, "missing"),
+                ({"ALPACA_API_KEY": "fixture-key", "APCA_API_SECRET_KEY": "fixture-secret"}, "incomplete"),
+                ({"ALPACA_API_KEY": "fixture-key", "ALPACA_SECRET_KEY": "invalid\r\nsecret"}, "incomplete"),
+            ):
+                with self.subTest(status=status), patch.dict(os.environ, env, clear=True):
+                    self.assertEqual(equity_provider.alpaca_credentials_status(), status)
+                    with self.assertRaises(EquityProviderError) as raised:
+                        equity_provider.read_configured_alpaca_history(
+                            "SPY", "2026-10-05", "2026-10-16", feed="iex"
+                        )
+                    self.assertEqual(raised.exception.code, f"credentials_{status}")
+            read.assert_not_called()
+
+    @patch.dict(os.environ, {"ALPACA_API_KEY": "unpaired-key", "APCA_API_KEY_ID": "matched-key",
+                             "APCA_API_SECRET_KEY": "matched-secret"}, clear=True)
+    def test_server_resolves_complete_pair_and_preserves_feed(self):
+        with patch.object(equity_provider, "read_alpaca_history", return_value=("frame", {"feed": "sip"})) as read:
+            self.assertEqual(equity_provider.alpaca_credentials_status(), "configured")
+            result = equity_provider.read_configured_alpaca_history("SPY", "2026-10-05", "2026-10-16", feed="sip")
+            self.assertEqual(result, ("frame", {"feed": "sip"}))
+            read.assert_called_once_with("SPY", "2026-10-05", "2026-10-16", feed="sip",
+                                         api_key="matched-key", api_secret="matched-secret", now=None)
+
+    @patch.dict(os.environ, {"ALPACA_API_KEY": "fixture-key", "ALPACA_SECRET_KEY": "fixture-secret"}, clear=True)
+    def test_sealed_period_rejected_before_reader(self):
+        with patch.object(equity_provider, "read_alpaca_history") as read:
+            with self.assertRaises(EquityProviderError) as raised:
+                equity_provider.read_configured_alpaca_history("SPY", "2026-10-20", "2026-10-26", feed="iex")
+            self.assertEqual(raised.exception.code, "sealed_range")
+            read.assert_not_called()
+
+    def test_transport_errors_are_distinguishable_without_provider_details(self):
+        with patch.object(equity_provider, "build_opener") as opener:
+            for failure, code in (
+                (HTTPError("https://fixture.invalid", 401, "PRIVATE_DETAIL", {}, None), "authentication"),
+                (HTTPError("https://fixture.invalid", 403, "PRIVATE_DETAIL", {}, None), "entitlement"),
+                (HTTPError("https://fixture.invalid", 429, "PRIVATE_DETAIL", {}, None), "rate_limit"),
+                (HTTPError("https://fixture.invalid", 503, "PRIVATE_DETAIL", {}, None), "unavailable"),
+                (TimeoutError("PRIVATE_DETAIL"), "unavailable"),
+            ):
+                with self.subTest(code=code):
+                    opener.return_value.open.side_effect = failure
+                    with self.assertRaises(EquityProviderError) as raised:
+                        equity_provider._api_get({"symbols": "SPY"}, "fixture-key", "fixture-secret")
+                    self.assertEqual(raised.exception.code, code)
+                    self.assertNotIn("PRIVATE_DETAIL", str(raised.exception))
 
 
 class AlpacaEquityHistoryTests(unittest.TestCase):
@@ -57,8 +114,11 @@ class AlpacaEquityHistoryTests(unittest.TestCase):
         self.assertEqual(len(frame), len(self.source))
 
     def test_missing_bar_rejected(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(EquityProviderError) as raised:
             self.load(lambda *_: {"bars": {"SPY": self.payload[1:]}, "next_page_token": None})
+        self.assertEqual(raised.exception.code, "coverage")
+        self.assertIn("Missing 1 expected regular-session bars", str(raised.exception))
+        self.assertIn("IEX covers one exchange", str(raised.exception))
 
     def test_out_of_order_and_duplicate_bars_rejected(self):
         swapped = list(self.payload)
@@ -101,8 +161,17 @@ class AlpacaEquityHistoryTests(unittest.TestCase):
             self.load(lambda *_: {"bars": {"SPY": []}, "next_page_token": "same"})
 
     def test_provider_empty_response_is_not_a_chart(self):
-        with self.assertRaises(EquityProviderError):
+        with self.assertRaises(EquityProviderError) as raised:
             self.load(lambda *_: {"bars": {"SPY": []}, "next_page_token": None})
+        self.assertEqual(raised.exception.code, "coverage")
+
+    def test_raw_invalid_ohlcv_not_echoed_in_error(self):
+        bad = [{"o": "PRIVATE_PROVIDER_FIELD", **{k: v for k, v in self.payload[0].items() if k != "o"}},
+               *self.payload[1:]]
+        with self.assertRaises(EquityProviderError) as raised:
+            self.load(lambda *_: {"bars": {"SPY": bad}})
+        self.assertEqual(raised.exception.code, "invalid_data")
+        self.assertNotIn("PRIVATE_PROVIDER_FIELD", str(raised.exception))
 
 
 if __name__ == "__main__":

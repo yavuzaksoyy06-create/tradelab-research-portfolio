@@ -1,0 +1,375 @@
+{
+  "schema": "tradelab.execution-robustness-checkpoint.v1",
+  "recorded_at": "2026-11-03T15:18:20.760128+00:00",
+  "base_commit": "7e0fbd82fc051bae7f2e945181a04926208d0393",
+  "implementation_commit": "9b05d1c428b9501aa2bed1a23afdcffa0013010d",
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-03T15:14:22.423831+00:00",
+        "finished_at": "2026-11-03T15:14:22.980949+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-11-03T15:14:22.980949+00:00",
+        "finished_at": "2026-11-03T15:14:23.353435+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-03T15:14:23.353435+00:00",
+        "finished_at": "2026-11-03T15:14:23.624252+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 397,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-03T15:14:23.624252+00:00",
+        "finished_at": "2026-11-03T15:15:36.465350+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 643,
+    "skipped": 1
+  },
+  "new_tests": {
+    "rehearsal": 15,
+    "ledger_recovery": 11,
+    "execution_stress": 10,
+    "ui": 12,
+    "cli": 4,
+    "v2_cache_regression": 1
+  },
+  "source_inventory_files": 162,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "v1_protected_files": [
+    "research_workspace/ise_ml.py",
+    "research_workspace/ise_source.py",
+    "research_workspace/ise_ml_ui.py",
+    "research_workspace/ise_diagnostics.py",
+    "docs/ISE_ML_PROTOCOL.md"
+  ],
+  "v1_changed": [],
+  "unchanged_v2_model_spec_and_results": [
+    "research_workspace/ise_direction_model.py",
+    "research_workspace/ise_direction_v2.py",
+    "research_workspace/ise_direction_v2_spec.json",
+    "docs/images/ise_direction_v2/results.json",
+    "docs/images/ise_direction_v2/comparison.png"
+  ],
+  "prospective_gate": "2027-01-21 21:15:00+00:00",
+  "stage7_cutoff": "2026-10-26",
+  "reserved_ise_rows": 108,
+  "bist_2025_holdout_reserved": true,
+  "v2_audit": {
+    "malformed_cache_baseline_failures": 4,
+    "corrected_before_display": true,
+    "model_or_threshold_retuned": false,
+    "real_data_refit": false,
+    "fresh_independent_validation": false,
+    "primary_edge_established": false
+  },
+  "offline_execution": {
+    "status": "PASSED_DIAGNOSTICS",
+    "synthetic": true,
+    "visible_bars": 260,
+    "scenarios": [
+      "baseline",
+      "high_cost",
+      "delay_1_bar",
+      "high_cost_delay_1_bar"
+    ],
+    "diagnostics": {
+      "prefix_replay": {
+        "checks": [
+          {
+            "visible_bars": 21,
+            "curve_identical": true,
+            "journal_identical": true,
+            "full_snapshot_replay_limit_preserved": true,
+            "passed": true
+          },
+          {
+            "visible_bars": 130,
+            "curve_identical": true,
+            "journal_identical": true,
+            "full_snapshot_replay_limit_preserved": true,
+            "passed": true
+          },
+          {
+            "visible_bars": 259,
+            "curve_identical": true,
+            "journal_identical": true,
+            "full_snapshot_replay_limit_preserved": true,
+            "passed": true
+          }
+        ],
+        "checked_prefixes": 3,
+        "status": "PASSED"
+      },
+      "future_suffix": {
+        "status": "PASSED",
+        "checked_prefixes": 1,
+        "visible_bars": 130,
+        "modified_eligible_suffix_first_index": 130,
+        "modified_eligible_suffix_end_exclusive": 260,
+        "curve_identical": true,
+        "artificial_scenario": true
+      },
+      "source_guards": [
+        {
+          "case": "missing_bar",
+          "passed": true,
+          "status": "REJECTED_BEFORE_REHEARSAL"
+        },
+        {
+          "case": "duplicate_bar",
+          "passed": true,
+          "status": "REJECTED_BEFORE_REHEARSAL"
+        },
+        {
+          "case": "sealed_date",
+          "passed": true,
+          "status": "REJECTED_BEFORE_REHEARSAL"
+        }
+      ],
+      "manual_halt": {
+        "status": "PASSED",
+        "halt_at": 37,
+        "entries_after_halt": 0,
+        "ending_position": 0,
+        "orders_sent": 0,
+        "artificial_scenario": true
+      },
+      "journal_recovery": {
+        "status": "PASSED",
+        "cases": [
+          {
+            "scenario": "baseline",
+            "status": "PASSED",
+            "passed": true,
+            "cash_fees_realized_match": true,
+            "position_intents_identity_match": true,
+            "terminal_head_verified": true,
+            "recovered_cash": 99539.4894118234,
+            "recovered_position": 0,
+            "broker_recovery_supported": false
+          },
+          {
+            "scenario": "high_cost",
+            "status": "PASSED",
+            "passed": true,
+            "cash_fees_realized_match": true,
+            "position_intents_identity_match": true,
+            "terminal_head_verified": true,
+            "recovered_cash": 98606.32956037496,
+            "recovered_position": 0,
+            "broker_recovery_supported": false
+          },
+          {
+            "scenario": "delay_1_bar",
+            "status": "PASSED",
+            "passed": true,
+            "cash_fees_realized_match": true,
+            "position_intents_identity_match": true,
+            "terminal_head_verified": true,
+            "recovered_cash": 99318.63295207058,
+            "recovered_position": 0,
+            "broker_recovery_supported": false
+          },
+          {
+            "scenario": "high_cost_delay_1_bar",
+            "status": "PASSED",
+            "passed": true,
+            "cash_fees_realized_match": true,
+            "position_intents_identity_match": true,
+            "terminal_head_verified": true,
+            "recovered_cash": 98487.33503736055,
+            "recovered_position": 0,
+            "broker_recovery_supported": false
+          }
+        ],
+        "scope": "Offline account reconstruction, not durable broker restart or exchange reconciliation"
+      }
+    },
+    "scenario_comparison": [
+      {
+        "scenario": "baseline",
+        "synthetic": true,
+        "fee_bps": 3.0,
+        "slippage_bps": 5.0,
+        "additional_delay_bars": 0,
+        "ending_equity": 99539.4894118234,
+        "net_pnl": -460.5105881766067,
+        "net_return": -0.004605105881766103,
+        "max_drawdown": -0.005647541541927592,
+        "mean_gross_exposure": 0.028673858488327653,
+        "maximum_gross_exposure": 0.1005920558467043,
+        "bars_with_position_share": 0.28846153846153844,
+        "total_fees": 166.64977207668,
+        "fill_count": 56,
+        "entries": 28,
+        "exits": 28,
+        "rejections": 2,
+        "cancellations": 0,
+        "ending_position": 0,
+        "pending_intent": false,
+        "halted": false,
+        "policy_sha256": "e0d4d86c9780b7daccdd91af613b0b881119f5250798cd076d5e391811eda53f",
+        "real_orders_sent": 0,
+        "paper_orders_sent": 0,
+        "model_fits": 0
+      },
+      {
+        "scenario": "high_cost",
+        "synthetic": true,
+        "fee_bps": 10.0,
+        "slippage_bps": 15.0,
+        "additional_delay_bars": 0,
+        "ending_equity": 98606.32956037496,
+        "net_pnl": -1393.6704396250425,
+        "net_return": -0.013936704396250388,
+        "max_drawdown": -0.014501587699537355,
+        "mean_gross_exposure": 0.02865466236561819,
+        "maximum_gross_exposure": 0.10047606955431997,
+        "bars_with_position_share": 0.28846153846153844,
+        "total_fees": 552.3681873249999,
+        "fill_count": 56,
+        "entries": 28,
+        "exits": 28,
+        "rejections": 2,
+        "cancellations": 0,
+        "ending_position": 0,
+        "pending_intent": false,
+        "halted": false,
+        "policy_sha256": "10d2c7c3d6600d64f2a62c32cd701fe6f7692899842d8eba828dcaf5cdfc2714",
+        "real_orders_sent": 0,
+        "paper_orders_sent": 0,
+        "model_fits": 0
+      },
+      {
+        "scenario": "delay_1_bar",
+        "synthetic": true,
+        "fee_bps": 3.0,
+        "slippage_bps": 5.0,
+        "additional_delay_bars": 1,
+        "ending_equity": 99318.63295207058,
+        "net_pnl": -681.3670479294233,
+        "net_return": -0.006813670479294265,
+        "max_drawdown": -0.007576859381776879,
+        "mean_gross_exposure": 0.02678619247309124,
+        "maximum_gross_exposure": 0.10033764265222622,
+        "bars_with_position_share": 0.2692307692307692,
+        "total_fees": 148.68908217943496,
+        "fill_count": 50,
+        "entries": 25,
+        "exits": 25,
+        "rejections": 0,
+        "cancellations": 2,
+        "ending_position": 0,
+        "pending_intent": false,
+        "halted": false,
+        "policy_sha256": "a234ed86fa9e75d2a91e18c19ab9b4bdb1e33cbb8509574acb55a24f57404395",
+        "real_orders_sent": 0,
+        "paper_orders_sent": 0,
+        "model_fits": 0
+      },
+      {
+        "scenario": "high_cost_delay_1_bar",
+        "synthetic": true,
+        "fee_bps": 10.0,
+        "slippage_bps": 15.0,
+        "additional_delay_bars": 1,
+        "ending_equity": 98487.33503736055,
+        "net_pnl": -1512.66496263945,
+        "net_return": -0.01512664962639454,
+        "max_drawdown": -0.015618978704027509,
+        "mean_gross_exposure": 0.026694758964953137,
+        "maximum_gross_exposure": 0.10048586882718187,
+        "bars_with_position_share": 0.2692307692307692,
+        "total_fees": 491.8957196894502,
+        "fill_count": 50,
+        "entries": 25,
+        "exits": 25,
+        "rejections": 0,
+        "cancellations": 2,
+        "ending_position": 0,
+        "pending_intent": false,
+        "halted": false,
+        "policy_sha256": "41af87808bb3c1f9ca4385c7a09d929ba59b2368a9e946dac46bdc794044e894",
+        "real_orders_sent": 0,
+        "paper_orders_sent": 0,
+        "model_fits": 0
+      }
+    ],
+    "app_route_smoke": {
+      "rehearsal_charts": 2,
+      "stress_charts": 1,
+      "exceptions": 0
+    },
+    "initial_load_runs": 0,
+    "broker_adapter_present": false,
+    "real_orders_sent": 0,
+    "paper_orders_sent": 0,
+    "model_fits": 0,
+    "strategy_promoted": false,
+    "holdout_scored": false,
+    "localhost_health_http": 200
+  },
+  "reproduced_regressions": {
+    "last_close_intent_baseline_failures": 1,
+    "rehashed_semantic_corruption_rejected": true,
+    "future_dependent_curve_detected": true,
+    "omitted_event_detected": true,
+    "source_guard_bypass_detected": true,
+    "valid_truncation_detected_with_expected_head": true
+  },
+  "artifact_sha256": {
+    "execution_robustness.png": "e5fcf9ba42a73731e0d7f7e8b14da51a7202f2b255f106c6737d48b44e10c043",
+    "synthetic_recovered_account.json": "7f57395e715087517bd25bb199d2961723d19c41cdebd53c3bc96973654f1042",
+    "synthetic_rehearsal.json": "91ba03030428994f36db825ef736aabc8ab93ef018ae2f2a1bbbca095424b537",
+    "synthetic_stress.json": "d37be5924bdcb4128ac81cde0656086e7ec802c669cedfb6ba1f67b75aedf6f7"
+  },
+  "test_log_sha256": {
+    "research_crypto.log": "0384e2c33c91709cb0df6819f186187a1f0dca64aa4ca67b2d915a161693edf9",
+    "research_fx.log": "e676c8c060d011d932a39fd8ec65809dc970fbf42d8b6e33ef9ea62ac1eff26b",
+    "research_macro.log": "89e282f2220ca4d67afc98d937953e92a458ad4f349d22c563f28a3973761200",
+    "research_workspace.log": "a50e0b6359613f1208095867b2fb478dcca936ad37cc8c695a94ebac8864a342"
+  },
+  "limitations": [
+    "Synthetic execution diagnostics are not real-market performance",
+    "V2 validation remains reused and primary improvement unproven",
+    "Hash evidence is not publisher authentication or durable broker reconciliation",
+    "No live feed, partial fills or broker execution implemented"
+  ],
+  "github_ci": {
+    "implementation_head": "9b05d1c428b9501aa2bed1a23afdcffa0013010d",
+    "run_id": 41662381516,
+    "run_number": 70,
+    "job_id": 126008655373,
+    "conclusion": "success",
+    "tests": 643,
+    "skipped": 0,
+    "failed": 0,
+    "suite_counts": {
+      "research_macro": 115,
+      "research_crypto": 100,
+      "research_fx": 31,
+      "research_workspace": 397
+    },
+    "direct_logs_reviewed": true,
+    "url": "https://github.com/yavuzaksoyy06-create/tradelab-research-portfolio/actions/runs/41662381516"
+  }
+}
