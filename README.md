@@ -7,6 +7,8 @@
 
 **Python · pandas · NumPy · SQLite/SQL · Streamlit · Plotly · Statistical inference · Market-data validation**
 
+The local workspace now uses a Turkish market-terminal layout with separate chart, analysis and evidence views. Alpaca is the terminal's default source, and a successfully loaded snapshot can also drive the strategy planner and execution rehearsal. [Interface and data workflow](docs/EQUITY_RESEARCH_LAB.md#terminal-layout-and-shared-alpaca-snapshots)
+
 I started TradeLab with a question that sounded simple: **when a support or resistance level looks convincing on a chart, does it still work after I define the rule, respect what was knowable at the time, simulate an actual portfolio, and pay trading costs?**
 
 Instead of building a system that just draws buy/sell arrows, I built a research workflow: historical market-data validation, causal technical features, a shared-capital portfolio simulator, statistical comparisons, a replay terminal and a financial-data quality lab. The most valuable outcome has been learning **when the evidence does *not* support a trading claim**.

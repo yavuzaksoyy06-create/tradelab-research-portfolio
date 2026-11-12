@@ -145,7 +145,7 @@ class Stage7PreparationUITests(unittest.TestCase):
             self.assertFalse(at.exception)
             self.assertIn("Stage 7 · Veri Hazırlığı", [h.value for h in at.subheader])
             self.assertTrue(any(b.key == "stage7_plan_submit" for b in at.button))
-            self.assertTrue(any("No file selected" in e.value for e in at.info))
+            self.assertTrue(any("OHLCV dosyası seçin" in e.value for e in at.info))
             self.assertEqual(len(at.get("plotly_chart")), 0)
 
     def test_relative_and_unc_paths_are_rejected_before_backend(self):

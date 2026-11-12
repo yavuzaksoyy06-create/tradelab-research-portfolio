@@ -61,8 +61,9 @@ class Stage7AuditTests(unittest.TestCase):
                    return_value=(self.frame, self.meta)):
             at = AppTest.from_file(str(app), default_timeout=60).run()
             at.radio(key="page").set_value("Equity Research").run()
+            at.radio(key="equity_mode").set_value("Synthetic teaching example").run()
             self.assertFalse(at.exception)
-            slider = next(s for s in at.slider if "As-of replay" in s.label)
+            slider = at.slider(key="equity_cursor")
             self.assertEqual(slider.max, split_plan(self.frame)["holdout_start"])
 
     def test_registered_snapshot_cannot_be_truncated_or_replaced(self):

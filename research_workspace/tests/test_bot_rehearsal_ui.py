@@ -220,3 +220,45 @@ class BotRehearsalUITests(unittest.TestCase):
             self.assertEqual(len(at.get("download_button")), 0)
             self.assertTrue(any("BOT_STRESS_REJECTED" in e.value for e in at.error))
             self.assertNotIn("SECRET", " ".join(e.value for e in at.error))
+
+    def test_loaded_alpaca_snapshot_is_prepared_and_report_keeps_source_classification(self):
+        # Synthetic bars stand in for an API response; no provider request is made.
+        metadata = {**self.metadata, "synthetic": False, "provider_api_response": True,
+                    "feed": "iex", "origin": "ALPACA TEST RESPONSE", "currency": "USD"}
+        with patch(MODULE + "get_loaded_alpaca_snapshot", return_value=(self.frame.copy(), metadata)), \
+             patch(MODULE + "synthetic_fixture") as fixture:
+            at = self.prepared()
+            self.assertEqual(at.radio(key="bot_source").value, "Alpaca · Piyasa Terminali")
+            at.button(key="bot_run").click().run()
+            self.assertFalse(at.exception)
+            self.assertFalse(at.error)
+            summary = json.loads(at.json[-1].value)
+            self.assertIs(summary["synthetic"], False)
+            self.assertEqual(summary["real_orders_sent"], 0)
+            self.assertEqual(summary["ise_reserved_rows"], 108)
+            self.assertTrue(any("Alpaca · IEX" in caption.value for caption in at.caption))
+            fixture.assert_not_called()
+
+    def test_missing_or_changed_alpaca_source_revokes_prepared_rehearsal(self):
+        metadata = {**self.metadata, "synthetic": False, "provider_api_response": True,
+                    "feed": "iex", "origin": "ALPACA TEST RESPONSE", "currency": "USD"}
+        with patch(MODULE + "get_loaded_alpaca_snapshot", return_value=(self.frame.copy(), metadata)) as read, \
+             patch(MODULE + "synthetic_fixture") as fixture, \
+             patch(MODULE + "run_rehearsal") as engine:
+            at = self.prepared()
+            self.assertIn("bot_rehearsal_loaded_data", at.session_state)
+            changed = self.frame.copy()
+            changed.loc[0, "close"] += .00001
+            read.return_value = (changed, metadata)
+            at.run()
+            self.assertNotIn("bot_rehearsal_loaded_data", at.session_state)
+            self.assertEqual(len(at.slider), 0)
+            at.button(key="bot_prepare").click().run()
+            self.assertIn("bot_rehearsal_loaded_data", at.session_state)
+            read.return_value = None
+            at.run()
+            self.assertNotIn("bot_rehearsal_loaded_data", at.session_state)
+            self.assertEqual(len(at.slider), 0)
+            self.assertTrue(any("Piyasa Terminali" in item.value for item in at.info))
+            engine.assert_not_called()
+            fixture.assert_not_called()

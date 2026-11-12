@@ -9,6 +9,7 @@ from streamlit.testing.v1 import AppTest
 
 from research_workspace.bot_strategy import decode_strategy_plan
 from research_workspace.bot_strategy_ui import EDIT_KEY, PLAN_KEY
+from research_workspace.equity_data import synthetic_fixture
 
 
 SCRIPT = "from research_workspace.bot_strategy_ui import render\nrender()"
@@ -126,3 +127,36 @@ class BotStrategyUITests(unittest.TestCase):
             self.assertNotIn("SECRET", errors)
             self.assertEqual(len(at.get("download_button")), 1)
             self.assertEqual(len(at.metric), 0)
+
+    def test_loaded_alpaca_snapshot_drives_preview_without_synthetic_generation(self):
+        # A simulated provider response exercises provenance routing without networking.
+        frame, metadata = synthetic_fixture("SPY")
+        metadata.update(synthetic=False, provider_api_response=True, feed="iex",
+                        origin="ALPACA TEST RESPONSE", currency="USD")
+        with patch(MODULE + "get_loaded_alpaca_snapshot", return_value=(frame, metadata)), \
+             patch(MODULE + "synthetic_fixture") as fixture:
+            at = self.freeze()
+            self.assertEqual(at.radio(key="bot_plan_source").value, "Alpaca · Piyasa Terminali")
+            at.button(key="bot_plan_preview").click().run()
+            self.assertFalse(at.exception)
+            self.assertFalse(at.error)
+            fixture.assert_not_called()
+            checked = json.loads(at.json[-1].value)
+            self.assertIs(checked["synthetic"], False)
+            self.assertEqual(checked["ise_reserved_rows"], 108)
+            self.assertEqual(checked["real_orders_sent"], 0)
+            self.assertEqual(len(at.get("download_button")), 3)
+            self.assertTrue(any("Alpaca IEX" in caption.value for caption in at.caption))
+
+    def test_selected_alpaca_missing_has_no_synthetic_fallback(self):
+        with patch(MODULE + "get_loaded_alpaca_snapshot", return_value=None), \
+             patch(MODULE + "synthetic_fixture") as fixture, \
+             patch(MODULE + "run_rehearsal") as engine:
+            at = self.freeze()
+            at.radio(key="bot_plan_source").set_value("Alpaca · Piyasa Terminali").run()
+            at.button(key="bot_plan_preview").click().run()
+            self.assertFalse(at.exception)
+            self.assertTrue(any("Piyasa Terminali" in item.value for item in at.info))
+            self.assertEqual(len(at.get("download_button")), 1)
+            fixture.assert_not_called()
+            engine.assert_not_called()

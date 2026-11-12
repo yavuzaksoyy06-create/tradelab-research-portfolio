@@ -51,3 +51,11 @@ This is **not a real-time stock-feed integration**, trade recommendation, execut
 Next steps include independent entitlement/rights review and an immutable source-vintage audit workflow (the optional API response alone is not that), plus a proper display of V4.1's existing historical research results. An authorized BIST source will need a different session calendar and source contract. Neither prospective evaluation nor broker orders are enabled by this module.
 
 Run the workspace using the [README](../README.md) and select **Equity Research**. The public test selection includes the new CSV and replay tests.
+
+## Terminal layout and shared Alpaca snapshots
+
+The local interface labels this page **Piyasa Terminali**. Its default source is **Alpaca**. Choose a symbol, IEX or SIP, and a completed-session interval, then use **Alpaca verisini yükle**. The default interval is the five latest eligible completed XNYS sessions before the research cutoff. Source, feed and observation time appear with the chart. Indicator controls, analysis and research evidence have separate sections.
+
+Successful provider responses stay in the local session. **Strateji Planlayıcı** and **Bot Provası** can reuse the matching snapshot through **Alpaca · Piyasa Terminali**. Each access checks the selection, metadata and OHLCV digest, validates the history and returns detached copies. A changed or missing selected snapshot prevents the dependent preview. Credentials stay in the server process and loading remains an explicit action.
+
+Authentication, feed entitlement, request limits and incomplete coverage have separate UI messages. A failed refresh clears the earlier chart. The 12 November 2026 live check received HTTP 401 from Alpaca, so real-price retrieval remained unavailable with the configured key pair. This outcome is recorded separately from injected provider fixtures used in automated tests. Credentials must be refreshed locally before another actual-data check.

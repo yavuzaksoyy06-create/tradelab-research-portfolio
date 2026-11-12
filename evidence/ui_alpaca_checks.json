@@ -1,0 +1,103 @@
+{
+  "schema": "tradelab.ui-alpaca-checkpoint.v1",
+  "recorded_at": "2026-11-12T11:11:31.501061+00:00",
+  "base_commit": "d7eba3424268af0cdc347f2da26cc7c53d79a521",
+  "public_tests": {
+    "scope": "public source selection, no original private data or checkpoints",
+    "suites": [
+      {
+        "suite": "research_macro",
+        "tests": 115,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-12T11:05:12.089365+00:00",
+        "finished_at": "2026-11-12T11:05:12.527000+00:00"
+      },
+      {
+        "suite": "research_crypto",
+        "tests": 100,
+        "skipped": 1,
+        "exit_code": 0,
+        "started_at": "2026-11-12T11:05:12.527000+00:00",
+        "finished_at": "2026-11-12T11:05:13.096357+00:00"
+      },
+      {
+        "suite": "research_fx",
+        "tests": 31,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-12T11:05:13.096357+00:00",
+        "finished_at": "2026-11-12T11:05:13.558652+00:00"
+      },
+      {
+        "suite": "research_workspace",
+        "tests": 455,
+        "skipped": 0,
+        "exit_code": 0,
+        "started_at": "2026-11-12T11:05:13.558652+00:00",
+        "finished_at": "2026-11-12T11:07:46.914972+00:00"
+      }
+    ],
+    "passed": true,
+    "tests": 701,
+    "skipped": 1
+  },
+  "source_inventory_files": 173,
+  "frozen_files_checked": 23,
+  "frozen_changed": [],
+  "actual_alpaca_request": {
+    "symbol": "SPY",
+    "feed": "iex",
+    "first_session": "2026-10-19",
+    "last_session": "2026-10-23",
+    "result": "AUTHENTICATION_REJECTED",
+    "http_status": 401,
+    "market_data_loaded": false,
+    "credentials_logged": false,
+    "credentials_changed": false,
+    "orders_sent": 0
+  },
+  "interface_checks": {
+    "home_desktop_reviewed": true,
+    "home_mobile_viewport": {
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "header_bottom": 60,
+      "hero_top": 76
+    },
+    "provider_authentication_error_reviewed": true,
+    "synthetic_chart_reviewed": true,
+    "planner_preview_reviewed": true,
+    "provider_fixture_reuse_tests_passed": true,
+    "private_screenshots": [
+      "home-desktop.jpg",
+      "home-mobile.jpg",
+      "alpaca-connection.jpg",
+      "planner-desktop.jpg"
+    ]
+  },
+  "regression_correction": "Replay UI test now explicitly selects the synthetic source, retaining its future-outcome assertions",
+  "unchanged_registered_results": [
+    "research_workspace/ise_direction_model.py",
+    "research_workspace/ise_direction_v2.py",
+    "research_workspace/ise_direction_v2_spec.json",
+    "docs/images/ise_direction_v2/results.json",
+    "docs/images/bot_rehearsal/synthetic_rehearsal.json",
+    "docs/images/bot_rehearsal/synthetic_stress.json"
+  ],
+  "protections": {
+    "stage7_cutoff": "2026-10-26",
+    "prospective_gate": "2027-01-21T21:15:00Z",
+    "reserved_ise_rows": 108,
+    "real_orders_sent": 0,
+    "paper_orders_sent": 0,
+    "original_trade_files_changed": false
+  },
+  "test_log_sha256": {
+    "research_crypto.log": "7dee7efc0c1bd98a7bb0d056756fc0de3dfbbaba9356a07aa869f363f43628bc",
+    "research_fx.log": "93303414a5f1bd1e2fdb5547e2ecc60dd3592f8676030697eba8fb49555f8e8f",
+    "research_macro.log": "0ac3d48f2d47d87b7904c7ee5773bd0e05938075f433918152ca6f0cb3ce7336",
+    "research_workspace.log": "4e15222bad050960564429aea6b4583f572c54f256345a6ad667202c10555a74"
+  }
+}

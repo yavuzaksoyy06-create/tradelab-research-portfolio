@@ -1,19 +1,22 @@
-"""Read-only US equity inspection from synthetic or user-supplied complete bars."""
+"""Turkish market terminal for completed US-equity bars and causal research."""
 from __future__ import annotations
 
-from datetime import date, timedelta
+from copy import deepcopy
+from datetime import date, datetime, timedelta, timezone
+import hashlib
 import json
-import os
 
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
 
-from research_sr_v4.data import DataQualityError
+from research_sr_v4.data import DataQualityError, schedule
 from research_workspace.equity_data import SYMBOLS, analyze_prefix, read_uploaded_csv, synthetic_fixture
 from research_workspace.equity_provenance import manifest_json
-from research_workspace.equity_provider import read_alpaca_history
+from research_workspace.equity_provider import (
+    EquityProviderError, alpaca_credentials_status, read_configured_alpaca_history,
+)
 from research_workspace.equity_indicators import EMA_PERIODS, indicator_frame
 from research_workspace.equity_zones import historical_zone_bands
 from research_workspace.equity_volume import volume_frame
@@ -21,7 +24,23 @@ from research_workspace.equity_structure import confirmed_swing_events, confirme
 from research_workspace.equity_commentary import commentary_report
 from research_workspace.stage7_ui import render_research
 from research_workspace.stage7_preparation_ui import render_preparation
-from research_workspace.stage7_events import replay_limit, validated_history
+from research_workspace.stage7_events import SEALED_START, fingerprint, replay_limit, validated_history
+
+
+_ALPACA = 'Alpaca historical (read-only)'
+_CSV = 'Upload my OHLCV CSV'
+_SYNTHETIC = 'Synthetic teaching example'
+_SOURCE_LABELS = {_ALPACA: 'Alpaca', _CSV: 'CSV dosyası', _SYNTHETIC: 'Sentetik demo'}
+_INSTRUMENTS = {'SPY': 'S&P 500 ETF', 'MSFT': 'Microsoft', 'QQQ': 'Nasdaq-100 ETF'}
+_SNAPSHOT_KEY = 'equity_provider_snapshot'
+_LOOPBACK = ('127.0.0.1', '::1', 'localhost')
+_UP, _DOWN = '#45D9AA', '#FF8292'
+_CHART_BG, _TEXT, _MUTED, _GRID = '#0D131D', '#EAF0F7', '#9BAFC5', '#243347'
+_LEGEND_LABELS = {
+    'Prior 20-bar mean': '20 mumluk hacim ort.',
+    'Confirmed low trendline': 'Dip trend çizgisi',
+    'Confirmed high trendline': 'Tepe trend çizgisi',
+}
 
 
 def _session_axis(visible):
@@ -37,30 +56,36 @@ def _session_axis(visible):
     for bar_label, session in zip(bar_labels, visible.session):
         if session != previous_session:
             tickvals.append(bar_label)
-            ticktext.append(pd.Timestamp(session).strftime('%d %b'))
+            ticktext.append(pd.Timestamp(session).strftime('%d.%m'))
             previous_session = session
     return bar_labels, tickvals, ticktext
 
 
 def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
                  show_volume_average=False, show_trendlines=False,
-                 show_structure=False):
+                 show_structure=False, currency=None):
     if any(period not in EMA_PERIODS for period in ema_periods):
         raise ValueError('Unsupported EMA period')
     visible = prefix.tail(130)
     bar_labels, day_ticks, day_labels = _session_axis(visible)
     rows = 3 if show_rsi else 2
-    heights = [0.62, 0.19, 0.19] if show_rsi else [0.78, 0.22]
-    fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, vertical_spacing=0.045,
+    heights = [0.66, 0.17, 0.17] if show_rsi else [0.82, 0.18]
+    fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, vertical_spacing=0.035,
                         row_heights=heights)
     indicators = indicator_frame(prefix) if (ema_periods or show_rsi) else None
+    candle_details = [
+        f'Açılış {o:.2f} · Kapanış {c:.2f}<br>Dip {l:.2f} · Tepe {h:.2f}'
+        for o, h, l, c in zip(visible.open, visible.high, visible.low, visible.close)
+    ]
     fig.add_trace(go.Candlestick(x=bar_labels, open=visible.open,
                                   high=visible.high, low=visible.low, close=visible.close,
-                                  increasing_line_color='#43d6a6', decreasing_line_color='#f27d88',
-                                  name='OHLC'), row=1, col=1)
-    colors = ['#43d6a6' if c >= o else '#f27d88' for c, o in zip(visible.close, visible.open)]
+                                  increasing_line_color=_UP, decreasing_line_color=_DOWN,
+                                  hovertext=candle_details, hoverinfo='text',
+                                  name='Fiyat', showlegend=False), row=1, col=1)
+    colors = [_UP if c >= o else _DOWN for c, o in zip(visible.close, visible.open)]
     fig.add_trace(go.Bar(x=bar_labels, y=visible.volume, marker_color=colors,
-                         name='Volume', opacity=0.7), row=2, col=1)
+                         name='Hacim', opacity=0.55, showlegend=False,
+                         hovertemplate='%{y:,.0f}<extra>Hacim</extra>'), row=2, col=1)
     if show_volume_average:
         volume_analytics = volume_frame(prefix).tail(len(visible))
         fig.add_trace(go.Scatter(
@@ -115,11 +140,11 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
                                          'America/New_York').strftime('%Y-%m-%d %H:%M')
                                          for p in selected],
                                      y=[p['price'] for p in selected], mode='markers',
-                                     marker=dict(symbol=shape, size=9, color=color),
+                                     marker=dict(symbol=shape, size=7, color=color),
                                      customdata=[[p['pivot_at'], p['confirmed_at']] for p in selected],
-                                     hovertemplate=('Pivot bar: %{customdata[0]}'
-                                                    '<br>Confirmed: %{customdata[1]}'
-                                                    '<extra>'+kind+'</extra>'),
+                                     hovertemplate=('Dönüş mumu %{customdata[0]}'
+                                                    '<br>Onay %{customdata[1]}'
+                                                    '<extra>'+('Destek' if kind == 'support' else 'Direnç')+'</extra>'),
                                      name=kind, showlegend=False), row=1, col=1)
     if show_trendlines:
         displayed = set()
@@ -139,7 +164,7 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
                           color='#64edb8' if kind == 'support' else '#f5b087'),
                 marker=dict(size=5), name=legend_label,
                 legendgroup=kind + '-trend', showlegend=kind not in displayed,
-                hovertemplate='%{y:.3f} · confirmed-pivot line<extra>' + legend_label + '</extra>',
+                hovertemplate='%{y:.2f}<extra>' + _LEGEND_LABELS[legend_label] + '</extra>',
                 connectgaps=False,
             ), row=1, col=1)
             displayed.add(kind)
@@ -158,172 +183,304 @@ def equity_chart(prefix, features, symbol, *, ema_periods=(), show_rsi=False,
                     marker=dict(size=6, color=color),
                     textfont=dict(size=10, color=color),
                     customdata=[e['confirmed_at'] for e in selected],
-                    hovertemplate='%{text} at %{customdata}<br>Pivot: %{y:.3f}<extra></extra>',
+                    hovertemplate='%{text} · %{customdata}<br>Seviye %{y:.2f}<extra></extra>',
                     name='Confirmed swing '+kind, showlegend=False,
                 ), row=1, col=1)
-    fig.update_layout(template='plotly_dark', paper_bgcolor='#0b1322', plot_bgcolor='#0b1322',
-                      height=570, margin=dict(l=18,r=18,t=54,b=20),
-                      title=f'{symbol} · completed 15-minute bars · read-only',
-                      xaxis_rangeslider_visible=False, hovermode='x unified',
-                      showlegend=bool(ema_periods or show_rsi or show_volume_average or show_trendlines))
+    fig.update_layout(
+        template='plotly_dark', paper_bgcolor=_CHART_BG, plot_bgcolor=_CHART_BG,
+        font=dict(family='Segoe UI, sans-serif', size=12, color=_TEXT),
+        height=590 if show_rsi else 510, margin=dict(l=12, r=18, t=42, b=16),
+        title=dict(text=f'{symbol} · 15 dk', x=0.018, font=dict(size=15)),
+        xaxis_rangeslider_visible=False, hovermode='x unified',
+        hoverlabel=dict(bgcolor='#141E2B', bordercolor=_GRID, font_color=_TEXT),
+        legend=dict(orientation='h', x=0, y=-0.12, xanchor='left', yanchor='top',
+                    font=dict(size=10, color=_MUTED)),
+        showlegend=bool(ema_periods or show_rsi or show_volume_average or show_trendlines),
+    )
     # Ordinal categories compress non-trading periods without inserting prices.
     # Explicit ordering keeps candles, volume and confirmed pivots aligned.
-    fig.update_xaxes(type='category', categoryorder='array', categoryarray=bar_labels)
+    fig.update_xaxes(type='category', categoryorder='array', categoryarray=bar_labels,
+                     showgrid=False, linecolor=_GRID, tickfont=dict(color=_MUTED))
     fig.update_xaxes(tickmode='array', tickvals=day_ticks, ticktext=day_labels,
-                     title_text='XNYS sessions · overnight/weekend gaps hidden',
                      row=rows, col=1)
-    fig.update_yaxes(title_text='Price (source units)', row=1, col=1)
-    fig.update_yaxes(title_text='Volume', row=2, col=1)
+    fig.update_yaxes(side='right', gridcolor=_GRID, zeroline=False,
+                     tickfont=dict(color=_MUTED), automargin=True)
+    fig.update_yaxes(title_text='USD' if currency == 'USD' else 'Fiyat',
+                     tickformat='.2f', row=1, col=1)
+    fig.update_yaxes(title_text='Hacim', tickformat='.2s', row=2, col=1)
     if show_rsi:
         fig.update_yaxes(title_text='RSI (14)', range=[0, 100], row=3, col=1)
     return fig
 
 
-def render():
-    st.caption('US Equity Research · XNYS · 15-minute candles · no orders / no live feed')
-    render_preparation()
-    st.warning('Educational, read-only inspection. Uploaded files are structurally checked, '
-               'but their market-data origin, license, and historical availability are NOT verified.')
-    c1, c2 = st.columns(2)
-    symbol = c1.selectbox('Instrument', SYMBOLS, key='equity_symbol')
-    mode = c2.radio('Data source', ['Synthetic teaching example', 'Upload my OHLCV CSV', 'Alpaca historical (read-only)'],
-                    horizontal=True, key='equity_mode')
-    if mode == 'Upload my OHLCV CSV':
-        st.caption('Required columns: timestamp,open,high,low,close,volume. '
-                   'UTC/offset timestamps; full consecutive XNYS sessions, 15-minute bars, max 5 MB / 5,000 bars.')
-        uploaded = st.file_uploader('Choose a local 15-minute OHLCV CSV', type=['csv'], key='equity_upload')
-        if uploaded is None:
-            st.info('UNAVAILABLE DATA · No file selected. No chart or market result is invented.')
-            return
-    if mode == 'Alpaca historical (read-only)':
-        st.caption('Explicit historical GET only, no broker orders, no disk cache. Local API credentials are read '
-                   'from environment variables; never enter them into GitHub or a shared Streamlit deployment.')
-        feed = st.selectbox('Alpaca feed', ['iex', 'sip'], key='equity_feed')
-        st.caption('IEX contains trades from one exchange; SIP may require additional entitlement. '
-                   'Full 15-minute XNYS sessions are required; incomplete provider coverage is rejected.')
-        latest = date.today() - timedelta(days=4)
-        start_date = st.date_input('First session date', value=latest-timedelta(days=8), key='equity_start')
-        end_date = st.date_input('Last session date', value=latest, key='equity_end')
-        request_identity = (symbol, feed, str(start_date), str(end_date))
+def _completed_session_window(now=None):
+    """Use the five latest fully closed, eligible sessions in the calendar."""
+    clock = pd.Timestamp(now if now is not None else datetime.now(timezone.utc))
+    if clock.tzinfo is None:
+        raise ValueError('An aware session clock is required')
+    last_allowed = date.fromisoformat(SEALED_START) - timedelta(days=1)
+    candidate = min(clock.tz_convert('America/New_York').date(), last_allowed)
+    calendar = schedule(candidate - timedelta(days=30), candidate)
+    dates = calendar.index[calendar.close <= clock]
+    if dates.empty:
+        raise ValueError('No completed session available in the current window')
+    return dates[-min(5, len(dates))].date(), dates[-1].date()
+
+
+def _provider_message(code):
+    messages = {
+        'credentials_missing': 'Bu yerel oturumda Alpaca anahtarları bulunamadı.',
+        'credentials_incomplete': 'Alpaca anahtar çifti eksik. Yerel yapılandırmayı kontrol edin.',
+        'authentication': 'Alpaca bu anahtar çiftini reddetti. Yerel Alpaca yapılandırmasını güncelleyip tekrar deneyin.',
+        'entitlement': 'Alpaca hesabı bu veri akışına erişemiyor. IEX seçeneğini veya veri aboneliğini kontrol edin.',
+        'rate_limit': 'Alpaca istek sınırına ulaşıldı. Bir süre sonra tekrar deneyin.',
+        'unavailable': 'Alpaca şu anda yanıt vermiyor. Bağlantıyı kontrol edip tekrar deneyin.',
+        'sealed_range': 'Bu araştırmada 26.10.2026 ve sonrası kapalı.',
+        'coverage': 'Alpaca seçilen aralıkta tüm 15 dakikalık mumları sağlayamadı. Daha kısa bir seans aralığı veya yetkiniz varsa SIP seçin.',
+        'invalid_data': 'Alpaca yanıtı tam seans veri kontrolünden geçemedi. Tarih aralığını ve veri akışını kontrol edin.',
+        'http_error': 'Alpaca isteği kabul etmedi. Veri akışını ve tarih aralığını kontrol edin.',
+    }
+    return messages.get(code, messages['invalid_data'])
+
+
+def _provider_snapshot_digest(identity, frame, metadata):
+    proof = {'selection': identity, 'bars_sha256': fingerprint(frame), 'source': metadata}
+    encoded = json.dumps(proof, sort_keys=True, separators=(',', ':'), allow_nan=False).encode('utf-8')
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def get_loaded_alpaca_snapshot(symbol=None):
+    """Return verified, detached data from this loopback session without a request."""
+    if st.get_option('server.address') not in _LOOPBACK:
+        return None
+    saved = st.session_state.get(_SNAPSHOT_KEY)
+    if saved is None:
+        return None
     try:
-        if mode == 'Synthetic teaching example':
-            frame, meta = synthetic_fixture(symbol)
-        elif mode == 'Upload my OHLCV CSV':
-            frame, meta = read_uploaded_csv(uploaded.getvalue(), symbol)
+        identity, frame, meta, expected_digest = saved
+        bound_symbol, feed, first, last = identity
+        if (not isinstance(frame, pd.DataFrame) or not isinstance(meta, dict)
+                or meta.get('symbol') != bound_symbol or meta.get('feed') != feed
+                or meta.get('provider_api_response') is not True or meta.get('synthetic') is not False
+                or expected_digest != _provider_snapshot_digest(identity, frame, meta)):
+            raise ValueError('Snapshot identity changed')
+        if symbol is not None and symbol != bound_symbol:
+            return None
+        clean = validated_history(frame, meta)
+        if not (first <= clean.session.iloc[0] <= clean.session.iloc[-1] <= last):
+            raise ValueError('Snapshot window changed')
+    except (ValueError, TypeError, KeyError, IndexError, AttributeError, OverflowError):
+        st.session_state.pop(_SNAPSHOT_KEY, None)
+        return None
+    return clean.copy(deep=True), deepcopy(meta)
+
+
+def _provider_source(symbol):
+    if st.get_option('server.address') not in _LOOPBACK:
+        st.info('Alpaca yüklemesi yalnızca bu bilgisayara bağlı yerel oturumda kullanılabilir.')
+        st.session_state.pop(_SNAPSHOT_KEY, None)
+        return None
+
+    first, latest = _completed_session_window()
+    feed_col, start_col, end_col, action_col = st.columns((1, 1, 1, 1.45),
+                                                         vertical_alignment='bottom')
+    feed = feed_col.selectbox('Veri akışı', ('iex', 'sip'), format_func=str.upper, key='equity_feed')
+    start_date = start_col.date_input('İlk seans', value=first, min_value=date(2000, 1, 1),
+                                      max_value=latest, format='DD.MM.YYYY', key='equity_start')
+    end_date = end_col.date_input('Son seans', value=latest, min_value=date(2000, 1, 1),
+                                  max_value=latest, format='DD.MM.YYYY', key='equity_end')
+    if start_date is None or end_date is None:
+        st.session_state.pop(_SNAPSHOT_KEY, None)
+        st.caption('Yüklemek için iki seans tarihi seçin.')
+        return None
+    identity = (symbol, feed, start_date.isoformat(), end_date.isoformat())
+    snapshot = st.session_state.get(_SNAPSHOT_KEY)
+    if snapshot is not None and (not isinstance(snapshot, tuple) or len(snapshot) != 4 or snapshot[0] != identity):
+        st.session_state.pop(_SNAPSHOT_KEY, None)
+    ready = alpaca_credentials_status()
+    load = action_col.button('Alpaca verisini yükle', key='equity_load_provider',
+                             type='primary', width='stretch', disabled=ready != 'configured')
+    st.caption('15 dk · 1–10 tam ABD seansı · IEX tek borsa, SIP hesap yetkisine bağlı. '
+               'Araştırma dönemi 26.10.2026 öncesiyle sınırlı.')
+    if ready != 'configured':
+        st.session_state.pop(_SNAPSHOT_KEY, None)
+        reason = 'credentials_incomplete' if ready == 'incomplete' else 'credentials_missing'
+        st.warning(_provider_message(reason))
+        return None
+    if not load:
+        return get_loaded_alpaca_snapshot(symbol)
+
+    # A failed refresh must not leave an older success under the same identity.
+    st.session_state.pop(_SNAPSHOT_KEY, None)
+    if start_date > end_date or (end_date - start_date).days > 20:
+        st.error('Kronolojik sırada en çok 21 takvim günü seçin.')
+        return None
+    try:
+        with st.spinner(f'{symbol} için {feed.upper()} geçmiş mumları alınıyor…'):
+            frame, meta = read_configured_alpaca_history(
+                symbol, identity[2], identity[3], feed=feed,
+            )
+            if (meta.get('symbol') != symbol or meta.get('feed') != feed
+                    or meta.get('synthetic') is not False
+                    or meta.get('provider_api_response') is not True):
+                raise ValueError('Unexpected source identity')
+            frame = validated_history(frame, meta)
+            if not (identity[2] <= frame.session.iloc[0] <= frame.session.iloc[-1] <= identity[3]):
+                raise ValueError('Unexpected requested session window')
+    except EquityProviderError as exc:
+        st.error(_provider_message(getattr(exc, 'code', None)))
+        return None
+    except (ValueError, TypeError, KeyError, DataQualityError):
+        st.error(_provider_message('invalid_data'))
+        return None
+    digest = _provider_snapshot_digest(identity, frame, meta)
+    st.session_state[_SNAPSHOT_KEY] = (identity, frame.copy(deep=True), deepcopy(meta), digest)
+    st.session_state.pop('equity_cursor', None)
+    return frame, meta
+
+
+def _load_source(mode, symbol):
+    if mode == _ALPACA:
+        return _provider_source(symbol)
+    st.session_state.pop(_SNAPSHOT_KEY, None)
+    if mode == _SYNTHETIC:
+        st.caption('Eğitim amaçlı üretilmiş örnek seri.')
+        return synthetic_fixture(symbol)
+    st.caption('15 dk tam seanslar ve saat dilimli zaman damgaları gerekli. En fazla 5 MB.')
+    uploaded = st.file_uploader('OHLCV dosyası seç', type=['csv'], max_upload_size=5,
+                                key='equity_upload')
+    return read_uploaded_csv(uploaded.getvalue(), symbol) if uploaded is not None else None
+
+
+def _format_number(value, decimals=2):
+    return f'{value:,.{decimals}f}'.translate(str.maketrans(',.', '.,'))
+
+
+def _render_chart(prefix, features, meta, limit, holdout):
+    symbol = meta['symbol']
+    stamp = prefix.bar_end.iloc[-1].tz_convert('Europe/Istanbul')
+    source = ('Sentetik demo' if meta['synthetic'] else
+              f'Alpaca · {meta["feed"].upper()}' if meta.get('provider_api_response') is True else
+              'Kullanıcı CSV')
+    unit = 'USD' if meta.get('currency') == 'USD' else ''
+    st.markdown(f'#### {symbol} · {_INSTRUMENTS[symbol]}')
+    st.caption(f'{source} · 15 dk · Gözlem {stamp:%d.%m.%Y %H:%M} TSİ')
+    if meta['synthetic']:
+        st.warning('Sentetik veri · Fiyatlar ve hacimler eğitim amacıyla üretilmiştir.')
+    if holdout:
+        st.caption('Ayrılmış son 20 seans, grafik ve analiz dışında tutuluyor.')
+    close = prefix.close.iloc[-1]
+    previous = prefix.close.iloc[-2] if len(prefix) > 1 else None
+    move = f'{_format_number((close / previous - 1) * 100)}%' if previous is not None else None
+    rvol = volume_frame(prefix)['relative_volume_20'].iloc[-1]
+    price, volume, relative, bars = st.columns(4)
+    price.metric('Son kapanış', f'{_format_number(close)} {unit}'.strip(), delta=move,
+                 help='Değişim bir önceki tamamlanmış 15 dakikalık muma göredir.')
+    volume.metric('Son mum hacmi', _format_number(prefix.volume.iloc[-1], 0))
+    relative.metric('Göreli hacim', f'{_format_number(rvol)}×' if pd.notna(rvol) else '—',
+                    help='Önceki 20 tamamlanmış mumun ortalama hacmine göre.')
+    bars.metric('Görünür mum', f'{len(prefix)} / {limit}')
+    with st.expander('Gösterge ve grafik ayarları'):
+        c1, c2, c3 = st.columns((2, 1, 1))
+        periods = c1.multiselect('Üstel ortalamalar', options=list(EMA_PERIODS), default=[9, 21],
+                                 key='equity_ema_overlays')
+        show_rsi = c2.checkbox('RSI (14)', value=False, key='equity_show_rsi')
+        show_volume_average = c2.checkbox('Hacim ortalaması', value=True,
+                                          key='equity_show_volume_average')
+        show_trendlines = c3.checkbox('Trend çizgileri', value=True, key='equity_show_trendlines')
+        show_structure = c3.checkbox('Tepe ve dip etiketleri', value=True,
+                                     key='equity_show_structure')
+    figure = equity_chart(prefix, features, symbol, ema_periods=tuple(periods), show_rsi=show_rsi,
+                          show_volume_average=show_volume_average, show_trendlines=show_trendlines,
+                          show_structure=show_structure, currency=unit)
+    figure.update_layout(title_text=f'{symbol} · 15 dk · {source}')
+    for trace in figure.data:
+        trace.name = _LEGEND_LABELS.get(trace.name, trace.name)
+    st.plotly_chart(figure, width='stretch', theme=None, key='equity_candles',
+                    config={'displaylogo': False, 'responsive': True,
+                            'modeBarButtonsToRemove': ['lasso2d', 'select2d']})
+    st.caption('Grafik saatleri New York yerel saatidir. Seans araları sıkıştırılır. '
+               'Bölgeler ve dönüş etiketleri onaylandıkları mumdan itibaren gösterilir.')
+
+
+def _render_analysis(prefix, features, meta):
+    snapshot = features['snapshots'][-1]
+    left, right = st.columns(2)
+    left.metric('ATR · ortalama gerçek aralık',
+                _format_number(snapshot['atr']) if snapshot['atr'] is not None else '—')
+    right.metric('Aktif destek / direnç bölgeleri', len(snapshot['zones']))
+    st.markdown('#### Grafiğin teknik okuması')
+    st.caption('Kurala dayalı yorum, seçili gözlem anına kadar kapanmış mumları kullanır.')
+    report = commentary_report(prefix, features, meta)
+    for section in report['sections']:
+        st.markdown(f'**{section["heading"]}**')
+        st.write(section['text'])
+    with st.expander('Hesaplama ayrıntıları ve kanıtlar'):
+        st.caption('EMA için ilgili pencere kadar mum, RSI (14) için 15 kapanış gerekir. '
+                   'Göreli hacim saat dilimi profiline göre normalize edilmez. '
+                   'IEX ve SIP hacim kapsamları farklıdır.')
+        st.json({'as_of_utc': report['as_of_utc'], 'method': report['method'],
+                 'structure': report['structure'], 'evidence': report['evidence']})
+    st.download_button('Teknik yorumu indir', data=json.dumps(report, ensure_ascii=False, indent=2) + '\n',
+                       mime='application/json', file_name=f'equity_{meta["symbol"].lower()}_commentary.json',
+                       key='equity_commentary_export', on_click='ignore')
+
+
+def _render_archive(frame, prefix, features, meta):
+    render_research(frame, meta, len(prefix))
+    with st.expander('Onaylanmış destek / direnç kayıtları'):
+        if features['lifecycle']:
+            st.dataframe(pd.DataFrame(features['lifecycle'][-50:]), hide_index=True, width='stretch')
         else:
-            if st.button('Load historical candles (read-only GET)', key='equity_load_provider'):
-                # Credentials are not placed in session state, URL params, or manifests.
-                key = os.getenv('ALPACA_API_KEY') or os.getenv('APCA_API_KEY_ID')
-                secret = os.getenv('ALPACA_SECRET_KEY') or os.getenv('APCA_API_SECRET_KEY')
-                frame, meta = read_alpaca_history(
-                    symbol, str(start_date), str(end_date), feed=feed,
-                    api_key=key, api_secret=secret,
-                )
-                st.session_state['equity_provider_snapshot'] = (request_identity, frame, meta)
-            snapshot = st.session_state.get('equity_provider_snapshot')
-            if snapshot is None or snapshot[0] != request_identity:
-                st.info('NO PROVIDER DATA LOADED · Choose historical dates and select Load. No network request runs automatically.')
-                return
-            _, frame, meta = snapshot
-        st.error(meta['origin']) if meta['synthetic'] else st.warning(meta['origin'])
-        if meta['synthetic']:
-            st.caption('Synthetic price levels near 100 are NOT SPY/MSFT/QQQ quotes or historical returns.')
-        frame = validated_history(frame, meta)
-        limit = replay_limit(frame)
-        if limit < len(frame):
-            st.info('Son 20 seans araştırma için ayrılmıştır; grafik, yorum ve sonuçlarda gösterilmez.')
-        count = st.slider('As-of replay · completed bars visible', min_value=1,
-                          max_value=limit, value=limit, step=1,
-                          key='equity_cursor')
-        prefix, features = analyze_prefix(frame, count)
-        last = features['snapshots'][-1]
-        volumes = volume_frame(prefix)
-        rvol = volumes['relative_volume_20'].iloc[-1]
-        a,b,c,d,e = st.columns(5)
-        a.metric('Visible bars', str(len(prefix)))
-        b.metric('Latest close', f'{prefix.close.iloc[-1]:.3f}')
-        c.metric('ATR (research engine)', f'{last["atr"]:.3f}' if last['atr'] is not None else 'N/A')
-        d.metric('Active S/R zones', len(last['zones']))
-        e.metric('RVOL / prior 20 bars', f'{rvol:.2f}x' if pd.notna(rvol) else 'N/A')
-        ema_selection = st.multiselect(
-            'Moving averages · EMA (15-minute bars)',
-            options=list(EMA_PERIODS), default=[9, 21], key='equity_ema_overlays'
-        )
-        show_rsi = st.checkbox('RSI (14) · Wilder smoothing', value=False, key='equity_show_rsi')
-        show_volume_average = st.checkbox('Volume baseline · 20 prior bars',
-                                          value=True, key='equity_show_volume_average')
-        c_trend, c_structure = st.columns(2)
-        show_trendlines = c_trend.checkbox('Confirmed trendlines · no hindsight',
-                                           value=True, key='equity_show_trendlines')
-        show_structure = c_structure.checkbox('Market structure · HH/HL/LH/LL',
-                                               value=True, key='equity_show_structure')
-        st.plotly_chart(equity_chart(prefix, features, symbol,
-                                    ema_periods=tuple(ema_selection), show_rsi=show_rsi,
-                                    show_volume_average=show_volume_average,
-                                    show_trendlines=show_trendlines,
-                                    show_structure=show_structure),
-                        width='stretch', key='equity_candles')
-        st.caption('Relative volume = current 15-minute bar volume / mean of the previous '
-                   '20 completed 15-minute bars. This is NOT time-of-day adjusted; it is '
-                   'not evidence of an institutional trader. A missing or zero baseline '
-                   'is shown as N/A. IEX and SIP volumes cover different markets.')
-        st.caption('HH = Higher High (daha yüksek tepe), HL = Higher Low (daha yüksek dip); '
-                   'LH = Lower High, LL = Lower Low. EH/EL = yaklaşık eşit; H0/L0 = ilk onaylı '
-                   'tepe/dip. Etiketler pivotun bulunduğu değil, onaylandığı mumda görünür.')
-        st.caption('Trendlines use the two most recent confirmed same-kind pivots; each segment '
-                   'begins at the second confirmation bar, and stops when a newer pivot changes '
-                   'the pair. HH/HL/LH/LL labels appear at confirmation, never at a future-known '
-                   'earlier pivot. These are mechanical descriptions, not price targets.')
-        render_research(frame, meta, count)
-        report = commentary_report(prefix, features, meta)
-        st.subheader('Otomatik grafik yorumu · kurala dayalı')
-        st.caption('Türkçe analiz sadece replay anında tamamlanan mumları kullanır. '
-                   'Tahmin modeli, yatırım tavsiyesi veya canlı işlem sinyali değildir.')
-        for section in report['sections']:
-            st.markdown('**' + section['heading'] + '** — ' + section['text'])
-        with st.expander('Yorumun sayısal dayanakları ve veri sınırları'):
-            st.json({'as_of_utc': report['as_of_utc'], 'method': report['method'],
-                     'structure': report['structure'], 'evidence': report['evidence']})
-        st.download_button('Yorumu ve sayısal dayanakları JSON indir',
-                           data=json.dumps(report, ensure_ascii=False, indent=2) + '\n',
-                           mime='application/json',
-                           file_name=f'equity_{symbol.lower()}_commentary.json',
-                           key='equity_commentary_export')
-        st.caption('Indicators are descriptive, calculated only from the completed replay prefix. '
-                   'EMA 9/21/50/200 require that many available bars; RSI(14) requires 15 closes. '
-                   'Insufficient history is shown as unavailable, never backfilled.')
-        st.caption('Chart display compresses nights, weekends and holidays. Each candle still represents '
-                   'one actual completed 15-minute XNYS bar; hover timestamps are New York local time. '
-                   'No missing market data is filled or fabricated.')
-        st.caption('S/R bands now show the zone state recorded at each completed candle: '
-                   'no zone is projected backward before its confirmation, and updated/invalidated '
-                   'levels do not overwrite their history. Pivot triangles are placed at the '
-                   'confirmation candle, not at the earlier pivot candle. '
-                   'These are bar-close states, not intrabar trade signals.')
-        st.caption('The V4 research engine is recalculated using only bars visible at the selected '
-                   'replay cursor. Uploaded history has no independently established point-in-time availability.')
-        with st.expander('S/R lifecycle events · audit trail'):
-            if features['lifecycle']:
-                st.dataframe(pd.DataFrame(features['lifecycle'][-50:]),
-                             hide_index=True, width='stretch')
-            else:
-                st.info('No confirmed S/R lifecycle events at this replay cursor.')
-        st.subheader('Observed S/R research signals')
-        signals = [s for s in features['signals'] if s['signal_index'] < len(prefix)]
-        if not signals:
-            st.info('No qualifying signals at the current cursor; this is not a zero-return result.')
-        else:
+            st.caption('Bu gözlem anında kayıt bulunmuyor.')
+        signals = [signal for signal in features['signals'] if signal['signal_index'] < len(prefix)]
+        if signals:
             st.dataframe(pd.DataFrame(signals[-25:]), hide_index=True, width='stretch')
-        st.download_button('Download replay provenance (JSON)',
-                           data=manifest_json(prefix, meta),
-                           file_name=f'equity_{symbol.lower()}_replay_manifest.json',
-                           mime='application/json', key='equity_manifest_download')
-        with st.expander('Latest causal snapshot and data provenance'):
-            st.json({'source':meta, 'cursor_known_at_utc':str(prefix.bar_end.iloc[-1]),
-                     'latest_snapshot':last, 'signal_count_to_cursor':len(signals),
-                     'limits':['OHLCV cannot identify institutional traders or resting order-book liquidity',
-                               'No real-data feed authenticity or redistribution rights are verified',
-                               'No trading fills, backtest returns or future evaluation are produced']})
-    except (ValueError, TypeError, KeyError, DataQualityError, pd.errors.ParserError) as exc:
-        st.error('EQUITY DATA REJECTED · '+str(exc))
-        st.info('A rejected or incomplete dataset is not automatically repaired or shown as real prices.')
+        else:
+            st.caption('Seçili anda araştırma koşullarına uyan sinyal bulunmuyor.')
+    st.download_button('Veri kaynağı özetini indir', data=manifest_json(prefix, meta),
+                       file_name=f'equity_{meta["symbol"].lower()}_replay_manifest.json',
+                       mime='application/json', key='equity_manifest_download', on_click='ignore')
+    with st.expander('Kaynak ve gözlem zamanı'):
+        st.json({'source': meta, 'cursor_known_at_utc': prefix.bar_end.iloc[-1].isoformat(),
+                 'latest_snapshot': features['snapshots'][-1], 'signal_count_to_cursor': len(signals)})
+
+
+def render():
+    with st.container(border=True):
+        st.markdown('#### Veri ve seans')
+        instrument_col, mode_col = st.columns((1, 3))
+        symbol = instrument_col.selectbox('Enstrüman', SYMBOLS, key='equity_symbol')
+        mode = mode_col.radio('Veri kaynağı', tuple(_SOURCE_LABELS), format_func=_SOURCE_LABELS.__getitem__,
+                              horizontal=True, key='equity_mode')
+        try:
+            loaded = _load_source(mode, symbol)
+            if loaded is not None:
+                frame, meta = loaded
+                frame = validated_history(frame, meta)
+                limit = replay_limit(frame)
+        except (ValueError, TypeError, KeyError, DataQualityError, pd.errors.ParserError):
+            st.session_state.pop(_SNAPSHOT_KEY, None)
+            st.error('Veri doğrulanamadı. Mum zamanlarını, dosya biçimini ve tam seans kapsamını kontrol edin.')
+            loaded = None
+
+    chart, analysis, archive = st.tabs(('Fiyat grafiği', 'Teknik analiz', 'Araştırma ve veri kaydı'))
+    if loaded is None:
+        with chart, st.container(border=True):
+            st.markdown('#### Grafik verisi bekleniyor')
+            st.info('Alpaca verisini yüklemek için enstrüman, veri akışı ve tarihleri seçin.'
+                    if mode == _ALPACA else 'Grafiği görmek için uygun bir OHLCV dosyası seçin.')
+        with analysis:
+            st.caption('Teknik okuma, veri yüklendiğinde hazırlanır.')
+    else:
+        with chart:
+            count = st.slider('Geçmişi incele · görünür tamamlanmış mumlar', min_value=1,
+                              max_value=limit, value=limit, step=1, key='equity_cursor')
+            prefix, features = analyze_prefix(frame, count)
+            _render_chart(prefix, features, meta, limit, limit < len(frame))
+        with analysis:
+            _render_analysis(prefix, features, meta)
+        with archive:
+            _render_archive(frame, prefix, features, meta)
+    with archive, st.expander('Veri hazırlama araçları'):
+        render_preparation()
